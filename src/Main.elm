@@ -26,6 +26,29 @@ type Garden
   = Garden (List Flower)
 
 
+type Zipper
+  = Hole
+  | Bouquet (List Flower) Zipper (List Flower)
+  | Pistil Zipper (List Garden)
+  | Petal Garden (List Garden) Zipper (List Garden)
+
+
+type Polarity
+  = Pos
+  | Neg
+
+negate : Polarity -> Polarity
+negate polarity =
+  case polarity of
+    Pos -> Neg
+    Neg -> Pos
+
+
+type alias Context =
+  { zipper : Zipper,
+    polarity : Polarity }
+
+
 type alias Model
   = Flower
 
@@ -61,7 +84,7 @@ init =
 -- VIEW
 
 
----- TEXT
+---- Text
 
 
 viewFlowerText : Flower -> String
@@ -93,17 +116,6 @@ viewGardenText (Garden bouquet) =
 ---- Graphics
 
 
-type Polarity
-  = Pos
-  | Neg
-
-negate : Polarity -> Polarity
-negate polarity =
-  case polarity of
-    Pos -> Neg
-    Neg -> Pos
-
-
 fgColor : Polarity -> Color
 fgColor polarity =
   case polarity of
@@ -126,26 +138,26 @@ borderWidth =
   3
 
 
-viewFlower : Polarity -> Flower -> Element msg
-viewFlower polarity flower =
+viewFlower : Context -> Flower -> Element msg
+viewFlower context flower =
   case flower of
     Atom name ->
       el [ width fill ]
         (el
           [ centerX
-          , Font.color (fgColor polarity)
+          , Font.color (fgColor context.polarity)
           , Font.size 32 ]
           (text name))
     
     Flower pistil petals ->
       let
         pistilEl =
-          viewGarden (negate polarity) pistil
+          viewGarden ({ context | polarity = negate context.polarity }) pistil
         
         petalsEl =
           let
             petalEl petal =
-              (viewGarden polarity petal)
+              (viewGarden context petal)
           in
           row
             [ width fill
@@ -156,24 +168,24 @@ viewFlower polarity flower =
       column
         [ width fill
         , height fill
-        , Background.color (bgColor (negate polarity))
-        , Border.color (bgColor (negate polarity))
+        , Background.color (bgColor (negate context.polarity))
+        , Border.color (bgColor (negate context.polarity))
         , Border.width borderWidth ]
         [ pistilEl, petalsEl ]
 
 
-viewGarden : Polarity -> Garden -> Element msg
-viewGarden polarity (Garden bouquet) =
+viewGarden : Context -> Garden -> Element msg
+viewGarden context (Garden bouquet) =
   wrappedRow
     [ width fill
     , height fill
     , padding 20
     , spacing 40
-    , Background.color (bgColor polarity) ]
-    (List.map (viewFlower polarity) bouquet)
+    , Background.color (bgColor context.polarity) ]
+    (List.map (viewFlower context) bouquet)
 
 
 view : Model -> Element msg
 view model =
   -- text (viewFlowerText model)
-  viewFlower Pos model
+  viewFlower (Context Hole Pos) model
