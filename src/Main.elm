@@ -81,6 +81,11 @@ hypsZipper zipper =
   List.foldl (\zip acc -> hypsZip zip ++ acc) [] zipper
 
 
+isHypothesis : Flower -> Zipper -> Bool
+isHypothesis flower zipper =
+  List.member flower (hypsZipper zipper)
+
+
 type Polarity
   = Pos
   | Neg
@@ -102,29 +107,49 @@ type alias Model
   = Bouquet
 
 
+bigFlower : Flower
+bigFlower =
+  Flower
+    ( Garden
+        [ Atom "a"
+        , Flower
+            ( Garden
+                [ Atom "a" ] )
+            [ Garden
+                [ Atom "b" ],
+              Garden
+                [ Flower
+                    ( Garden
+                        [ Atom "b" ] )
+                    [ Garden
+                        [ Atom "c" ] ],
+                  Atom "b" ] ]
+        , Atom "d" ] )
+    [ Garden
+        [ Atom "b"
+        , Atom "a" ]
+    , Garden
+      [ Atom "c" ] ]
+
+
+modusPonensCurryfied : Flower
+modusPonensCurryfied =
+  let
+    ab =
+      Flower
+        ( Garden
+            [ Atom "a" ] )
+        [ Garden
+            [ Atom "b" ] ]
+  in
+  Flower
+    ( Garden [ ab ] ) 
+    [ Garden [ ab ] ]
+
+
 init : Model
 init =
-  [ Flower
-      ( Garden
-          [ Atom "a"
-          , Flower
-              ( Garden
-                  [ Atom "a" ] )
-              [ Garden
-                  [ Atom "b" ],
-                Garden
-                  [ Flower
-                      ( Garden
-                          [ Atom "b" ] )
-                      [ Garden
-                          [ Atom "c" ] ],
-                    Atom "b" ] ]
-          , Atom "d" ] )
-      [ Garden
-          [ Atom "b"
-          , Atom "a" ]
-      , Garden
-        [ Atom "c" ] ] ]
+  [ bigFlower ]
 
 
 -- UPDATE
@@ -133,6 +158,7 @@ type ProofRule
   = Justify
   | Unlock
   | Explode
+
 
 type Msg
   = ProofAction ProofRule Bouquet Zipper
@@ -143,16 +169,13 @@ update msg model =
   case msg of
     ProofAction rule bouquet zipper ->
       case (rule, bouquet, zipper) of
-        (Justify, [flower], _) ->
-          if List.member flower (hypsZipper zipper) then
-            fillZipper [] zipper
-          else
-            model
+        (Justify, _, _) ->
+          fillZipper [] zipper
 
         (Unlock, [], Pistil [Garden petal] :: tail)  ->
           fillZipper petal tail
         
-        (Unlock, [], Pistil branches :: Bouquet left right :: Pistil petals :: tail)  ->
+        (Unlock, [], Pistil branches :: Bouquet left right :: Pistil petals :: tail) ->
           let
             case_ : Garden -> Flower
             case_ branch =
@@ -230,59 +253,96 @@ borderWidth =
   3
 
 
-viewFlower : Context -> Flower -> Element Msg
-viewFlower context flower =
+actionable : List (Attribute Msg)
+actionable =
+  [ pointer
+  , Border.width 3
+  , Border.color (rgb 1.0 0.5 0)
+  , Border.dotted ]
+
+
+viewFlowerProof : Context -> Flower -> Element Msg
+viewFlowerProof context flower =
   case flower of
     Atom name ->
+      let
+        justifyAction : List (Attribute Msg)
+        justifyAction =
+          if isHypothesis flower context.zipper then
+            (Events.onClick (ProofAction Justify [flower] context.zipper))
+            :: actionable
+          else
+            []
+      in
       el
       [ width fill
       , height fill ]
         (el
-          [ centerX
-          , centerY
-          , padding 3
-          -- , Border.width 1
-          , Border.dashed
-          , Border.color (fgColor context.polarity)
-          , Font.color (fgColor context.polarity)
-          , Font.size 32
-          , Events.onClick (ProofAction Justify [flower] context.zipper) ]
-          (text name))
+          ( [ centerX
+            , centerY
+            , padding 3
+            -- , Border.width 1
+            , Border.dashed
+            , Border.color (fgColor context.polarity)
+            , Font.color (fgColor context.polarity)
+            , Font.size 32 ]
+           ++ justifyAction )
+          ( text name ) )
     
     Flower pistil petals ->
       let
         pistilEl =
           let
             (Garden bouquet) = pistil
-            newZipper = Pistil petals :: context.zipper
+
+            newZipper =
+              Pistil petals :: context.zipper
+
+            unlockAction =
+              if List.isEmpty bouquet then
+                (Events.onClick (ProofAction Unlock bouquet newZipper))
+                :: actionable
+              else
+                []
           in
           el
-            [ width fill
-            , height (fill)
-            , Events.onClick
-                (ProofAction Unlock bouquet newZipper) ]
-            (viewGarden
-              { context
-              | zipper = newZipper
-              , polarity = negate context.polarity }
-              pistil)
+            ( [ width fill
+              , height fill
+              , padding 20
+              , Background.color (bgColor (negate context.polarity)) ]
+             ++ unlockAction )
+            ( viewGardenProof
+                { context
+                | zipper = newZipper
+                , polarity = negate context.polarity }
+                pistil )
         
         petalsEl =
           let
             petalEl (left, right) petal =
               let
                 (Garden bouquet) = petal
-                newZipper = Petal pistil left right :: context.zipper
+
+                newZipper =
+                  Petal pistil left right :: context.zipper
+
+                explodeAction =
+                  if List.isEmpty bouquet then
+                    (Events.onClick (ProofAction Explode bouquet newZipper))
+                    :: actionable
+                  else
+                    []
               in
               el
-                [ width fill
-                , height (fill)
-                , Events.onClick
-                    (ProofAction Explode bouquet newZipper) ]
-                (viewGarden
-                  { context
-                  | zipper = newZipper }
-                  petal)
+                ( [ width fill
+                  , height (fill)
+                  , padding 20
+                  , Background.color (bgColor context.polarity) ]
+                 ++ explodeAction )
+                ( viewGardenProof
+                    { context
+                    | zipper = newZipper }
+                    petal )
           in
           row
             [ width fill
@@ -299,25 +359,27 @@ viewFlower context flower =
         [ pistilEl, petalsEl ]
 
 
-viewGarden : Context -> Garden -> Element Msg
-viewGarden context (Garden bouquet) =
+viewGardenProof : Context -> Garden -> Element Msg
+viewGardenProof context (Garden bouquet) =
   let
     flowerEl (left, right) =
-      viewFlower
+      viewFlowerProof
         { context
         | zipper = Bouquet left right :: context.zipper }
   in
   wrappedRow
     [ width fill
     , height fill
-    , padding 20
-    , spacing 40
-    , Background.color (bgColor context.polarity) ]
+    , spacing 40 ]
     (Utils.List.zipMap flowerEl bouquet)
 
 
 view : Model -> Element Msg
 view model =
   -- text (viewFlowerText model)
-  column [width fill, height fill]
-    (List.map (viewFlower (Context [] Pos)) model)
+  column
+    [ width fill
+    , height fill
+    , spacing 100
+    , Background.color (rgb 0.65 0.65 0.65) ]
+    (List.map (viewFlowerProof (Context [] Pos)) model)
