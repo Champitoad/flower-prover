@@ -10,6 +10,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Events as Events
+import Html.Attributes exposing (style)
 
 
 -- MAIN
@@ -361,16 +362,15 @@ viewFlowerProof interaction context flower =
             []
       in
       el
-      [ width fill
-      , height fill ]
-        (el
-          ( [ centerX
-            , centerY
-            , padding 3
-            , Font.color (fgColor context.polarity)
-            , Font.size 32 ]
-           ++ justifyAction )
-          ( text name ) )
+        ( [ width shrink
+          , height shrink
+          , centerX, centerY
+          , padding 3
+          , Font.color (fgColor context.polarity)
+          , Font.size 32
+          , htmlAttribute <| style "user-select" "none" ]
+          ++ justifyAction )
+        ( text name )
     
     Flower pistil petals ->
       let
@@ -496,7 +496,9 @@ view model =
       case model.mode of
         ProofMode interaction ->
           (Utils.List.zipMap
-            (\(l, r) -> viewFlowerProof interaction (Context [(l, Hole, r)] Pos))
+            (\(l, r) flower ->
+              el [width fill, height fill, centerX, centerY]
+              (viewFlowerProof interaction (Context [(l, Hole, r)] Pos) flower))
             model.goal)
 
         EditMode ->
