@@ -1,9 +1,14 @@
-module Utils.Events exposing (onMouseDown, onMouseUp, alwaysStopPropagationOn)
+module Utils.Events exposing (..)
 
 import Html.Events
 import Json.Decode as Json
 
 import Element exposing (..)
+
+
+onClick : msg -> Attribute msg
+onClick =
+  alwaysStopPropagationOn "onclick"
 
 
 onMouseDown : msg -> Attribute msg
@@ -18,10 +23,6 @@ onMouseUp =
 
 alwaysStopPropagationOn : String -> msg -> Attribute msg
 alwaysStopPropagationOn event msg =
+  let always m = ( m, True ) in
   Html.Events.stopPropagationOn event (Json.map always (Json.succeed msg)) |>
   htmlAttribute
-
-
-always : msg -> ( msg, Bool )
-always msg =
-  ( msg, True )

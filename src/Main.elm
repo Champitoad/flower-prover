@@ -144,6 +144,11 @@ type alias Model
     , mode : UIMode }
 
 
+yinyang : Flower
+yinyang =
+  Flower (Garden []) [Garden []]
+
+
 identity : Flower
 identity =
   Flower
@@ -256,10 +261,12 @@ update msg model =
           { model | mode = ProofMode Justifying }
 
         (Unlock, [], Bouquet left right :: Pistil [Garden petal] :: parent)  ->
+          let _ = Debug.log "unlock" () in
           { model | goal = fillZipper (left ++ petal ++ right) parent }
         
         (Unlock, [], Bouquet left right :: Pistil branches ::
                      Bouquet l r :: Pistil petals :: parent) ->
+          let _ = Debug.log "case" () in
           let
             case_ : Garden -> Flower
             case_ branch =
@@ -437,7 +444,7 @@ viewFlowerProof interaction context flower =
                 newZipper =
                   Petal pistil leftPetals rightPetals :: context.zipper
 
-                explodeAction =
+                closeAction =
                   if List.isEmpty bouquet then
                     (Events.onClick (ProofAction Close bouquet newZipper))
                     :: actionable
@@ -453,7 +460,7 @@ viewFlowerProof interaction context flower =
                   , padding 20
                   , Border.rounded borderRound
                   , Background.color (bgColor context.polarity) ]
-                 ++ explodeAction
+                 ++ closeAction
                  ++ importStartAction )
                 ( viewGardenProof
                     interaction
