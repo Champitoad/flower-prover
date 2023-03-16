@@ -362,6 +362,10 @@ borderWidth : Int
 borderWidth =
   3
 
+borderRound : Int
+borderRound =
+  10
+
 
 actionable : List (Attribute Msg)
 actionable =
@@ -415,7 +419,7 @@ viewFlowerProof interaction context flower =
             ( [ width fill
               , height fill
               , padding 20
-              , Background.color (bgColor (negate context.polarity)) ]
+              , Border.rounded borderRound ]
              ++ unlockAction )
             ( viewGardenProof
                 interaction
@@ -439,13 +443,18 @@ viewFlowerProof interaction context flower =
                     :: actionable
                   else
                     []
+
+                importStartAction =
+                  [onMouseDown (ProofAction ImportStart [flower] context.zipper)]
               in
               el
                 ( [ width fill
                   , height fill
                   , padding 20
+                  , Border.rounded borderRound
                   , Background.color (bgColor context.polarity) ]
-                 ++ explodeAction )
+                 ++ explodeAction
+                 ++ importStartAction )
                 ( viewGardenProof
                     interaction
                     { context
@@ -457,17 +466,19 @@ viewFlowerProof interaction context flower =
             , height fill
             , spacing borderWidth ]
             (Utils.List.zipMap petalEl petals)  
-
-        importStartAction =
-          [onMouseDown (ProofAction ImportStart [flower] context.zipper)]
       in
       column
-        ( [ width fill
-          , height fill
-          , Background.color (bgColor (negate context.polarity))
-          , Border.color (bgColor (negate context.polarity))
-          , Border.width borderWidth ]
-         ++ importStartAction )
+        [ width fill
+        , height fill
+        , padding borderWidth
+        , Background.color (fgColor context.polarity)
+        , Border.color (fgColor context.polarity)
+        , Border.rounded borderRound
+        , Border.shadow
+            { offset = (0, 5)
+            , size = 0.25
+            , blur = 15
+            , color = fgColor context.polarity } ]
         [ pistilEl, petalsEl ]
 
 
