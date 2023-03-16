@@ -38,13 +38,10 @@ type Garden
   = Garden Bouquet
 
 
-type FlowerZip
-  = Hole
+type Zip
+  = Bouquet Bouquet Bouquet
   | Pistil (List Garden)
   | Petal Garden (List Garden) (List Garden)
-
-type alias Zip
-  = (Bouquet, FlowerZip, Bouquet)
 
 type alias Zipper
   = List Zip
@@ -53,20 +50,16 @@ type alias Zipper
 
 
 fillZip : Zip -> Bouquet -> Bouquet
-fillZip (left, zip, right) bouquet =
-  let
-    filled =
-      case zip of
-        Hole ->
-          bouquet
+fillZip zip bouquet =
+  case zip of
+    Bouquet left right ->
+      left ++ bouquet ++ right
 
-        Pistil petals ->
-          [Flower (Garden bouquet) petals]
+    Pistil petals ->
+      [Flower (Garden bouquet) petals]
 
-        Petal pistil leftPetals rightPetals ->
-          [Flower pistil (leftPetals ++ Garden bouquet :: rightPetals)]
-  in
-  left ++ filled ++ right
+    Petal pistil leftPetals rightPetals ->
+      [Flower pistil (leftPetals ++ Garden bouquet :: rightPetals)]
 
 
 fillZipper : Bouquet -> Zipper -> Bouquet
@@ -75,20 +68,16 @@ fillZipper =
 
 
 hypsZip : Zip -> Bouquet
-hypsZip (left, zip, right) =
-  let
-    hyps =
-      case zip of
-        Hole ->
-          []
+hypsZip zip =
+  case zip of
+    Bouquet left right ->
+      left ++ right
 
-        Pistil _ ->
-          []
-        
-        Petal (Garden bouquet) _ _ ->
-          bouquet
-  in
-  left ++ right ++ hyps
+    Pistil _ ->
+      []
+    
+    Petal (Garden bouquet) _ _ ->
+      bouquet
 
 
 hypsZipper : Zipper -> Bouquet
@@ -101,9 +90,21 @@ isHypothesis flower zipper =
   List.member flower (hypsZipper zipper)
 
 
-leastCommonAncestor : Zipper -> Zipper -> Zipper
-leastCommonAncestor z1 z2 =
-  Utils.List.longestCommonSuffix z1 z2
+justifies : Zipper -> Zipper -> Bool
+justifies source destination =
+  let lca = Utils.List.longestCommonSuffix source destination in
+  case source of
+    -- Self pollination
+    Bouquet _ _ :: (Pistil _ :: grandParent as parent) ->
+      lca == grandParent ||
+      lca == parent
+
+    -- Wind pollination
+    Bouquet _ _ :: parent ->
+      lca == parent
+    
+    _ ->
+      False
 
 
 type Polarity
@@ -129,7 +130,7 @@ type alias Selection
 
 type ProofInteraction
   = Justifying
-  | Importing Flower -- source statement
+  | Importing Zipper Flower -- source path and statement
   | Fencing Selection
 
 
@@ -141,6 +142,27 @@ type UIMode
 type alias Model
   = { goal : Bouquet
     , mode : UIMode }
+
+
+identity : Flower
+identity =
+  Flower
+    (Garden [Atom "a"])
+    [Garden [Atom "a"]]
+
+
+yvonne : Flower
+yvonne =
+  Flower
+    ( Garden
+        [ Flower
+            (Garden [Atom "b"])
+            [Garden [Atom "c"]] ] )
+    [ Garden
+        [ Atom "a"
+        , Flower
+            (Garden [Atom "b"])
+            [Garden [Atom "c"]] ]]
 
 
 bigFlower : Flower
@@ -218,11 +240,11 @@ update msg model =
           { model | goal = fillZipper [] zipper }
         
         (ImportStart, [source], _) ->
-          { model | mode = ProofMode (Importing source) }
+          { model | mode = ProofMode (Importing zipper source) }
         
         (Import, _, _) ->
           case model.mode of
-            ProofMode (Importing source) ->
+            ProofMode (Importing _ source) ->
               { model
               | goal = fillZipper (bouquet ++ [source]) zipper
               , mode = ProofMode Justifying }
@@ -233,10 +255,11 @@ update msg model =
         (ImportCancel, _, _) ->
           { model | mode = ProofMode Justifying }
 
-        (Unlock, [], (left, Pistil [Garden petal], right) :: parent)  ->
+        (Unlock, [], Bouquet left right :: Pistil [Garden petal] :: parent)  ->
           { model | goal = fillZipper (left ++ petal ++ right) parent }
         
-        (Unlock, [], (left, Pistil branches, right) :: (l, Pistil petals, r) :: parent) ->
+        (Unlock, [], Bouquet left right :: Pistil branches ::
+                     Bouquet l r :: Pistil petals :: parent) ->
           let
             case_ : Garden -> Flower
             case_ branch =
@@ -251,7 +274,7 @@ update msg model =
           { model
           | goal = fillZipper (l ++ (Flower pistil [Garden cases]) :: r) parent }
         
-        (Close, [], (left, Petal _ _ _, right) :: parent) ->
+        (Close, [], Bouquet left right :: Petal _ _ _ :: parent) ->
           { model | goal = fillZipper (left ++ right) parent }
 
         _ ->
@@ -294,7 +317,7 @@ viewZipperText : Zipper -> String
 viewZipperText zipper =
   fillZipper [Atom "□"] zipper |>
   List.map (viewFlowerText) |>
-  String.concat
+  String.join ", "
 
 logZipper : String -> Zipper -> String
 logZipper msg zipper =
@@ -374,20 +397,12 @@ viewFlowerProof interaction context flower =
     
     Flower pistil petals ->
       let
-        (left, right, parent) =
-          case context.zipper of
-            (l, Hole, r) :: p ->
-              (l, r, p)
-            
-            _ ->
-              ([], [], [])
-
         pistilEl =
           let
             (Garden bouquet) = pistil
 
             newZipper =
-              (left, Pistil petals, right) :: parent
+              Pistil petals :: context.zipper
 
             unlockAction =
               if List.isEmpty bouquet then
@@ -416,7 +431,7 @@ viewFlowerProof interaction context flower =
                 (Garden bouquet) = petal
 
                 newZipper =
-                  (left, Petal pistil leftPetals rightPetals, right) :: parent
+                  Petal pistil leftPetals rightPetals :: context.zipper
 
                 explodeAction =
                   if List.isEmpty bouquet then
@@ -463,12 +478,13 @@ viewGardenProof interaction context (Garden bouquet) =
       viewFlowerProof
         interaction
         { context
-        | zipper = (left, Hole, right) :: context.zipper }
+        | zipper = Bouquet left right :: context.zipper }
     
     importAction =
       case interaction of
-        Importing content ->
-          if isHypothesis content context.zipper then
+        Importing sourceZipper _ ->
+          -- if isHypothesis content context.zipper then
+          if justifies sourceZipper context.zipper then
             [ onMouseUp (ProofAction Import bouquet context.zipper)
             , mouseOver [ Border.color (rgb 1 0.8 0) ] ]
           else
@@ -498,7 +514,7 @@ view model =
           (Utils.List.zipMap
             (\(l, r) flower ->
               el [width fill, height fill, centerX, centerY]
-              (viewFlowerProof interaction (Context [(l, Hole, r)] Pos) flower))
+              (viewFlowerProof interaction (Context [Bouquet l r] Pos) flower))
             model.goal)
 
         EditMode ->
