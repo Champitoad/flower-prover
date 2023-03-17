@@ -211,24 +211,42 @@ bigFlower =
       [ Atom "c" ] ]
 
 
+implies : String -> String -> Flower
+implies a b =
+  Flower
+    ( Garden
+        [ Atom a ] )
+    [ Garden
+        [ Atom b ] ]
+
 modusPonensCurryfied : Flower
 modusPonensCurryfied =
-  let
-    ab =
-      Flower
-        ( Garden
-            [ Atom "a" ] )
-        [ Garden
-            [ Atom "b" ] ]
-  in
   Flower
-    ( Garden [ ab ] ) 
-    [ Garden [ ab ] ]
+    ( Garden [ implies "a" "b" ] ) 
+    [ Garden [ implies "a" "b" ] ]
+
+
+notFalse : Flower
+notFalse =
+  Flower (Garden [Flower (Garden []) []]) []
+
+
+criticalPair : Flower
+criticalPair =
+  Flower
+    ( Garden
+        [ Flower
+            ( Garden [] )
+            [ Garden [ Atom "a" ]
+            , Garden [ Atom "b" ] ]
+        , implies "a" "c"
+        , implies "b" "c" ] )
+    [ Garden [ Atom "c" ] ]
 
 
 init : Model
 init =
-  { goal = [ bigFlower ]
+  { goal = [ criticalPair ]
   , mode = ProofMode Justifying }
 
 
