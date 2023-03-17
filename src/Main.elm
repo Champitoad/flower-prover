@@ -260,13 +260,10 @@ update msg model =
         (ImportCancel, _, _) ->
           { model | mode = ProofMode Justifying }
 
-        (Unlock, [], Bouquet left right :: Pistil [Garden petal] :: parent)  ->
-          let _ = Debug.log "unlock" () in
-          { model | goal = fillZipper (left ++ petal ++ right) parent }
+        (Unlock, [], Pistil [Garden petal] :: parent)  ->
+          { model | goal = fillZipper petal parent }
         
-        (Unlock, [], Bouquet left right :: Pistil branches ::
-                     Bouquet l r :: Pistil petals :: parent) ->
-          let _ = Debug.log "case" () in
+        (Unlock, [], Pistil branches :: Bouquet left right :: Pistil petals :: parent) ->
           let
             case_ : Garden -> Flower
             case_ branch =
@@ -279,10 +276,10 @@ update msg model =
               List.map case_ branches  
           in
           { model
-          | goal = fillZipper (l ++ (Flower pistil [Garden cases]) :: r) parent }
+          | goal = fillZipper [Flower pistil [Garden cases]] parent }
         
-        (Close, [], Bouquet left right :: Petal _ _ _ :: parent) ->
-          { model | goal = fillZipper (left ++ right) parent }
+        (Close, [], Petal _ _ _ :: parent) ->
+          { model | goal = fillZipper [] parent }
 
         _ ->
           model
@@ -450,9 +447,6 @@ viewFlowerProof interaction context flower =
                     :: actionable
                   else
                     []
-
-                importStartAction =
-                  [onMouseDown (ProofAction ImportStart [flower] context.zipper)]
               in
               el
                 ( [ width fill
@@ -460,8 +454,7 @@ viewFlowerProof interaction context flower =
                   , padding 20
                   , Border.rounded borderRound
                   , Background.color (bgColor context.polarity) ]
-                 ++ closeAction
-                 ++ importStartAction )
+                 ++ closeAction )
                 ( viewGardenProof
                     interaction
                     { context
@@ -473,19 +466,23 @@ viewFlowerProof interaction context flower =
             , height fill
             , spacing borderWidth ]
             (Utils.List.zipMap petalEl petals)  
+
+        importStartAction =
+          [onMouseDown (ProofAction ImportStart [flower] context.zipper)]
       in
       column
-        [ width fill
-        , height fill
-        , padding borderWidth
-        , Background.color (fgColor context.polarity)
-        , Border.color (fgColor context.polarity)
-        , Border.rounded borderRound
-        , Border.shadow
-            { offset = (0, 5)
-            , size = 0.25
-            , blur = 15
-            , color = fgColor context.polarity } ]
+        ( [ width fill
+          , height fill
+          , padding borderWidth
+          , Background.color (fgColor context.polarity)
+          , Border.color (fgColor context.polarity)
+          , Border.rounded borderRound
+          , Border.shadow
+              { offset = (0, 5)
+              , size = 0.25
+              , blur = 15
+              , color = fgColor context.polarity } ]
+         ++ importStartAction )
         [ pistilEl, petalsEl ]
 
 
