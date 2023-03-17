@@ -7,9 +7,14 @@
     visible during drag, or only when hovering target?)
 
 - Implement Fencing proof interaction with multiselection
-  - Start with long press to support mobile
-  - Apply by pressing key, or button to support mobile
-  - Cancel by clicking on any garden, or by clicking on close button
+  - Selection mode when maintaining shift key pressed
+  - Mobile support:
+    - Start with long press on any flower
+    - Cancel by clicking on any garden, or by clicking on close button (shown
+      only in selection mode)
+  - When selection non-empty: apply by pressing button (otherwise disabled when
+    selection is empty, and hidden outside of selection mode), or shortkey (like
+    `!`)
 
 - Undo/redo history
   - Works for the entire state, thus switching freely between different UI modes
@@ -32,6 +37,9 @@
     - free space to paste clipboard
   - Flowers/petals created by `grow` buttons don't have polarity restrictions:
     everything can be removed, and things can be added anywhere
+  - First-order:
+    - `add variable` zones in all gardens, regardless of polarity
+    - In a typed setting 
 
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers
@@ -46,3 +54,5 @@
 - Name flowers
 
 - View for partial proof term attached to flower
+
+- Analogy between Proof/Edit modes and Survival/Creative modes in Minecraft
