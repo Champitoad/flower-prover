@@ -10,6 +10,8 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Events as Events
+
+import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 
 
@@ -21,7 +23,7 @@ main =
   Browser.sandbox
     { init = init
     , update = update
-    , view = \model -> layout [] (view model) }
+    , view = \model -> layout [] (viewGoal model) }
 
 
 -- MODEL
@@ -127,11 +129,15 @@ type alias Context
 type alias Selection
   = List Zipper
  
+type alias Position
+  = { x : Int
+    , y : Int }
 
 type alias DnD
   = { source : Zipper
     , content : Flower
-    , target : Zipper }
+    , target : Zipper
+    , cursorPosition : Position }
 
 
 type ProofInteraction
@@ -241,6 +247,7 @@ type ProofRule
 type Msg
   = ProofAction ProofRule Bouquet Zipper
   | HoverTarget Zipper
+  | Dragging Position
   | Nothing
 
 
@@ -253,8 +260,13 @@ update msg model =
           { model | goal = fillZipper [] zipper }
         
         (ImportStart, [content], _) ->
-          let dummyDest = Bouquet [] [] :: zipper in
-          let dnd = { source = zipper, content = content, target = dummyDest } in
+          let
+            dnd =
+              { source = zipper
+              , content = content
+              , target = Bouquet [] [] :: zipper
+              , cursorPosition = { x = 0, y = 0 } }
+          in
           { model | mode = ProofMode (Importing dnd) }
         
         (Import, _, _) ->
@@ -294,10 +306,18 @@ update msg model =
         _ ->
           model
     
-    HoverTarget target ->
+    HoverTarget tgt ->
       case model.mode of
         ProofMode (Importing dnd) ->
-          { model | mode = ProofMode (Importing { dnd | target = target }) }
+          { model | mode = ProofMode (Importing { dnd | target = tgt }) }
+      
+        _ ->
+          model
+
+    Dragging pos ->
+      case model.mode of
+        ProofMode (Importing dnd) ->
+          { model | mode = ProofMode (Importing { dnd | cursorPosition = pos }) }
       
         _ ->
           model
@@ -555,8 +575,8 @@ viewGardenProof interaction context (Garden bouquet) =
     (Utils.List.zipMap flowerEl bouquet)
 
 
-view : Model -> Element Msg
-view model =
+viewGoal : Model -> Element Msg
+viewGoal model =
   -- text (viewFlowerText model)
   let
     bouquetEls =
@@ -569,7 +589,7 @@ view model =
             model.goal)
 
         EditMode ->
-          Debug.todo ""
+          Debug.todo ""  
   in
   column
     [ width fill
@@ -577,3 +597,38 @@ view model =
     , spacing 100
     , Background.color (rgb 0.65 0.65 0.65) ]
     bouquetEls
+
+
+viewImportedFlower : Model -> Html Msg
+viewImportedFlower model =
+  case model.mode of
+    ProofMode (Importing dnd) ->
+      let
+        contentEl =
+          viewFlowerProof
+            (Importing dnd)
+            { zipper = [], polarity = Pos }
+            dnd.content
+      in
+      div
+        [ style "position" "absolute"
+        , style "x" (String.fromInt dnd.cursorPosition.x)
+        , style "y" (String.fromInt dnd.cursorPosition.y) ]
+        [ layout [] contentEl ]
+    
+    _ ->
+      div [] []
+
+
+view : Model -> Html Msg
+view model =
+  let
+    goal =
+      layout
+        [ Debug.todo "Capture the cursor position in a Dragging message" ]
+        (viewGoal model)
+    importedFlower = viewImportedFlower model
+    app =
+      div [] [goal, importedFlower]
+  in
+  app
