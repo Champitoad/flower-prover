@@ -1,3 +1,5 @@
+- Fix empty pistil being highlighted even when it is not itself in a pistil
+
 - Use HTML5 drag-and-drop API instead of custom handling of mousedown and
   mouseup events for Importing interaction
   - Try to support mobile touchscreens
