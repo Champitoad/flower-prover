@@ -21,6 +21,11 @@ onMouseUp =
   alwaysStopPropagationOn "mouseup"
 
 
+onMouseMove : msg -> Attribute msg
+onMouseMove =
+  alwaysStopPropagationOn "mousemove"
+
+
 alwaysStopPropagationOn : String -> msg -> Attribute msg
 alwaysStopPropagationOn event msg =
   let always m = ( m, True ) in

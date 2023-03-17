@@ -128,9 +128,15 @@ type alias Selection
   = List Zipper
  
 
+type alias DnD
+  = { source : Zipper
+    , content : Flower
+    , target : Zipper }
+
+
 type ProofInteraction
   = Justifying
-  | Importing Zipper Flower -- source path and statement
+  | Importing DnD
   | Fencing Selection
 
 
@@ -234,6 +240,8 @@ type ProofRule
 
 type Msg
   = ProofAction ProofRule Bouquet Zipper
+  | HoverTarget Zipper
+  | Nothing
 
 
 update : Msg -> Model -> Model
@@ -244,14 +252,16 @@ update msg model =
         (Justify, _, _) ->
           { model | goal = fillZipper [] zipper }
         
-        (ImportStart, [source], _) ->
-          { model | mode = ProofMode (Importing zipper source) }
+        (ImportStart, [content], _) ->
+          let dummyDest = Bouquet [] [] :: zipper in
+          let dnd = { source = zipper, content = content, target = dummyDest } in
+          { model | mode = ProofMode (Importing dnd) }
         
         (Import, _, _) ->
           case model.mode of
-            ProofMode (Importing _ source) ->
+            ProofMode (Importing dnd) ->
               { model
-              | goal = fillZipper (bouquet ++ [source]) zipper
+              | goal = fillZipper (bouquet ++ [dnd.content]) zipper
               , mode = ProofMode Justifying }
             
             _ ->
@@ -283,6 +293,17 @@ update msg model =
 
         _ ->
           model
+    
+    HoverTarget target ->
+      case model.mode of
+        ProofMode (Importing dnd) ->
+          { model | mode = ProofMode (Importing { dnd | target = target }) }
+      
+        _ ->
+          model
+    
+    Nothing ->
+      model
 
 
 -- VIEW
@@ -377,6 +398,21 @@ actionable =
   , Border.width 3
   , Border.color (rgb 1.0 0.5 0)
   , Border.dotted ]
+
+
+type alias DropStyle msg
+  = { active : List (Attribute msg)
+    , inactive : List (Attribute msg) }
+
+dropTarget : DropStyle msg
+dropTarget =
+  let
+    border =
+      [ Border.width 3
+      , Border.dashed ]
+  in
+  { active = Border.color (rgb 1 0.8 0) :: border
+  , inactive = Border.color transparent :: border }
 
 
 viewFlowerProof : ProofInteraction -> Context -> Flower -> Element Msg
@@ -481,7 +517,8 @@ viewFlowerProof interaction context flower =
               { offset = (0, 5)
               , size = 0.25
               , blur = 15
-              , color = fgColor context.polarity } ]
+              , color = fgColor context.polarity }
+          , onMouseMove Nothing ] -- stop propagation during drag-and-drop
          ++ importStartAction )
         [ pistilEl, petalsEl ]
 
@@ -497,11 +534,11 @@ viewGardenProof interaction context (Garden bouquet) =
     
     importAction =
       case interaction of
-        Importing sourceZipper _ ->
-          -- if isHypothesis content context.zipper then
-          if justifies sourceZipper context.zipper then
-            [ onMouseUp (ProofAction Import bouquet context.zipper)
-            , mouseOver [ Border.color (rgb 1 0.8 0) ] ]
+        Importing dnd ->
+          -- if isHypothesis dnd.content context.zipper then
+          if justifies dnd.source context.zipper then
+            onMouseUp (ProofAction Import bouquet context.zipper) ::
+            if context.zipper == dnd.target then dropTarget.active else []
           else
             [ onMouseUp (ProofAction ImportCancel bouquet context.zipper) ]
 
@@ -512,9 +549,8 @@ viewGardenProof interaction context (Garden bouquet) =
     ( [ width fill
       , height fill
       , spacing 40
-      , Border.width 3
-      , Border.dashed
-      , Border.color transparent ]
+      , onMouseMove (HoverTarget context.zipper) ]
+     ++ dropTarget.inactive
      ++ importAction )
     (Utils.List.zipMap flowerEl bouquet)
 
