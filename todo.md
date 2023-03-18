@@ -35,7 +35,9 @@
         GUI to build statements/objects in a custom domain, i.e. euclidian
         geometry
     - `grow` buttons to grow a flower/petal
-    - free space to paste clipboard
+    - free space to:
+      - paste clipboard by clicking
+      - reorder flowers by drag-and-drop
   - Flowers/petals created by `grow` buttons don't have polarity restrictions:
     everything can be removed, and things can be added anywhere
   - First-order:
