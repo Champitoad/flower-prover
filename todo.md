@@ -1,5 +1,7 @@
 - Fix empty pistil being highlighted even when it is not itself in a pistil
 
+- Add support for formulas, and their introduction rules by click
+
 - Use HTML5 drag-and-drop API instead of custom handling of mousedown and
   mouseup events for Importing interaction
   - Try to support mobile touchscreens
@@ -41,7 +43,8 @@
     everything can be removed, and things can be added anywhere
   - First-order:
     - `add variable` zones in all gardens, regardless of polarity
-    - In a typed setting 
+    - In a typed setting, one can imagine that it opens a custom GUI to choose a
+      type (locally, or even in an online data base)
 
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers
