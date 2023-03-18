@@ -11,7 +11,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Events as Events
 
-import Html exposing (Html, div)
+import Html exposing (Html)
 import Html.Attributes exposing (style)
 
 import Html5.DragDrop as DnD
@@ -154,6 +154,7 @@ type ProofInteraction
 type UIMode
   = ProofMode ProofInteraction
   | EditMode
+  | NavigationMode
 
 
 type alias Model
@@ -465,136 +466,166 @@ stopPropagation =
   , onMouseMove DoNothing ]
 
 
-viewFlowerProof : ProofInteraction -> Context -> Flower -> Element Msg
-viewFlowerProof dnd context flower =
-  case flower of
-    Atom name ->
+viewAtom : UIMode -> Context -> String -> Element Msg
+viewAtom mode context name =
+  case mode of
+    ProofMode _ ->
       let
-        justifyAction : List (Attribute Msg)
+        atom =
+          Atom "name"
+
         justifyAction =
-          if isHypothesis flower context.zipper then
-            (Events.onClick (ProofAction Justify [flower] context.zipper))
+          if isHypothesis atom context.zipper then
+            (Events.onClick (ProofAction Justify [atom] context.zipper))
             :: actionable
           else
             []
       in
       el
-        ( [ width shrink
-          , height shrink
-          , centerX, centerY
-          , padding 3
-          , Font.color (fgColor context.polarity)
-          , Font.size 32
-          , htmlAttribute <| style "user-select" "none" ]
-          ++ justifyAction )
-        ( text name )
-    
-    Flower pistil petals ->
+        [ width fill
+        , height fill ]
+        ( el
+            ( [ width shrink
+              , height shrink
+              , centerX, centerY
+              , padding 3
+              , Font.color (fgColor context.polarity)
+              , Font.size 32
+              , htmlAttribute <| style "user-select" "none" ]
+            ++ justifyAction )
+            ( text name ) )
+
+    _ ->
+      Debug.todo ""
+
+
+viewPistil : UIMode -> Context -> Garden -> List Garden -> Element Msg
+viewPistil mode context (Garden bouquet as pistil) petals =
+  case mode of
+    ProofMode _ ->
       let
-        pistilEl =
+        newZipper =
+          Pistil petals :: context.zipper
+
+        unlockAction =
           let
-            (Garden bouquet) = pistil
-
-            newZipper =
-              Pistil petals :: context.zipper
-
-            unlockAction =
-              let
-                action =
-                  (Events.onClick (ProofAction Unlock bouquet newZipper))
-                  :: actionable
-              in
-              if List.isEmpty bouquet then
-                case context.zipper of
-                  _ :: Pistil _ :: _ ->
-                    action
-                  _ ->
-                    if List.length petals == 1 then action else []
-              else
-                []
+            action =
+              (Events.onClick (ProofAction Unlock bouquet newZipper))
+              :: actionable
           in
-          el
-            ( [ width fill
-              , height fill
-              , padding 20
-              , Border.rounded borderRound ]
-             ++ unlockAction )
-            ( viewGardenProof
-                dnd
-                { context
-                | zipper = newZipper
-                , polarity = negate context.polarity }
-                pistil )
-        
-        petalsEl =
-          let
-            petalEl (leftPetals, rightPetals) petal =
-              let
-                (Garden bouquet) = petal
-
-                newZipper =
-                  Petal pistil leftPetals rightPetals :: context.zipper
-
-                closeAction =
-                  if List.isEmpty bouquet then
-                    (Events.onClick (ProofAction Close bouquet newZipper))
-                    :: actionable
-                  else
-                    []
-              in
-              el
-                ( [ width fill
-                  , height fill
-                  , padding 20
-                  , Border.rounded borderRound
-                  , Background.color (bgColor context.polarity) ]
-                 ++ closeAction )
-                ( viewGardenProof
-                    dnd
-                    { context
-                    | zipper = newZipper }
-                    petal )
-          in
-          row
-            [ width fill
-            , height fill
-            , spacing borderWidth ]
-            ( Utils.List.zipperMap petalEl petals )
-
-        importStartAction =
-          List.map htmlAttribute <|
-          DnD.draggable DragDropMsg
-            { source = context.zipper, content = flower }
+          if List.isEmpty bouquet then
+            case context.zipper of
+              _ :: Pistil _ :: _ ->
+                action
+              _ ->
+                if List.length petals == 1 then action else []
+          else
+            []
       in
-      column
+      el
         ( [ width fill
           , height fill
-          , padding borderWidth
-          , Background.color (fgColor context.polarity)
-          , Border.color (fgColor context.polarity)
+          , padding 10
+          , Border.rounded borderRound ]
+          ++ unlockAction )
+        ( viewGardenProof
+            mode
+            { context
+            | zipper = newZipper
+            , polarity = negate context.polarity }
+            pistil )
+    _ ->
+      Debug.todo ""
+
+
+viewPetal : UIMode -> Context -> Garden -> (List Garden, List Garden) -> Garden -> Element Msg
+viewPetal mode context pistil (leftPetals, rightPetals) (Garden bouquet as petal) =
+  case mode of
+    ProofMode _ ->
+      let
+        newZipper =
+          Petal pistil leftPetals rightPetals :: context.zipper
+
+        closeAction =
+          if List.isEmpty bouquet then
+            (Events.onClick (ProofAction Close bouquet newZipper))
+            :: actionable
+          else
+            []
+      in
+      el
+        ( [ width fill
+          , height fill
+          , padding 10
           , Border.rounded borderRound
-          , Border.shadow
-              { offset = (0, 5)
-              , size = 0.25
-              , blur = 15
-              , color = fgColor context.polarity } ]
-         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-         ++ importStartAction )
-        [ pistilEl, petalsEl ]
+          , Background.color (bgColor context.polarity) ]
+          ++ closeAction )
+        ( viewGardenProof
+            mode
+            { context
+            | zipper = newZipper }
+            petal )
+    _ ->
+      Debug.todo ""
 
 
-viewGardenProof : ProofInteraction -> Context -> Garden -> Element Msg
-viewGardenProof interaction context (Garden bouquet) =
+viewFlower : UIMode -> Context -> Flower -> Element Msg
+viewFlower mode context flower =
+  case mode of
+    ProofMode _ ->
+      case flower of
+        Atom name ->
+          viewAtom mode context name
+        
+        Flower pistil petals ->
+          let
+            pistilEl =
+              viewPistil mode context pistil petals
+            
+            petalsEl =
+              row
+                [ width fill
+                , height fill
+                , spacing borderWidth ]
+                ( Utils.List.zipperMap (viewPetal mode context pistil) petals )
+
+            importStartAction =
+              List.map htmlAttribute <|
+              DnD.draggable DragDropMsg
+                { source = context.zipper, content = flower }
+          in
+          column
+            ( [ width fill
+              , height fill
+              , padding borderWidth
+              , Background.color (fgColor context.polarity)
+              , Border.color (fgColor context.polarity)
+              , Border.rounded borderRound
+              , Border.shadow
+                  { offset = (0, 5)
+                  , size = 0.25
+                  , blur = 15
+                  , color = fgColor context.polarity } ]
+            ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
+            ++ importStartAction )
+            [ pistilEl, petalsEl ]
+    
+    _ ->
+      Debug.todo ""
+
+
+viewGardenProof : UIMode -> Context -> Garden -> Element Msg
+viewGardenProof mode context (Garden bouquet) =
   let
     flowerEl (left, right) =
-      viewFlowerProof
-        interaction
+      viewFlower
+        mode
         { context
         | zipper = Bouquet left right :: context.zipper }
     
-    importAction (left, right) =
-      case interaction of
-        Importing dnd ->
+    dropAction (left, right) =
+      case mode of
+        ProofMode (Importing dnd) ->
           case DnD.getDragId dnd of
             Just { source, content } ->
               -- if isHypothesis content context.zipper then
@@ -619,20 +650,24 @@ viewGardenProof interaction context (Garden bouquet) =
                 []
             _ ->
               []
-        _ ->
+
+        ProofMode Justifying ->
           []
+        
+        _ ->
+          Debug.todo ""
     
     dropZone lr =
       el
         ( [ width fill
           , height fill
-          , padding 10
+          , padding 0
           , Border.width dropTarget.borderWidth
           , Border.color transparent ]
-         ++ importAction lr )
+         ++ dropAction lr )
         none
     
-    els =
+    intersticial =
       let
         sperse ((left, right) as lr) flower =
           [dropZone (left, flower :: right), flowerEl lr flower]
@@ -644,7 +679,7 @@ viewGardenProof interaction context (Garden bouquet) =
     [ width fill
     , height fill
     , spacing 10 ]
-    els
+    intersticial
 
 
 viewGoal : Model -> Element Msg
@@ -653,14 +688,14 @@ viewGoal model =
   let
     bouquetEls =
       case model.mode of
-        ProofMode interaction ->
+        ProofMode _ ->
           (Utils.List.zipperMap
             (\(l, r) flower ->
               el [width fill, height fill, centerX, centerY]
-              (viewFlowerProof interaction (Context [Bouquet l r] Pos) flower))
+              (viewFlower model.mode (Context [Bouquet l r] Pos) flower))
             model.goal)
 
-        EditMode ->
+        _ ->
           Debug.todo ""  
   in
   column
