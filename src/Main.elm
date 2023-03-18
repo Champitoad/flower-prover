@@ -15,6 +15,7 @@ import Html exposing (Html)
 import Html.Attributes exposing (style)
 
 import Html5.DragDrop as DnD
+import List exposing (drop)
 
 
 -- MAIN
@@ -528,7 +529,7 @@ viewPistil mode context (Garden bouquet as pistil) petals =
           , padding 10
           , Border.rounded borderRound ]
           ++ unlockAction )
-        ( viewGardenProof
+        ( viewGarden
             mode
             { context
             | zipper = newZipper
@@ -560,7 +561,7 @@ viewPetal mode context pistil (leftPetals, rightPetals) (Garden bouquet as petal
           , Border.rounded borderRound
           , Background.color (bgColor context.polarity) ]
           ++ closeAction )
-        ( viewGardenProof
+        ( viewGarden
             mode
             { context
             | zipper = newZipper }
@@ -614,8 +615,8 @@ viewFlower mode context flower =
       Debug.todo ""
 
 
-viewGardenProof : UIMode -> Context -> Garden -> Element Msg
-viewGardenProof mode context (Garden bouquet) =
+viewGarden : UIMode -> Context -> Garden -> Element Msg
+viewGarden mode context (Garden bouquet) =
   let
     flowerEl (left, right) =
       viewFlower
@@ -657,29 +658,48 @@ viewGardenProof mode context (Garden bouquet) =
         _ ->
           Debug.todo ""
     
-    dropZone lr =
-      el
-        ( [ width fill
-          , height fill
-          , padding 0
-          , Border.width dropTarget.borderWidth
-          , Border.color transparent ]
-         ++ dropAction lr )
-        none
-    
-    intersticial =
+    layoutAttrs =
+      [ width fill
+      , height fill ]
+
+    intersticial () =
       let
-        sperse ((left, right) as lr) flower =
-          [dropZone (left, flower :: right), flowerEl lr flower]
+        attrs =
+          layoutAttrs ++
+          [ spacing 10 ]
+
+        dropZone lr =
+          el
+            ( [ width fill
+              , height fill
+              , Border.width dropTarget.borderWidth
+              , Border.color transparent ]
+            ++ dropAction lr )
+            none
+
+        els =
+          let
+            sperse ((left, right) as lr) flower =
+              [dropZone (left, flower :: right), flowerEl lr flower]
+          in
+          ( bouquet |> Utils.List.zipperMap sperse |> List.concat ) ++
+          [ dropZone (bouquet, []) ]
       in
-      ( bouquet |> Utils.List.zipperMap sperse |> List.concat ) ++
-      [ dropZone (bouquet, []) ]
+      wrappedRow attrs els
+        
+    normal () =
+      let
+        attrs =
+          spacing 30 ::
+          padding 30 ::
+          layoutAttrs ++
+          dropAction (bouquet, [])
+        els =
+          bouquet |> Utils.List.zipperMap flowerEl
+      in
+      wrappedRow attrs els
   in
-  wrappedRow
-    [ width fill
-    , height fill
-    , spacing 10 ]
-    intersticial
+  normal ()
 
 
 viewGoal : Model -> Element Msg

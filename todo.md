@@ -3,9 +3,6 @@
 - Use HTML5 drag-and-drop API for Importing interaction
   - Try to support mobile touchscreens
     (https://github.com/norpan/elm-html5-drag-drop/blob/master/example/Example.elm)
-  - Instead of having gardens as targets and importing at the end of them,
-    add drop zones at the start, end and between flowers of gardens (make them
-    visible during drag, or only when hovering target?)
 
 - Implement Fencing proof interaction with multiselection
   - Selection mode when maintaining shift key pressed
