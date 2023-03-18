@@ -11655,6 +11655,7 @@ var $author$project$Main$Pistil = function (a) {
 	return {$: 'Pistil', a: a};
 };
 var $author$project$Main$Unlock = {$: 'Unlock'};
+var $author$project$Main$borderRound = 10;
 var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
 var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 	return A2(
@@ -11674,6 +11675,18 @@ var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$F
 var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
 var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
 var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
+var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
+};
 var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
 	function (a, b, c, d, e) {
 		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
@@ -11693,10 +11706,13 @@ var $mdgriffith$elm_ui$Element$Border$width = function (v) {
 var $author$project$Main$actionable = _List_fromArray(
 	[
 		$mdgriffith$elm_ui$Element$pointer,
-		$mdgriffith$elm_ui$Element$Border$width(3),
+		$mdgriffith$elm_ui$Element$Border$width(5),
 		$mdgriffith$elm_ui$Element$Border$color(
-		A3($mdgriffith$elm_ui$Element$rgb, 1.0, 0.5, 0)),
-		$mdgriffith$elm_ui$Element$Border$dotted
+		A3($mdgriffith$elm_ui$Element$rgb, 0.3, 0.9, 0.3)),
+		$mdgriffith$elm_ui$Element$Border$dotted,
+		$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound),
+		$mdgriffith$elm_ui$Element$Background$color(
+		A4($mdgriffith$elm_ui$Element$rgba, 0.3, 0.9, 0.3, 0.5))
 	]);
 var $author$project$Main$bgColor = function (polarity) {
 	if (polarity.$ === 'Pos') {
@@ -11705,7 +11721,6 @@ var $author$project$Main$bgColor = function (polarity) {
 		return A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0);
 	}
 };
-var $author$project$Main$borderRound = 10;
 var $author$project$Main$borderWidth = 3;
 var $norpan$elm_html5_drag_drop$Html5$DragDrop$DragEnd = {$: 'DragEnd'};
 var $norpan$elm_html5_drag_drop$Html5$DragDrop$DragStart = F2(
@@ -11769,7 +11784,6 @@ var $norpan$elm_html5_drag_drop$Html5$DragDrop$draggable = F2(
 			]);
 	});
 var $mdgriffith$elm_ui$Element$Border$dashed = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDashed);
-var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
 var $author$project$Main$dropTarget = function () {
 	var width = 3;
 	var border = _List_fromArray(
@@ -12050,17 +12064,6 @@ var $mdgriffith$elm_ui$Element$padding = function (x) {
 			f,
 			f));
 };
-var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
-var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + $elm$core$String$fromInt(radius),
-			'border-radius',
-			$elm$core$String$fromInt(radius) + 'px'));
-};
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
 var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
 var $mdgriffith$elm_ui$Element$row = F2(
@@ -12215,8 +12218,8 @@ var $author$project$Main$viewAtom = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 524, column: 7},
-					end: {line: 524, column: 17}
+					start: {line: 526, column: 7},
+					end: {line: 526, column: 17}
 				})('');
 		}
 	});
@@ -12497,8 +12500,8 @@ var $author$project$Main$viewFlower = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 639, column: 7},
-					end: {line: 639, column: 17}
+					start: {line: 647, column: 7},
+					end: {line: 647, column: 17}
 				})('');
 		}
 	});
@@ -12589,8 +12592,8 @@ var $author$project$Main$viewGarden = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 683, column: 11},
-					end: {line: 683, column: 21}
+					start: {line: 691, column: 11},
+					end: {line: 691, column: 21}
 				})('');
 		};
 		var borderAttrs = _List_fromArray(
@@ -12679,30 +12682,37 @@ var $author$project$Main$viewPetal = F5(
 				$author$project$Main$actionable) : _List_Nil;
 			return A2(
 				$mdgriffith$elm_ui$Element$el,
-				_Utils_ap(
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$padding(20),
-							$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound),
-							$mdgriffith$elm_ui$Element$Background$color(
-							$author$project$Main$bgColor(context.polarity))
-						]),
-					closeAction),
-				A3(
-					$author$project$Main$viewGarden,
-					mode,
-					_Utils_update(
-						context,
-						{zipper: newZipper}),
-					petal));
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound),
+						$mdgriffith$elm_ui$Element$Background$color(
+						$author$project$Main$bgColor(context.polarity))
+					]),
+				A2(
+					$mdgriffith$elm_ui$Element$el,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$padding(20)
+							]),
+						closeAction),
+					A3(
+						$author$project$Main$viewGarden,
+						mode,
+						_Utils_update(
+							context,
+							{zipper: newZipper}),
+						petal)));
 		} else {
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 594, column: 7},
-					end: {line: 594, column: 17}
+					start: {line: 602, column: 7},
+					end: {line: 602, column: 17}
 				})('');
 		}
 	});
@@ -12734,31 +12744,38 @@ var $author$project$Main$viewPistil = F4(
 			}();
 			return A2(
 				$mdgriffith$elm_ui$Element$el,
-				_Utils_ap(
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$padding(20),
-							$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound)
-						]),
-					unlockAction),
-				A3(
-					$author$project$Main$viewGarden,
-					mode,
-					_Utils_update(
-						context,
-						{
-							polarity: $author$project$Main$invert(context.polarity),
-							zipper: newZipper
-						}),
-					pistil));
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound)
+					]),
+				A2(
+					$mdgriffith$elm_ui$Element$el,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$padding(20)
+							]),
+						unlockAction),
+					A3(
+						$author$project$Main$viewGarden,
+						mode,
+						_Utils_update(
+							context,
+							{
+								polarity: $author$project$Main$invert(context.polarity),
+								zipper: newZipper
+							}),
+						pistil)));
 		} else {
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 563, column: 7},
-					end: {line: 563, column: 17}
+					start: {line: 568, column: 7},
+					end: {line: 568, column: 17}
 				})('');
 		}
 	});
@@ -12798,8 +12815,8 @@ var $author$project$Main$viewGoal = function (model) {
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 748, column: 11},
-					end: {line: 748, column: 21}
+					start: {line: 756, column: 11},
+					end: {line: 756, column: 21}
 				})('');
 		}
 	}();

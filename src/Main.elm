@@ -458,9 +458,11 @@ borderRound =
 actionable : List (Attribute Msg)
 actionable =
   [ pointer
-  , Border.width 3
-  , Border.color (rgb 1.0 0.5 0)
-  , Border.dotted ]
+  , Border.width 5
+  , Border.color (rgb 0.3 0.9 0.3)
+  , Border.dotted
+  , Border.rounded borderRound
+  , Background.color (rgba 0.3 0.9 0.3 0.5) ]
 
 
 type alias DropStyle msg
@@ -550,15 +552,18 @@ viewPistil mode context (Garden bouquet as pistil) petals =
       el
         ( [ width fill
           , height fill
-          , padding 20
-          , Border.rounded borderRound ]
-          ++ unlockAction )
-        ( viewGarden
-            mode
-            { context
-            | zipper = newZipper
-            , polarity = invert context.polarity }
-            pistil )
+          , Border.rounded borderRound ])
+        ( el
+            ( [ width fill
+              , height fill
+              , padding 20 ]
+             ++ unlockAction )
+            ( viewGarden
+              mode
+              { context
+              | zipper = newZipper
+              , polarity = invert context.polarity }
+              pistil ) )
     _ ->
       Debug.todo ""
 
@@ -579,17 +584,20 @@ viewPetal mode context pistil (leftPetals, rightPetals) (Garden bouquet as petal
             []
       in
       el
-        ( [ width fill
-          , height fill
-          , padding 20
-          , Border.rounded borderRound
-          , Background.color (bgColor context.polarity) ]
-          ++ closeAction )
-        ( viewGarden
-            mode
-            { context
-            | zipper = newZipper }
-            petal )
+        [ width fill
+        , height fill
+        , Border.rounded borderRound
+        , Background.color (bgColor context.polarity) ]
+        ( el
+            ( [ width fill
+              , height fill
+              , padding 20 ]
+             ++ closeAction )
+            ( viewGarden
+                mode
+                { context
+                | zipper = newZipper }
+                petal ) )
     _ ->
       Debug.todo ""
 
