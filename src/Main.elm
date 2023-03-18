@@ -14,6 +14,8 @@ import Element.Events as Events
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 
+import Html5.DragDrop as DnD
+
 
 -- MAIN
 
@@ -23,7 +25,7 @@ main =
   Browser.sandbox
     { init = init
     , update = update
-    , view = \model -> layout [] (viewGoal model) }
+    , view = view }
 
 
 -- MODEL
@@ -129,20 +131,23 @@ type alias Context
 type alias Selection
   = List Zipper
  
-type alias Position
-  = { x : Int
-    , y : Int }
 
-type alias DnD
-  = { source : Zipper
-    , content : Flower
-    , target : Zipper
-    , cursorPosition : Position }
+type alias FlowerDragId
+  = { source : Zipper, content : Flower }
+
+type alias FlowerDropId
+  = Maybe { target : Zipper, content : Bouquet }
+
+type alias FlowerDnD
+  = DnD.Model FlowerDragId FlowerDropId
+
+type alias FlowerDnDMsg
+  = DnD.Msg FlowerDragId FlowerDropId
 
 
 type ProofInteraction
   = Justifying
-  | Importing DnD
+  | Importing
   | Fencing Selection
 
 
@@ -153,7 +158,8 @@ type UIMode
 
 type alias Model
   = { goal : Bouquet
-    , mode : UIMode }
+    , mode : UIMode
+    , dragDrop : FlowerDnD }
 
 
 yinyang : Flower
@@ -247,16 +253,15 @@ criticalPair =
 init : Model
 init =
   { goal = [ criticalPair ]
-  , mode = ProofMode Justifying }
+  , mode = ProofMode Justifying
+  , dragDrop = DnD.init }
 
 
 -- UPDATE
 
 type ProofRule
   = Justify -- down pollination
-  | ImportStart -- up pollination (start drag-and-drop on source)
-  | Import -- up pollination (stop drag-and-drop on destination)
-  | ImportCancel -- up pollination (cancel drag-and-drop)
+  | Import -- up pollination
   | Unlock -- empty pistil
   | Close -- empty petal
   | Fence -- fencing
@@ -264,9 +269,8 @@ type ProofRule
 
 type Msg
   = ProofAction ProofRule Bouquet Zipper
-  | HoverTarget Zipper
-  | Dragging Position
-  | Nothing
+  | DragDropMsg FlowerDnDMsg
+  | DoNothing
 
 
 update : Msg -> Model -> Model
@@ -277,28 +281,10 @@ update msg model =
         (Justify, _, _) ->
           { model | goal = fillZipper [] zipper }
         
-        (ImportStart, [content], _) ->
-          let
-            dnd =
-              { source = zipper
-              , content = content
-              , target = Bouquet [] [] :: zipper
-              , cursorPosition = { x = 0, y = 0 } }
-          in
-          { model | mode = ProofMode (Importing dnd) }
-        
         (Import, _, _) ->
-          case model.mode of
-            ProofMode (Importing dnd) ->
-              { model
-              | goal = fillZipper (bouquet ++ [dnd.content]) zipper
-              , mode = ProofMode Justifying }
-            
-            _ ->
-              model
-        
-        (ImportCancel, _, _) ->
-          { model | mode = ProofMode Justifying }
+          { model
+          | goal = fillZipper bouquet zipper
+          , mode = ProofMode Justifying }
 
         (Unlock, [], Pistil [Garden petal] :: parent)  ->
           { model | goal = fillZipper petal parent }
@@ -324,23 +310,31 @@ update msg model =
         _ ->
           model
     
-    HoverTarget tgt ->
-      case model.mode of
-        ProofMode (Importing dnd) ->
-          { model | mode = ProofMode (Importing { dnd | target = tgt }) }
-      
-        _ ->
-          model
-
-    Dragging pos ->
-      case model.mode of
-        ProofMode (Importing dnd) ->
-          { model | mode = ProofMode (Importing { dnd | cursorPosition = pos }) }
-      
-        _ ->
-          model
+    DragDropMsg dndMsg ->
+      let
+        ( dragDrop, result ) =
+          DnD.update dndMsg model.dragDrop
+        
+        newModel =
+          case result of
+            Just (drag, drop, _) ->
+              case drop of
+                Just destination ->
+                  update
+                    ( ProofAction Import
+                      ( destination.content ++ [drag.content] )
+                      destination.target )
+                    model
+                
+                Nothing ->
+                  model
+            
+            Nothing ->
+              model
+      in
+      { newModel | dragDrop = dragDrop }
     
-    Nothing ->
+    DoNothing ->
       model
 
 
@@ -439,22 +433,35 @@ actionable =
 
 
 type alias DropStyle msg
-  = { active : List (Attribute msg)
+  = { borderWidth : Int
+    , active : List (Attribute msg)
     , inactive : List (Attribute msg) }
+
 
 dropTarget : DropStyle msg
 dropTarget =
   let
+    width =
+      3
+
     border =
-      [ Border.width 3
-      , Border.dashed ]
+      [ Border.width width
+      , Border.dashed
+      , Border.color (rgb 1 0.8 0) ]
   in
-  { active = Border.color (rgb 1 0.8 0) :: border
-  , inactive = Border.color transparent :: border }
+  { borderWidth = width
+  , active = Background.color (rgba 1 0.8 0 0.5) :: border
+  , inactive = border }
 
 
-viewFlowerProof : ProofInteraction -> Context -> Flower -> Element Msg
-viewFlowerProof interaction context flower =
+stopPropagation : List (Attribute Msg)
+stopPropagation =
+  [ onDragOver DoNothing
+  , onMouseMove DoNothing ]
+
+
+viewFlowerProof : FlowerDnD -> Context -> Flower -> Element Msg
+viewFlowerProof dnd context flower =
   case flower of
     Atom name ->
       let
@@ -508,7 +515,7 @@ viewFlowerProof interaction context flower =
               , Border.rounded borderRound ]
              ++ unlockAction )
             ( viewGardenProof
-                interaction
+                dnd
                 { context
                 | zipper = newZipper
                 , polarity = negate context.polarity }
@@ -538,7 +545,7 @@ viewFlowerProof interaction context flower =
                   , Background.color (bgColor context.polarity) ]
                  ++ closeAction )
                 ( viewGardenProof
-                    interaction
+                    dnd
                     { context
                     | zipper = newZipper }
                     petal )
@@ -547,10 +554,12 @@ viewFlowerProof interaction context flower =
             [ width fill
             , height fill
             , spacing borderWidth ]
-            (Utils.List.zipMap petalEl petals)  
+            ( Utils.List.zipMap petalEl petals )
 
         importStartAction =
-          [onMouseDown (ProofAction ImportStart [flower] context.zipper)]
+          List.map htmlAttribute <|
+          DnD.draggable DragDropMsg
+            { source = context.zipper, content = flower }
       in
       column
         ( [ width fill
@@ -563,31 +572,44 @@ viewFlowerProof interaction context flower =
               { offset = (0, 5)
               , size = 0.25
               , blur = 15
-              , color = fgColor context.polarity }
-          , onMouseMove Nothing ] -- stop propagation during drag-and-drop
+              , color = fgColor context.polarity } ]
+         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
          ++ importStartAction )
         [ pistilEl, petalsEl ]
 
 
-viewGardenProof : ProofInteraction -> Context -> Garden -> Element Msg
-viewGardenProof interaction context (Garden bouquet) =
+viewGardenProof : FlowerDnD -> Context -> Garden -> Element Msg
+viewGardenProof dnd context (Garden bouquet) =
   let
     flowerEl (left, right) =
       viewFlowerProof
-        interaction
+        dnd
         { context
         | zipper = Bouquet left right :: context.zipper }
     
     importAction =
-      case interaction of
-        Importing dnd ->
-          -- if isHypothesis dnd.content context.zipper then
-          if justifies dnd.source context.zipper then
-            onMouseUp (ProofAction Import bouquet context.zipper) ::
-            if context.zipper == dnd.target then dropTarget.active else []
+      case DnD.getDragId dnd of
+        Just { source } ->
+          -- if isHypothesis content context.zipper then
+          if justifies source context.zipper then
+            let
+              dropTargetStyle =
+                case DnD.getDropId dnd of
+                  Just (Just { target }) ->
+                    if context.zipper == target
+                    then dropTarget.active
+                    else dropTarget.inactive
+                
+                  _ ->
+                    dropTarget.inactive
+            in
+            dropTargetStyle ++
+            ( List.map htmlAttribute <|
+              DnD.droppable DragDropMsg
+                (Just { target = context.zipper, content = bouquet }) )
           else
-            [ onMouseUp (ProofAction ImportCancel bouquet context.zipper) ]
-
+            []
+      
         _ ->
           []
   in
@@ -595,8 +617,8 @@ viewGardenProof interaction context (Garden bouquet) =
     ( [ width fill
       , height fill
       , spacing 40
-      , onMouseMove (HoverTarget context.zipper) ]
-     ++ dropTarget.inactive
+      , Border.width dropTarget.borderWidth
+      , Border.color transparent ]
      ++ importAction )
     (Utils.List.zipMap flowerEl bouquet)
 
@@ -611,7 +633,7 @@ viewGoal model =
           (Utils.List.zipMap
             (\(l, r) flower ->
               el [width fill, height fill, centerX, centerY]
-              (viewFlowerProof interaction (Context [Bouquet l r] Pos) flower))
+              (viewFlowerProof model.dragDrop (Context [Bouquet l r] Pos) flower))
             model.goal)
 
         EditMode ->
@@ -625,36 +647,6 @@ viewGoal model =
     bouquetEls
 
 
-viewImportedFlower : Model -> Html Msg
-viewImportedFlower model =
-  case model.mode of
-    ProofMode (Importing dnd) ->
-      let
-        contentEl =
-          viewFlowerProof
-            (Importing dnd)
-            { zipper = [], polarity = Pos }
-            dnd.content
-      in
-      div
-        [ style "position" "absolute"
-        , style "x" (String.fromInt dnd.cursorPosition.x)
-        , style "y" (String.fromInt dnd.cursorPosition.y) ]
-        [ layout [] contentEl ]
-    
-    _ ->
-      div [] []
-
-
 view : Model -> Html Msg
 view model =
-  let
-    goal =
-      layout
-        [ Debug.todo "Capture the cursor position in a Dragging message" ]
-        (viewGoal model)
-    importedFlower = viewImportedFlower model
-    app =
-      div [] [goal, importedFlower]
-  in
-  app
+  layout [] (viewGoal model)

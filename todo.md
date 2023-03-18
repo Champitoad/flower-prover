@@ -1,7 +1,6 @@
 - Add support for formulas, and their introduction rules by click
 
-- Use HTML5 drag-and-drop API instead of custom handling of mousedown and
-  mouseup events for Importing interaction
+- Use HTML5 drag-and-drop API for Importing interaction
   - Try to support mobile touchscreens
     (https://github.com/norpan/elm-html5-drag-drop/blob/master/example/Example.elm)
   - Instead of having gardens as targets and importing at the end of them,

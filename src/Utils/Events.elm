@@ -26,6 +26,11 @@ onMouseMove =
   alwaysStopPropagationOn "mousemove"
 
 
+onDragOver : msg -> Attribute msg
+onDragOver =
+  alwaysStopPropagationOn "dragover"
+
+
 alwaysStopPropagationOn : String -> msg -> Attribute msg
 alwaysStopPropagationOn event msg =
   let always m = ( m, True ) in
