@@ -128,8 +128,8 @@ type Polarity
   | Neg
 
 
-negate : Polarity -> Polarity
-negate polarity =
+invert : Polarity -> Polarity
+invert polarity =
   case polarity of
     Pos -> Neg
     Neg -> Pos
@@ -497,7 +497,7 @@ viewAtom mode context name =
     ProofMode _ ->
       let
         atom =
-          Atom "name"
+          Atom name
 
         justifyAction =
           if isHypothesis atom context.zipper then
@@ -557,7 +557,7 @@ viewPistil mode context (Garden bouquet as pistil) petals =
             mode
             { context
             | zipper = newZipper
-            , polarity = negate context.polarity }
+            , polarity = invert context.polarity }
             pistil )
     _ ->
       Debug.todo ""
