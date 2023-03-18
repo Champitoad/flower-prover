@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Utils.List
 import Utils.Events exposing (..)
@@ -15,18 +15,29 @@ import Html exposing (Html)
 import Html.Attributes exposing (style)
 
 import Html5.DragDrop as DnD
-import List exposing (drop)
+
+import Json.Decode exposing (Value)      
 
 
 -- MAIN
 
+port dragstart : Value -> Cmd msg
+
 
 main : Program () Model Msg
 main =
-  Browser.sandbox
+  Browser.element
     { init = init
     , update = update
+    , subscriptions = subscriptions
     , view = view }
+
+
+-- SUBSCRIPTIONS
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+  Sub.none      
 
 
 -- MODEL
@@ -251,10 +262,11 @@ criticalPair =
     [ Garden [ Atom "c" ] ]
 
 
-init : Model
-init =
-  { goal = [ criticalPair ]
-  , mode = ProofMode Justifying }
+init : () -> (Model, Cmd Msg)
+init () =
+  ( { goal = [ criticalPair ]
+    , mode = ProofMode Justifying }
+  , Cmd.none )
 
 
 -- UPDATE
@@ -273,77 +285,89 @@ type Msg
   | DoNothing
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     ProofAction rule bouquet zipper ->
-      case (rule, bouquet, zipper) of
-        (Justify, _, _) ->
-          { model | goal = fillZipper [] zipper }
-        
-        (Import, _, _) ->
-          { model
-          | goal = fillZipper bouquet zipper
-          , mode = ProofMode Justifying }
-
-        (Unlock, [], Pistil [Garden petal] :: parent)  ->
-          { model | goal = fillZipper petal parent }
-        
-        (Unlock, [], Pistil branches :: Bouquet left right :: Pistil petals :: parent) ->
-          let
-            case_ : Garden -> Flower
-            case_ branch =
-              Flower branch petals
+      let
+        model_=
+          case (rule, bouquet, zipper) of
+            (Justify, _, _) ->
+              { model | goal = fillZipper [] zipper }
             
-            pistil =
-              Garden (left ++ right)
-            
-            cases =
-              List.map case_ branches  
-          in
-          { model
-          | goal = fillZipper [Flower pistil [Garden cases]] parent }
-        
-        (Close, [], Petal _ _ _ :: parent) ->
-          { model | goal = fillZipper [] parent }
+            (Import, _, _) ->
+              { model
+              | goal = fillZipper bouquet zipper
+              , mode = ProofMode Justifying }
 
-        _ ->
-          model
-    
+            (Unlock, [], Pistil [Garden petal] :: parent)  ->
+              { model | goal = fillZipper petal parent }
+            
+            (Unlock, [], Pistil branches :: Bouquet left right :: Pistil petals :: parent) ->
+              let
+                case_ : Garden -> Flower
+                case_ branch =
+                  Flower branch petals
+                
+                pistil =
+                  Garden (left ++ right)
+                
+                cases =
+                  List.map case_ branches  
+              in
+              { model
+              | goal = fillZipper [Flower pistil [Garden cases]] parent }
+            
+            (Close, [], Petal _ _ _ :: parent) ->
+              { model | goal = fillZipper [] parent }
+
+            _ ->
+              model
+      in
+      (model_, Cmd.none)
+
     DragDropMsg dndMsg ->
-      case (model.mode, DnD.getDragstartEvent dndMsg) of
-        (ProofMode Justifying, Just _) ->
-          let ( newDragDrop, _ ) = DnD.update dndMsg DnD.init in
-          { model | mode = ProofMode (Importing newDragDrop) }
-        
-        (ProofMode (Importing dragDrop), _) ->
-          let
-            ( newDragDrop, result ) =
-              DnD.update dndMsg dragDrop
+      let
+        cmd =
+          DnD.getDragstartEvent dndMsg |>
+          Maybe.map (.event >> dragstart) |>
+          Maybe.withDefault Cmd.none
+        model_ =
+          case (model.mode, DnD.getDragstartEvent dndMsg) of
+            (ProofMode Justifying, Just _) ->
+              let ( newDragDrop, _ ) = DnD.update dndMsg DnD.init in
+              { model | mode = ProofMode (Importing newDragDrop) }
             
-            newModel =
-              case result of
-                Just (drag, drop, _) ->
-                  case drop of
-                    Just destination ->
-                      update
-                        ( ProofAction Import [drag.content] destination.target )
-                        model
+            (ProofMode (Importing dragDrop), _) ->
+              let
+                ( newDragDrop, result ) =
+                  DnD.update dndMsg dragDrop
+                
+                newModel =
+                  case result of
+                    Just (drag, drop, _) ->
+                      case drop of
+                        Just destination ->
+                          update
+                            ( ProofAction Import [drag.content] destination.target )
+                            model |>
+                          Tuple.first
+                        
+                        Nothing ->
+                          model
                     
                     Nothing ->
                       model
-                
-                Nothing ->
-                  model
-          in
-          { newModel | mode = ProofMode (Importing newDragDrop) }
-        
-        _ ->
-          model
+              in
+              { newModel | mode = ProofMode (Importing newDragDrop) }
+            
+            _ ->
+              model
+      in
+      (model_, cmd)
     
     DoNothing ->
-      model
-
+      (model, Cmd.none)
 
 -- VIEW
 
