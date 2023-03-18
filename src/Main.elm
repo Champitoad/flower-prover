@@ -661,6 +661,10 @@ viewGarden mode context (Garden bouquet) =
     layoutAttrs =
       [ width fill
       , height fill ]
+    
+    borderAttrs =
+      [ Border.width dropTarget.borderWidth
+      , Border.color transparent ]
 
     intersticial () =
       let
@@ -671,9 +675,8 @@ viewGarden mode context (Garden bouquet) =
         dropZone lr =
           el
             ( [ width fill
-              , height fill
-              , Border.width dropTarget.borderWidth
-              , Border.color transparent ]
+              , height fill ]
+            ++ borderAttrs
             ++ dropAction lr )
             none
 
@@ -693,7 +696,9 @@ viewGarden mode context (Garden bouquet) =
           spacing 30 ::
           padding 30 ::
           layoutAttrs ++
+          borderAttrs ++
           dropAction (bouquet, [])
+
         els =
           bouquet |> Utils.List.zipperMap flowerEl
       in
