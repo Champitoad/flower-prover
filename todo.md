@@ -1,9 +1,5 @@
 - Add support for formulas, and their introduction rules by click
 
-- Use HTML5 drag-and-drop API for Importing interaction
-  - Try to support mobile touchscreens
-    (https://github.com/norpan/elm-html5-drag-drop/blob/master/example/Example.elm)
-
 - Implement Fencing proof interaction with multiselection
   - Selection mode when maintaining shift key pressed
   - Mobile support:

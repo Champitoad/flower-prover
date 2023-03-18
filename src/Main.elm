@@ -513,9 +513,9 @@ viewAtom mode context name =
             ( [ width shrink
               , height shrink
               , centerX, centerY
-              , padding 3
+              , padding 10
               , Font.color (fgColor context.polarity)
-              , Font.size 32
+              , Font.size 50
               , htmlAttribute <| style "user-select" "none" ]
             ++ justifyAction )
             ( text name ) )
@@ -550,7 +550,7 @@ viewPistil mode context (Garden bouquet as pistil) petals =
       el
         ( [ width fill
           , height fill
-          , padding 10
+          , padding 20
           , Border.rounded borderRound ]
           ++ unlockAction )
         ( viewGarden
@@ -581,7 +581,7 @@ viewPetal mode context pistil (leftPetals, rightPetals) (Garden bouquet as petal
       el
         ( [ width fill
           , height fill
-          , padding 10
+          , padding 20
           , Border.rounded borderRound
           , Background.color (bgColor context.polarity) ]
           ++ closeAction )
