@@ -1,5 +1,3 @@
-- Fix empty pistil being highlighted even when it is not itself in a pistil
-
 - Add support for formulas, and their introduction rules by click
 
 - Use HTML5 drag-and-drop API instead of custom handling of mousedown and

@@ -487,9 +487,17 @@ viewFlowerProof interaction context flower =
               Pistil petals :: context.zipper
 
             unlockAction =
+              let
+                action =
+                  (Events.onClick (ProofAction Unlock bouquet newZipper))
+                  :: actionable
+              in
               if List.isEmpty bouquet then
-                (Events.onClick (ProofAction Unlock bouquet newZipper))
-                :: actionable
+                case context.zipper of
+                  _ :: Pistil _ :: _ ->
+                    action
+                  _ ->
+                    if List.length petals == 1 then action else []
               else
                 []
           in
