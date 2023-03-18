@@ -147,7 +147,7 @@ type alias FlowerDnDMsg
 
 type ProofInteraction
   = Justifying
-  | Importing
+  | Importing FlowerDnD
   | Fencing Selection
 
 
@@ -158,8 +158,7 @@ type UIMode
 
 type alias Model
   = { goal : Bouquet
-    , mode : UIMode
-    , dragDrop : FlowerDnD }
+    , mode : UIMode }
 
 
 yinyang : Flower
@@ -253,8 +252,7 @@ criticalPair =
 init : Model
 init =
   { goal = [ criticalPair ]
-  , mode = ProofMode Justifying
-  , dragDrop = DnD.init }
+  , mode = ProofMode Justifying }
 
 
 -- UPDATE
@@ -311,28 +309,35 @@ update msg model =
           model
     
     DragDropMsg dndMsg ->
-      let
-        ( dragDrop, result ) =
-          DnD.update dndMsg model.dragDrop
+      case (model.mode, DnD.getDragstartEvent dndMsg) of
+        (ProofMode Justifying, Just _) ->
+          let ( newDragDrop, _ ) = DnD.update dndMsg DnD.init in
+          { model | mode = ProofMode (Importing newDragDrop) }
         
-        newModel =
-          case result of
-            Just (drag, drop, _) ->
-              case drop of
-                Just destination ->
-                  update
-                    ( ProofAction Import
-                      ( destination.content ++ [drag.content] )
-                      destination.target )
-                    model
+        (ProofMode (Importing dragDrop), _) ->
+          let
+            ( newDragDrop, result ) =
+              DnD.update dndMsg dragDrop
+            
+            newModel =
+              case result of
+                Just (drag, drop, _) ->
+                  case drop of
+                    Just destination ->
+                      update
+                        ( ProofAction Import [drag.content] destination.target )
+                        model
+                    
+                    Nothing ->
+                      model
                 
                 Nothing ->
                   model
-            
-            Nothing ->
-              model
-      in
-      { newModel | dragDrop = dragDrop }
+          in
+          { newModel | mode = ProofMode (Importing newDragDrop) }
+        
+        _ ->
+          model
     
     DoNothing ->
       model
@@ -460,7 +465,7 @@ stopPropagation =
   , onMouseMove DoNothing ]
 
 
-viewFlowerProof : FlowerDnD -> Context -> Flower -> Element Msg
+viewFlowerProof : ProofInteraction -> Context -> Flower -> Element Msg
 viewFlowerProof dnd context flower =
   case flower of
     Atom name ->
@@ -554,7 +559,7 @@ viewFlowerProof dnd context flower =
             [ width fill
             , height fill
             , spacing borderWidth ]
-            ( Utils.List.zipMap petalEl petals )
+            ( Utils.List.zipperMap petalEl petals )
 
         importStartAction =
           List.map htmlAttribute <|
@@ -578,49 +583,68 @@ viewFlowerProof dnd context flower =
         [ pistilEl, petalsEl ]
 
 
-viewGardenProof : FlowerDnD -> Context -> Garden -> Element Msg
-viewGardenProof dnd context (Garden bouquet) =
+viewGardenProof : ProofInteraction -> Context -> Garden -> Element Msg
+viewGardenProof interaction context (Garden bouquet) =
   let
     flowerEl (left, right) =
       viewFlowerProof
-        dnd
+        interaction
         { context
         | zipper = Bouquet left right :: context.zipper }
     
-    importAction =
-      case DnD.getDragId dnd of
-        Just { source } ->
-          -- if isHypothesis content context.zipper then
-          if justifies source context.zipper then
-            let
-              dropTargetStyle =
-                case DnD.getDropId dnd of
-                  Just (Just { target }) ->
-                    if context.zipper == target
-                    then dropTarget.active
-                    else dropTarget.inactive
-                
-                  _ ->
-                    dropTarget.inactive
-            in
-            dropTargetStyle ++
-            ( List.map htmlAttribute <|
-              DnD.droppable DragDropMsg
-                (Just { target = context.zipper, content = bouquet }) )
-          else
-            []
-      
+    importAction (left, right) =
+      case interaction of
+        Importing dnd ->
+          case DnD.getDragId dnd of
+            Just { source, content } ->
+              -- if isHypothesis content context.zipper then
+              if justifies source context.zipper then
+                let
+                  dropTargetStyle =
+                    case DnD.getDropId dnd of
+                      Just (Just { target }) ->
+                        if Bouquet left right :: context.zipper == target
+                        then dropTarget.active
+                        else dropTarget.inactive
+                    
+                      _ ->
+                        dropTarget.inactive
+                in
+                dropTargetStyle ++
+                ( List.map htmlAttribute <|
+                  DnD.droppable DragDropMsg
+                    (Just { target = Bouquet left right :: context.zipper
+                          , content = [content] }) )
+              else
+                []
+            _ ->
+              []
         _ ->
           []
+    
+    dropZone lr =
+      el
+        ( [ width fill
+          , height fill
+          , padding 10
+          , Border.width dropTarget.borderWidth
+          , Border.color transparent ]
+         ++ importAction lr )
+        none
+    
+    els =
+      let
+        sperse ((left, right) as lr) flower =
+          [dropZone (left, flower :: right), flowerEl lr flower]
+      in
+      ( bouquet |> Utils.List.zipperMap sperse |> List.concat ) ++
+      [ dropZone (bouquet, []) ]
   in
   wrappedRow
-    ( [ width fill
-      , height fill
-      , spacing 40
-      , Border.width dropTarget.borderWidth
-      , Border.color transparent ]
-     ++ importAction )
-    (Utils.List.zipMap flowerEl bouquet)
+    [ width fill
+    , height fill
+    , spacing 10 ]
+    els
 
 
 viewGoal : Model -> Element Msg
@@ -630,10 +654,10 @@ viewGoal model =
     bouquetEls =
       case model.mode of
         ProofMode interaction ->
-          (Utils.List.zipMap
+          (Utils.List.zipperMap
             (\(l, r) flower ->
               el [width fill, height fill, centerX, centerY]
-              (viewFlowerProof model.dragDrop (Context [Bouquet l r] Pos) flower))
+              (viewFlowerProof interaction (Context [Bouquet l r] Pos) flower))
             model.goal)
 
         EditMode ->

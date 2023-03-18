@@ -5,8 +5,8 @@ type alias Zipper a
   = (List a, List a)
 
 
-zipMap : (Zipper a -> a -> b) -> List a -> List b
-zipMap f list =
+zipperMap : (Zipper a -> a -> b) -> List a -> List b
+zipperMap f list =
   let
     aux left l =
       case l of
