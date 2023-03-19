@@ -557,7 +557,7 @@ viewPistil mode context (Garden bouquet as pistil) petals =
         ( el
             ( [ width fill
               , height fill
-              , padding 20 ]
+              , padding 10 ]
              ++ unlockAction )
             ( viewGarden
               mode
@@ -592,7 +592,7 @@ viewPetal mode context pistil (leftPetals, rightPetals) (Garden bouquet as petal
         ( el
             ( [ width fill
               , height fill
-              , padding 20 ]
+              , padding 10 ]
              ++ closeAction )
             ( viewGarden
                 mode
@@ -726,9 +726,10 @@ viewGarden mode context (Garden bouquet) =
     normal () =
       let
         attrs =
+          (width (fill |> minimum 30)) ::
+          (height (fill |> minimum 30)) ::
           spacing 30 ::
           padding 30 ::
-          layoutAttrs ++
           borderAttrs ++
           dropAction (bouquet, [])
 

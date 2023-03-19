@@ -12028,6 +12028,14 @@ var $author$project$Main$justifies = F2(
 			return false;
 		}
 	});
+var $mdgriffith$elm_ui$Internal$Model$Min = F2(
+	function (a, b) {
+		return {$: 'Min', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$minimum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
+	});
 var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
 var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -12652,16 +12660,22 @@ var $author$project$Main$viewGarden = F3(
 			var els = A2($author$project$Utils$List$zipperMap, flowerEl, bouquet);
 			var attrs = A2(
 				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$spacing(30),
+				$mdgriffith$elm_ui$Element$width(
+					A2($mdgriffith$elm_ui$Element$minimum, 30, $mdgriffith$elm_ui$Element$fill)),
 				A2(
 					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$padding(30),
-					_Utils_ap(
-						layoutAttrs,
-						_Utils_ap(
-							borderAttrs,
-							dropAction(
-								_Utils_Tuple2(bouquet, _List_Nil))))));
+					$mdgriffith$elm_ui$Element$height(
+						A2($mdgriffith$elm_ui$Element$minimum, 30, $mdgriffith$elm_ui$Element$fill)),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$spacing(30),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$padding(30),
+							_Utils_ap(
+								borderAttrs,
+								dropAction(
+									_Utils_Tuple2(bouquet, _List_Nil)))))));
 			return A2($mdgriffith$elm_ui$Element$wrappedRow, attrs, els);
 		};
 		return normal(_Utils_Tuple0);
@@ -12698,7 +12712,7 @@ var $author$project$Main$viewPetal = F5(
 							[
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$padding(20)
+								$mdgriffith$elm_ui$Element$padding(10)
 							]),
 						closeAction),
 					A3(
@@ -12758,7 +12772,7 @@ var $author$project$Main$viewPistil = F4(
 							[
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$padding(20)
+								$mdgriffith$elm_ui$Element$padding(10)
 							]),
 						unlockAction),
 					A3(
@@ -12816,8 +12830,8 @@ var $author$project$Main$viewGoal = function (model) {
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 757, column: 11},
-					end: {line: 757, column: 21}
+					start: {line: 758, column: 11},
+					end: {line: 758, column: 21}
 				})('');
 		}
 	}();
