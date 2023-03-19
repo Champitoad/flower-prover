@@ -16,8 +16,6 @@
   - Works for the entire state, thus switching freely between different UI modes
   - Buttons at the bottom of the screen + usual shortkeys
 
-- Mode selection bar at bottom of the screen
-
 - Implement Edit mode
   - The drop zones of Importing turn into `add flower` zones in positive gardens
   - `add petal` zones at the start, end and between petals of negative flowers

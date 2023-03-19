@@ -12239,8 +12239,8 @@ var $author$project$Main$viewAtom = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 538, column: 7},
-					end: {line: 538, column: 17}
+					start: {line: 540, column: 7},
+					end: {line: 540, column: 17}
 				})('');
 		}
 	});
@@ -12521,8 +12521,8 @@ var $author$project$Main$viewFlower = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 659, column: 7},
-					end: {line: 659, column: 17}
+					start: {line: 661, column: 7},
+					end: {line: 661, column: 17}
 				})('');
 		}
 	});
@@ -12613,8 +12613,8 @@ var $author$project$Main$viewGarden = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 703, column: 11},
-					end: {line: 703, column: 21}
+					start: {line: 705, column: 11},
+					end: {line: 705, column: 21}
 				})('');
 		};
 		var borderAttrs = _List_fromArray(
@@ -12738,8 +12738,8 @@ var $author$project$Main$viewPetal = F5(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 614, column: 7},
-					end: {line: 614, column: 17}
+					start: {line: 616, column: 7},
+					end: {line: 616, column: 17}
 				})('');
 		}
 	});
@@ -12801,8 +12801,8 @@ var $author$project$Main$viewPistil = F4(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 580, column: 7},
-					end: {line: 580, column: 17}
+					start: {line: 582, column: 7},
+					end: {line: 582, column: 17}
 				})('');
 		}
 	});
@@ -12882,57 +12882,133 @@ var $author$project$Main$End = {$: 'End'};
 var $author$project$Main$Middle = {$: 'Middle'};
 var $author$project$Main$NavigationMode = {$: 'NavigationMode'};
 var $author$project$Main$Start = {$: 'Start'};
-var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
-var $elm$html$Html$Attributes$src = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'src',
-		_VirtualDom_noJavaScriptOrHtmlUri(url));
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $feathericons$elm_feather$FeatherIcons$Icon = function (a) {
+	return {$: 'Icon', a: a};
 };
-var $mdgriffith$elm_ui$Element$image = F2(
-	function (attrs, _v0) {
-		var src = _v0.src;
-		var description = _v0.description;
-		var imageAttributes = A2(
-			$elm$core$List$filter,
-			function (a) {
-				switch (a.$) {
-					case 'Width':
-						return true;
-					case 'Height':
-						return true;
-					default:
-						return false;
-				}
-			},
-			attrs);
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.imageContainer),
-				attrs),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[
-						A4(
-						$mdgriffith$elm_ui$Internal$Model$element,
-						$mdgriffith$elm_ui$Internal$Model$asEl,
-						$mdgriffith$elm_ui$Internal$Model$NodeName('img'),
-						_Utils_ap(
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Internal$Model$Attr(
-									$elm$html$Html$Attributes$src(src)),
-									$mdgriffith$elm_ui$Internal$Model$Attr(
-									$elm$html$Html$Attributes$alt(description))
-								]),
-							imageAttributes),
-						$mdgriffith$elm_ui$Internal$Model$Unkeyed(_List_Nil))
-					])));
+var $feathericons$elm_feather$FeatherIcons$defaultAttributes = function (name) {
+	return {
+		_class: $elm$core$Maybe$Just('feather feather-' + name),
+		size: 24,
+		sizeUnit: '',
+		strokeWidth: 2,
+		viewBox: '0 0 24 24'
+	};
+};
+var $feathericons$elm_feather$FeatherIcons$makeBuilder = F2(
+	function (name, src) {
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: $feathericons$elm_feather$FeatherIcons$defaultAttributes(name),
+				src: src
+			});
 	});
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
+var $elm$svg$Svg$polyline = $elm$svg$Svg$trustedNode('polyline');
+var $feathericons$elm_feather$FeatherIcons$checkSquare = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'check-square',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('9 11 12 14 22 4')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$edit2 = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'edit-2',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z')
+				]),
+			_List_Nil)
+		]));
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
+var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
+var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
+var $avh4$elm_color$Color$RgbaSpace = F4(
+	function (a, b, c, d) {
+		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+	});
+var $avh4$elm_color$Color$fromRgba = function (components) {
+	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
+};
+var $avh4$elm_color$Color$toCssString = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	var roundTo = function (x) {
+		return $elm$core$Basics$round(x * 1000) / 1000;
+	};
+	var pct = function (x) {
+		return $elm$core$Basics$round(x * 10000) / 100;
+	};
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				'rgba(',
+				$elm$core$String$fromFloat(
+				pct(r)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(g)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(b)),
+				'%,',
+				$elm$core$String$fromFloat(
+				roundTo(a)),
+				')'
+			]));
+};
+var $mdgriffith$elm_ui$Element$toRgb = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	return {alpha: a, blue: b, green: g, red: r};
+};
+var $author$project$Utils$Style$htmlColor = function (color) {
+	var value = $avh4$elm_color$Color$toCssString(
+		$avh4$elm_color$Color$fromRgba(
+			$mdgriffith$elm_ui$Element$toRgb(color)));
+	return A2($elm$html$Html$Attributes$style, 'color', value);
+};
+var $elm$svg$Svg$polygon = $elm$svg$Svg$trustedNode('polygon');
+var $feathericons$elm_feather$FeatherIcons$navigation = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'navigation',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$polygon,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('3 11 22 2 13 21 11 13 3 11')
+				]),
+			_List_Nil)
+		]));
 var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 	return {$: 'Px', a: a};
 };
@@ -12955,40 +13031,83 @@ var $mdgriffith$elm_ui$Element$Border$roundEach = function (_v0) {
 			'border-radius',
 			$elm$core$String$fromInt(topLeft) + ('px ' + ($elm$core$String$fromInt(topRight) + ('px ' + ($elm$core$String$fromInt(bottomRight) + ('px ' + ($elm$core$String$fromInt(bottomLeft) + 'px'))))))));
 };
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $elm$svg$Svg$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
+var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $feathericons$elm_feather$FeatherIcons$toHtml = F2(
+	function (attributes, _v0) {
+		var src = _v0.a.src;
+		var attrs = _v0.a.attrs;
+		var strSize = $elm$core$String$fromFloat(attrs.size);
+		var baseAttributes = _List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$fill('none'),
+				$elm$svg$Svg$Attributes$height(
+				_Utils_ap(strSize, attrs.sizeUnit)),
+				$elm$svg$Svg$Attributes$width(
+				_Utils_ap(strSize, attrs.sizeUnit)),
+				$elm$svg$Svg$Attributes$stroke('currentColor'),
+				$elm$svg$Svg$Attributes$strokeLinecap('round'),
+				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
+				$elm$svg$Svg$Attributes$strokeWidth(
+				$elm$core$String$fromFloat(attrs.strokeWidth)),
+				$elm$svg$Svg$Attributes$viewBox(attrs.viewBox)
+			]);
+		var combinedAttributes = _Utils_ap(
+			function () {
+				var _v1 = attrs._class;
+				if (_v1.$ === 'Just') {
+					var c = _v1.a;
+					return A2(
+						$elm$core$List$cons,
+						$elm$svg$Svg$Attributes$class(c),
+						baseAttributes);
+				} else {
+					return baseAttributes;
+				}
+			}(),
+			attributes);
+		return A2(
+			$elm$svg$Svg$svg,
+			combinedAttributes,
+			A2(
+				$elm$core$List$map,
+				$elm$svg$Svg$map($elm$core$Basics$never),
+				src));
+	});
+var $feathericons$elm_feather$FeatherIcons$withSize = F2(
+	function (size, _v0) {
+		var attrs = _v0.a.attrs;
+		var src = _v0.a.src;
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: _Utils_update(
+					attrs,
+					{size: size}),
+				src: src
+			});
+	});
 var $author$project$Main$viewModeSelector = function (currentMode) {
 	var borderRoundSize = 10;
 	var item = F2(
 		function (mode, position) {
 			var isSelected = function () {
-				var _v4 = _Utils_Tuple2(mode, currentMode);
-				if ((_v4.a.$ === 'ProofMode') && (_v4.b.$ === 'ProofMode')) {
+				var _v5 = _Utils_Tuple2(mode, currentMode);
+				if ((_v5.a.$ === 'ProofMode') && (_v5.b.$ === 'ProofMode')) {
 					return true;
 				} else {
 					return _Utils_eq(mode, currentMode);
 				}
-			}();
-			var icon = function () {
-				var _v2 = function () {
-					switch (mode.$) {
-						case 'ProofMode':
-							return _Utils_Tuple2('Prove', 'prove');
-						case 'EditMode':
-							return _Utils_Tuple2('Edit', 'pen');
-						default:
-							return _Utils_Tuple2('Navigate', 'navigate');
-					}
-				}();
-				var label = _v2.a;
-				var filename = _v2.b;
-				return A2(
-					$mdgriffith$elm_ui$Element$image,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$author$project$Main$nonSelectable
-						]),
-					{description: label, src: '../assets/img/' + (filename + '.svg')});
 			}();
 			var changeAction = _List_fromArray(
 				[
@@ -13013,6 +13132,35 @@ var $author$project$Main$viewModeSelector = function (currentMode) {
 				A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0));
 			var bgColor = _v0.a;
 			var fgColor = _v0.b;
+			var _v1 = function () {
+				var _v2 = function () {
+					switch (mode.$) {
+						case 'ProofMode':
+							return _Utils_Tuple2('Prove', $feathericons$elm_feather$FeatherIcons$checkSquare);
+						case 'EditMode':
+							return _Utils_Tuple2('Edit', $feathericons$elm_feather$FeatherIcons$edit2);
+						default:
+							return _Utils_Tuple2('Navigate', $feathericons$elm_feather$FeatherIcons$navigation);
+					}
+				}();
+				var title = _v2.a;
+				var icon = _v2.b;
+				var elem = A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+					$mdgriffith$elm_ui$Element$html(
+						A2(
+							$feathericons$elm_feather$FeatherIcons$toHtml,
+							_List_fromArray(
+								[
+									$author$project$Utils$Style$htmlColor(fgColor)
+								]),
+							A2($feathericons$elm_feather$FeatherIcons$withSize, 30, icon))));
+				return _Utils_Tuple2(elem, title);
+			}();
+			var iconEl = _v1.a;
+			var titleText = _v1.b;
 			return A2(
 				$mdgriffith$elm_ui$Element$el,
 				_Utils_ap(
@@ -13020,13 +13168,15 @@ var $author$project$Main$viewModeSelector = function (currentMode) {
 						[
 							$mdgriffith$elm_ui$Element$width(
 							$mdgriffith$elm_ui$Element$px(60)),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$padding(12),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(55)),
 							$mdgriffith$elm_ui$Element$Background$color(bgColor),
-							$mdgriffith$elm_ui$Element$Border$roundEach(borderRound)
+							$mdgriffith$elm_ui$Element$Border$roundEach(borderRound),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$elm$html$Html$Attributes$title(titleText))
 						]),
 					changeAction),
-				icon);
+				iconEl);
 		});
 	var borderColor = A3($mdgriffith$elm_ui$Element$rgb, 0.6, 0.6, 0.6);
 	return A2(
