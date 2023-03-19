@@ -5196,10 +5196,10 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$Justifying = {$: 'Justifying'};
-var $author$project$Main$ProofMode = function (a) {
-	return {$: 'ProofMode', a: a};
+var $author$project$Main$EditMode = function (a) {
+	return {$: 'EditMode', a: a};
 };
+var $author$project$Main$Erasing = {$: 'Erasing'};
 var $author$project$Main$Atom = function (a) {
 	return {$: 'Atom', a: a};
 };
@@ -5260,14 +5260,17 @@ var $author$project$Main$criticalPair = A2(
 					$author$project$Main$Atom('c')
 				]))
 		]));
+var $norpan$elm_html5_drag_drop$Html5$DragDrop$NotDragging = {$: 'NotDragging'};
+var $norpan$elm_html5_drag_drop$Html5$DragDrop$init = $norpan$elm_html5_drag_drop$Html5$DragDrop$NotDragging;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
+			dragDrop: $norpan$elm_html5_drag_drop$Html5$DragDrop$init,
 			goal: _List_fromArray(
 				[$author$project$Main$criticalPair]),
-			mode: $author$project$Main$ProofMode($author$project$Main$Justifying)
+			mode: $author$project$Main$EditMode($author$project$Main$Erasing)
 		},
 		$elm$core$Platform$Cmd$none);
 };
@@ -5276,14 +5279,19 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
 };
-var $author$project$Main$Import = {$: 'Import'};
-var $author$project$Main$Importing = function (a) {
-	return {$: 'Importing', a: a};
-};
-var $author$project$Main$ProofAction = F3(
+var $author$project$Main$Action = F3(
 	function (a, b, c) {
-		return {$: 'ProofAction', a: a, b: b, c: c};
+		return {$: 'Action', a: a, b: b, c: c};
 	});
+var $author$project$Main$DoNothing = {$: 'DoNothing'};
+var $author$project$Main$Import = {$: 'Import'};
+var $author$project$Main$Importing = {$: 'Importing'};
+var $author$project$Main$Justifying = {$: 'Justifying'};
+var $author$project$Main$ProofMode = function (a) {
+	return {$: 'ProofMode', a: a};
+};
+var $author$project$Main$Reorder = {$: 'Reorder'};
+var $author$project$Main$Reordering = {$: 'Reordering'};
 var $elm$core$Basics$composeR = F3(
 	function (f, g, x) {
 		return g(
@@ -5337,9 +5345,6 @@ var $norpan$elm_html5_drag_drop$Html5$DragDrop$getDragstartEvent = function (msg
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $norpan$elm_html5_drag_drop$Html5$DragDrop$NotDragging = {$: 'NotDragging'};
-var $norpan$elm_html5_drag_drop$Html5$DragDrop$init = $norpan$elm_html5_drag_drop$Html5$DragDrop$NotDragging;
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
 		if (maybe.$ === 'Just') {
@@ -5481,30 +5486,21 @@ var $elm$core$Maybe$withDefault = F2(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'ProofAction':
+			case 'Action':
 				var rule = msg.a;
 				var bouquet = msg.b;
 				var zipper = msg.c;
-				var model_ = function () {
+				var newGoal = function () {
 					var _v1 = _Utils_Tuple3(rule, bouquet, zipper);
-					_v1$5:
+					_v1$6:
 					while (true) {
 						switch (_v1.a.$) {
 							case 'Justify':
 								var _v2 = _v1.a;
-								return _Utils_update(
-									model,
-									{
-										goal: A2($author$project$Main$fillZipper, _List_Nil, zipper)
-									});
+								return A2($author$project$Main$fillZipper, _List_Nil, zipper);
 							case 'Import':
 								var _v3 = _v1.a;
-								return _Utils_update(
-									model,
-									{
-										goal: A2($author$project$Main$fillZipper, bouquet, zipper),
-										mode: $author$project$Main$ProofMode($author$project$Main$Justifying)
-									});
+								return A2($author$project$Main$fillZipper, bouquet, zipper);
 							case 'Unlock':
 								if (((!_v1.b.b) && _v1.c.b) && (_v1.c.a.$ === 'Pistil')) {
 									if (_v1.c.a.a.b && (!_v1.c.a.a.b.b)) {
@@ -5513,11 +5509,7 @@ var $author$project$Main$update = F2(
 										var _v6 = _v5.a.a;
 										var petal = _v6.a.a;
 										var parent = _v5.b;
-										return _Utils_update(
-											model,
-											{
-												goal: A2($author$project$Main$fillZipper, petal, parent)
-											});
+										return A2($author$project$Main$fillZipper, petal, parent);
 									} else {
 										if (((_v1.c.b.b && (_v1.c.b.a.$ === 'Bouquet')) && _v1.c.b.b.b) && (_v1.c.b.b.a.$ === 'Pistil')) {
 											var _v7 = _v1.a;
@@ -5536,29 +5528,25 @@ var $author$project$Main$update = F2(
 												return A2($author$project$Main$Flower, branch, petals);
 											};
 											var cases = A2($elm$core$List$map, case_, branches);
-											return _Utils_update(
-												model,
-												{
-													goal: A2(
-														$author$project$Main$fillZipper,
+											return A2(
+												$author$project$Main$fillZipper,
+												_List_fromArray(
+													[
+														A2(
+														$author$project$Main$Flower,
+														pistil,
 														_List_fromArray(
 															[
-																A2(
-																$author$project$Main$Flower,
-																pistil,
-																_List_fromArray(
-																	[
-																		$author$project$Main$Garden(cases)
-																	]))
-															]),
-														parent)
-												});
+																$author$project$Main$Garden(cases)
+															]))
+													]),
+												parent);
 										} else {
-											break _v1$5;
+											break _v1$6;
 										}
 									}
 								} else {
-									break _v1$5;
+									break _v1$6;
 								}
 							case 'Close':
 								if (((!_v1.b.b) && _v1.c.b) && (_v1.c.a.$ === 'Petal')) {
@@ -5566,88 +5554,27 @@ var $author$project$Main$update = F2(
 									var _v13 = _v1.c;
 									var _v14 = _v13.a;
 									var parent = _v13.b;
-									return _Utils_update(
-										model,
-										{
-											goal: A2($author$project$Main$fillZipper, _List_Nil, parent)
-										});
+									return A2($author$project$Main$fillZipper, _List_Nil, parent);
 								} else {
-									break _v1$5;
+									break _v1$6;
 								}
+							case 'Reorder':
+								var _v15 = _v1.a;
+								return A2($author$project$Main$fillZipper, bouquet, zipper);
 							default:
-								break _v1$5;
+								break _v1$6;
 						}
 					}
-					return model;
+					return model.goal;
 				}();
-				return _Utils_Tuple2(model_, $elm$core$Platform$Cmd$none);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{goal: newGoal}),
+					$elm$core$Platform$Cmd$none);
 			case 'DragDropMsg':
 				var dndMsg = msg.a;
-				var model_ = function () {
-					var _v15 = _Utils_Tuple2(
-						model.mode,
-						$norpan$elm_html5_drag_drop$Html5$DragDrop$getDragstartEvent(dndMsg));
-					_v15$2:
-					while (true) {
-						if (_v15.a.$ === 'ProofMode') {
-							switch (_v15.a.a.$) {
-								case 'Justifying':
-									if (_v15.b.$ === 'Just') {
-										var _v16 = _v15.a.a;
-										var _v17 = A2($norpan$elm_html5_drag_drop$Html5$DragDrop$update, dndMsg, $norpan$elm_html5_drag_drop$Html5$DragDrop$init);
-										var newDragDrop = _v17.a;
-										return _Utils_update(
-											model,
-											{
-												mode: $author$project$Main$ProofMode(
-													$author$project$Main$Importing(newDragDrop))
-											});
-									} else {
-										break _v15$2;
-									}
-								case 'Importing':
-									var dragDrop = _v15.a.a.a;
-									var _v18 = A2($norpan$elm_html5_drag_drop$Html5$DragDrop$update, dndMsg, dragDrop);
-									var newDragDrop = _v18.a;
-									var result = _v18.b;
-									var newModel = function () {
-										if (result.$ === 'Just') {
-											var _v20 = result.a;
-											var drag = _v20.a;
-											var drop = _v20.b;
-											if (drop.$ === 'Just') {
-												var destination = drop.a;
-												return A2(
-													$author$project$Main$update,
-													A3(
-														$author$project$Main$ProofAction,
-														$author$project$Main$Import,
-														_List_fromArray(
-															[drag.content]),
-														destination.target),
-													model).a;
-											} else {
-												return model;
-											}
-										} else {
-											return model;
-										}
-									}();
-									return _Utils_update(
-										newModel,
-										{
-											mode: $author$project$Main$ProofMode(
-												$author$project$Main$Importing(newDragDrop))
-										});
-								default:
-									break _v15$2;
-							}
-						} else {
-							break _v15$2;
-						}
-					}
-					return model;
-				}();
+				var dragStart = $norpan$elm_html5_drag_drop$Html5$DragDrop$getDragstartEvent(dndMsg);
 				var cmd = A2(
 					$elm$core$Maybe$withDefault,
 					$elm$core$Platform$Cmd$none,
@@ -5659,11 +5586,117 @@ var $author$project$Main$update = F2(
 								return $.event;
 							},
 							$author$project$Main$dragstart),
-						$norpan$elm_html5_drag_drop$Html5$DragDrop$getDragstartEvent(dndMsg)));
+						dragStart));
+				var _v16 = A2($norpan$elm_html5_drag_drop$Html5$DragDrop$update, dndMsg, model.dragDrop);
+				var newDragDrop = _v16.a;
+				var result = _v16.b;
+				var model_ = function () {
+					if (dragStart.$ === 'Just') {
+						var _v18 = model.mode;
+						_v18$2:
+						while (true) {
+							switch (_v18.$) {
+								case 'ProofMode':
+									if (_v18.a.$ === 'Justifying') {
+										var _v19 = _v18.a;
+										return _Utils_update(
+											model,
+											{
+												dragDrop: newDragDrop,
+												mode: $author$project$Main$ProofMode($author$project$Main$Importing)
+											});
+									} else {
+										break _v18$2;
+									}
+								case 'EditMode':
+									if (_v18.a.$ === 'Erasing') {
+										var _v20 = _v18.a;
+										return _Utils_update(
+											model,
+											{
+												dragDrop: newDragDrop,
+												mode: $author$project$Main$EditMode($author$project$Main$Reordering)
+											});
+									} else {
+										break _v18$2;
+									}
+								default:
+									break _v18$2;
+							}
+						}
+						return model;
+					} else {
+						var defaultMode = function () {
+							var _v27 = model.mode;
+							switch (_v27.$) {
+								case 'ProofMode':
+									return $author$project$Main$ProofMode($author$project$Main$Justifying);
+								case 'EditMode':
+									return $author$project$Main$EditMode($author$project$Main$Erasing);
+								default:
+									return model.mode;
+							}
+						}();
+						if (result.$ === 'Just') {
+							var _v22 = result.a;
+							var drag = _v22.a;
+							var drop = _v22.b;
+							if (drop.$ === 'Just') {
+								var destination = drop.a;
+								var action = function () {
+									var _v24 = model.mode;
+									_v24$2:
+									while (true) {
+										switch (_v24.$) {
+											case 'ProofMode':
+												if (_v24.a.$ === 'Importing') {
+													var _v25 = _v24.a;
+													return A3(
+														$author$project$Main$Action,
+														$author$project$Main$Import,
+														_List_fromArray(
+															[drag.content]),
+														destination.target);
+												} else {
+													break _v24$2;
+												}
+											case 'EditMode':
+												if (_v24.a.$ === 'Reordering') {
+													var _v26 = _v24.a;
+													return A3(
+														$author$project$Main$Action,
+														$author$project$Main$Reorder,
+														_List_fromArray(
+															[drag.content]),
+														destination.target);
+												} else {
+													break _v24$2;
+												}
+											default:
+												break _v24$2;
+										}
+									}
+									return $author$project$Main$DoNothing;
+								}();
+								var newModel = A2($author$project$Main$update, action, model).a;
+								return _Utils_update(
+									newModel,
+									{dragDrop: newDragDrop, mode: defaultMode});
+							} else {
+								return _Utils_update(
+									model,
+									{dragDrop: newDragDrop, mode: defaultMode});
+							}
+						} else {
+							return _Utils_update(
+								model,
+								{dragDrop: newDragDrop});
+						}
+					}
+				}();
 				return _Utils_Tuple2(model_, cmd);
 			case 'ChangeUIMode':
 				var mode = msg.a;
-				var _v22 = A2($elm$core$Debug$log, 'mode', mode);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -12198,51 +12231,50 @@ var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$nonSelectable = $mdgriffith$elm_ui$Element$htmlAttribute(
 	A2($elm$html$Html$Attributes$style, 'user-select', 'none'));
 var $author$project$Main$viewAtom = F3(
-	function (mode, context, name) {
-		if (mode.$ === 'ProofMode') {
-			var atom = $author$project$Main$Atom(name);
-			var justifyAction = A2($author$project$Main$isHypothesis, atom, context.zipper) ? A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$Events$onClick(
-					A3(
-						$author$project$Main$ProofAction,
-						$author$project$Main$Justify,
-						_List_fromArray(
-							[atom]),
-						context.zipper)),
-				$author$project$Main$actionable) : _List_Nil;
-			return A2(
+	function (model, context, name) {
+		var atom = $author$project$Main$Atom(name);
+		var clickAction = function () {
+			var _v0 = model.mode;
+			if ((_v0.$ === 'ProofMode') && (_v0.a.$ === 'Justifying')) {
+				var _v1 = _v0.a;
+				return A2($author$project$Main$isHypothesis, atom, context.zipper) ? A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$Events$onClick(
+						A3(
+							$author$project$Main$Action,
+							$author$project$Main$Justify,
+							_List_fromArray(
+								[atom]),
+							context.zipper)),
+					$author$project$Main$actionable) : _List_Nil;
+			} else {
+				return _List_Nil;
+			}
+		}();
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+				]),
+			A2(
 				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-					]),
-				A2(
-					$mdgriffith$elm_ui$Element$el,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-								$mdgriffith$elm_ui$Element$centerX,
-								$mdgriffith$elm_ui$Element$centerY,
-								$mdgriffith$elm_ui$Element$padding(10),
-								$mdgriffith$elm_ui$Element$Font$color(
-								$author$project$Main$flowerForegroundColor(context.polarity)),
-								$mdgriffith$elm_ui$Element$Font$size(50),
-								$author$project$Main$nonSelectable
-							]),
-						justifyAction),
-					$mdgriffith$elm_ui$Element$text(name)));
-		} else {
-			return _Debug_todo(
-				'Main',
-				{
-					start: {line: 540, column: 7},
-					end: {line: 540, column: 17}
-				})('');
-		}
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$centerY,
+							$mdgriffith$elm_ui$Element$padding(10),
+							$mdgriffith$elm_ui$Element$Font$color(
+							$author$project$Main$flowerForegroundColor(context.polarity)),
+							$mdgriffith$elm_ui$Element$Font$size(50),
+							$author$project$Main$nonSelectable
+						]),
+					clickAction),
+				$mdgriffith$elm_ui$Element$text(name)));
 	});
 var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
 	function (a, b, c, d, e) {
@@ -12459,87 +12491,78 @@ var $author$project$Utils$List$zipperMap = F2(
 		return A2(aux, _List_Nil, list);
 	});
 var $author$project$Main$viewFlower = F3(
-	function (mode, context, flower) {
-		if (mode.$ === 'ProofMode') {
-			if (flower.$ === 'Atom') {
-				var name = flower.a;
-				return A3($author$project$Main$viewAtom, mode, context, name);
-			} else {
-				var pistil = flower.a;
-				var petals = flower.b;
-				var pistilEl = A4($author$project$Main$viewPistil, mode, context, pistil, petals);
-				var petalsEl = A2(
-					$mdgriffith$elm_ui$Element$row,
+	function (model, context, flower) {
+		if (flower.$ === 'Atom') {
+			var name = flower.a;
+			return A3($author$project$Main$viewAtom, model, context, name);
+		} else {
+			var pistil = flower.a;
+			var petals = flower.b;
+			var pistilEl = A4($author$project$Main$viewPistil, model, context, pistil, petals);
+			var petalsEl = A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing($author$project$Main$flowerBorderWidth)
+					]),
+				A2(
+					$author$project$Utils$List$zipperMap,
+					A3($author$project$Main$viewPetal, model, context, pistil),
+					petals));
+			var importStartAction = A2(
+				$elm$core$List$map,
+				$mdgriffith$elm_ui$Element$htmlAttribute,
+				A2(
+					$norpan$elm_html5_drag_drop$Html5$DragDrop$draggable,
+					$author$project$Main$DragDropMsg,
+					{content: flower, source: context.zipper}));
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_Utils_ap(
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing($author$project$Main$flowerBorderWidth)
+							$mdgriffith$elm_ui$Element$padding($author$project$Main$flowerBorderWidth),
+							$mdgriffith$elm_ui$Element$Background$color(
+							$author$project$Main$flowerForegroundColor(context.polarity)),
+							$mdgriffith$elm_ui$Element$Border$color(
+							$author$project$Main$flowerForegroundColor(context.polarity)),
+							$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound),
+							$mdgriffith$elm_ui$Element$Border$shadow(
+							{
+								blur: 15,
+								color: $author$project$Main$flowerForegroundColor(context.polarity),
+								offset: _Utils_Tuple2(0, 5),
+								size: 0.25
+							})
 						]),
-					A2(
-						$author$project$Utils$List$zipperMap,
-						A3($author$project$Main$viewPetal, mode, context, pistil),
-						petals));
-				var importStartAction = A2(
-					$elm$core$List$map,
-					$mdgriffith$elm_ui$Element$htmlAttribute,
-					A2(
-						$norpan$elm_html5_drag_drop$Html5$DragDrop$draggable,
-						$author$project$Main$DragDropMsg,
-						{content: flower, source: context.zipper}));
-				return A2(
-					$mdgriffith$elm_ui$Element$column,
 					_Utils_ap(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$padding($author$project$Main$flowerBorderWidth),
-								$mdgriffith$elm_ui$Element$Background$color(
-								$author$project$Main$flowerForegroundColor(context.polarity)),
-								$mdgriffith$elm_ui$Element$Border$color(
-								$author$project$Main$flowerForegroundColor(context.polarity)),
-								$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound),
-								$mdgriffith$elm_ui$Element$Border$shadow(
-								{
-									blur: 15,
-									color: $author$project$Main$flowerForegroundColor(context.polarity),
-									offset: _Utils_Tuple2(0, 5),
-									size: 0.25
-								})
-							]),
-						_Utils_ap(
-							A2(
-								$elm$core$List$map,
-								$mdgriffith$elm_ui$Element$htmlAttribute,
-								A2($norpan$elm_html5_drag_drop$Html5$DragDrop$droppable, $author$project$Main$DragDropMsg, $elm$core$Maybe$Nothing)),
-							importStartAction)),
-					_List_fromArray(
-						[pistilEl, petalsEl]));
-			}
-		} else {
-			return _Debug_todo(
-				'Main',
-				{
-					start: {line: 661, column: 7},
-					end: {line: 661, column: 17}
-				})('');
+						A2(
+							$elm$core$List$map,
+							$mdgriffith$elm_ui$Element$htmlAttribute,
+							A2($norpan$elm_html5_drag_drop$Html5$DragDrop$droppable, $author$project$Main$DragDropMsg, $elm$core$Maybe$Nothing)),
+						importStartAction)),
+				_List_fromArray(
+					[pistilEl, petalsEl]));
 		}
 	});
 var $author$project$Main$viewGarden = F3(
-	function (mode, context, _v5) {
-		var bouquet = _v5.a;
+	function (model, context, _v7) {
+		var bouquet = _v7.a;
 		var layoutAttrs = _List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 			]);
-		var flowerEl = function (_v13) {
-			var left = _v13.a;
-			var right = _v13.b;
+		var flowerEl = function (_v16) {
+			var left = _v16.a;
+			var right = _v16.b;
 			return A2(
 				$author$project$Main$viewFlower,
-				mode,
+				model,
 				_Utils_update(
 					context,
 					{
@@ -12549,72 +12572,75 @@ var $author$project$Main$viewGarden = F3(
 							context.zipper)
 					}));
 		};
-		var dropAction = function (_v12) {
-			var left = _v12.a;
-			var right = _v12.b;
-			_v8$2:
+		var dropAction = function (_v15) {
+			var left = _v15.a;
+			var right = _v15.b;
+			var _v10 = model.mode;
+			_v10$3:
 			while (true) {
-				if (mode.$ === 'ProofMode') {
-					switch (mode.a.$) {
-						case 'Importing':
-							var dnd = mode.a.a;
-							var _v9 = $norpan$elm_html5_drag_drop$Html5$DragDrop$getDragId(dnd);
-							if (_v9.$ === 'Just') {
-								var source = _v9.a.source;
-								var content = _v9.a.content;
-								if (A2($author$project$Main$justifies, source, context.zipper)) {
-									var dropTargetStyle = function () {
-										var _v10 = $norpan$elm_html5_drag_drop$Html5$DragDrop$getDropId(dnd);
-										if ((_v10.$ === 'Just') && (_v10.a.$ === 'Just')) {
-											var target = _v10.a.a.target;
-											return _Utils_eq(
-												A2(
-													$elm$core$List$cons,
-													A2($author$project$Main$Bouquet, left, right),
-													context.zipper),
-												target) ? $author$project$Main$dropTarget.active : $author$project$Main$dropTarget.inactive;
-										} else {
-											return $author$project$Main$dropTarget.inactive;
-										}
-									}();
-									return _Utils_ap(
-										dropTargetStyle,
-										A2(
-											$elm$core$List$map,
-											$mdgriffith$elm_ui$Element$htmlAttribute,
+				switch (_v10.$) {
+					case 'ProofMode':
+						switch (_v10.a.$) {
+							case 'Importing':
+								var _v11 = _v10.a;
+								var _v12 = $norpan$elm_html5_drag_drop$Html5$DragDrop$getDragId(model.dragDrop);
+								if (_v12.$ === 'Just') {
+									var source = _v12.a.source;
+									var content = _v12.a.content;
+									if (A2($author$project$Main$justifies, source, context.zipper)) {
+										var dropTargetStyle = function () {
+											var _v13 = $norpan$elm_html5_drag_drop$Html5$DragDrop$getDropId(model.dragDrop);
+											if ((_v13.$ === 'Just') && (_v13.a.$ === 'Just')) {
+												var target = _v13.a.a.target;
+												return _Utils_eq(
+													A2(
+														$elm$core$List$cons,
+														A2($author$project$Main$Bouquet, left, right),
+														context.zipper),
+													target) ? $author$project$Main$dropTarget.active : $author$project$Main$dropTarget.inactive;
+											} else {
+												return $author$project$Main$dropTarget.inactive;
+											}
+										}();
+										return _Utils_ap(
+											dropTargetStyle,
 											A2(
-												$norpan$elm_html5_drag_drop$Html5$DragDrop$droppable,
-												$author$project$Main$DragDropMsg,
-												$elm$core$Maybe$Just(
-													{
-														content: _List_fromArray(
-															[content]),
-														target: A2(
-															$elm$core$List$cons,
-															A2($author$project$Main$Bouquet, left, right),
-															context.zipper)
-													}))));
+												$elm$core$List$map,
+												$mdgriffith$elm_ui$Element$htmlAttribute,
+												A2(
+													$norpan$elm_html5_drag_drop$Html5$DragDrop$droppable,
+													$author$project$Main$DragDropMsg,
+													$elm$core$Maybe$Just(
+														{
+															content: _List_Nil,
+															target: A2(
+																$elm$core$List$cons,
+																A2($author$project$Main$Bouquet, left, right),
+																context.zipper)
+														}))));
+									} else {
+										return _List_Nil;
+									}
 								} else {
 									return _List_Nil;
 								}
-							} else {
+							case 'Justifying':
+								var _v14 = _v10.a;
 								return _List_Nil;
-							}
-						case 'Justifying':
-							var _v11 = mode.a;
-							return _List_Nil;
-						default:
-							break _v8$2;
-					}
-				} else {
-					break _v8$2;
+							default:
+								break _v10$3;
+						}
+					case 'EditMode':
+						return _List_Nil;
+					default:
+						break _v10$3;
 				}
 			}
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 705, column: 11},
-					end: {line: 705, column: 21}
+					start: {line: 741, column: 11},
+					end: {line: 741, column: 21}
 				})('');
 		};
 		var borderAttrs = _List_fromArray(
@@ -12622,7 +12648,7 @@ var $author$project$Main$viewGarden = F3(
 				$mdgriffith$elm_ui$Element$Border$width($author$project$Main$dropTarget.borderWidth),
 				$mdgriffith$elm_ui$Element$Border$color($author$project$Main$transparent)
 			]);
-		var intersticial = function (_v7) {
+		var intersticial = function (_v9) {
 			var dropZone = function (lr) {
 				return A2(
 					$mdgriffith$elm_ui$Element$el,
@@ -12668,7 +12694,7 @@ var $author$project$Main$viewGarden = F3(
 					]));
 			return A2($mdgriffith$elm_ui$Element$wrappedRow, attrs, els);
 		};
-		var normal = function (_v6) {
+		var normal = function (_v8) {
 			var els = A2($author$project$Utils$List$zipperMap, flowerEl, bouquet);
 			var attrs = A2(
 				$elm$core$List$cons,
@@ -12693,74 +12719,75 @@ var $author$project$Main$viewGarden = F3(
 		return normal(_Utils_Tuple0);
 	});
 var $author$project$Main$viewPetal = F5(
-	function (mode, context, pistil, _v3, petal) {
-		var leftPetals = _v3.a;
-		var rightPetals = _v3.b;
+	function (model, context, pistil, _v4, petal) {
+		var leftPetals = _v4.a;
+		var rightPetals = _v4.b;
 		var bouquet = petal.a;
-		if (mode.$ === 'ProofMode') {
-			var newZipper = A2(
-				$elm$core$List$cons,
-				A3($author$project$Main$Petal, pistil, leftPetals, rightPetals),
-				context.zipper);
-			var closeAction = $elm$core$List$isEmpty(bouquet) ? A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$Events$onClick(
-					A3($author$project$Main$ProofAction, $author$project$Main$Close, bouquet, newZipper)),
-				$author$project$Main$actionable) : _List_Nil;
-			return A2(
+		var newZipper = A2(
+			$elm$core$List$cons,
+			A3($author$project$Main$Petal, pistil, leftPetals, rightPetals),
+			context.zipper);
+		var clickAction = function () {
+			var _v5 = model.mode;
+			if ((_v5.$ === 'ProofMode') && (_v5.a.$ === 'Justifying')) {
+				var _v6 = _v5.a;
+				return $elm$core$List$isEmpty(bouquet) ? A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$Events$onClick(
+						A3($author$project$Main$Action, $author$project$Main$Close, bouquet, newZipper)),
+					$author$project$Main$actionable) : _List_Nil;
+			} else {
+				return _List_Nil;
+			}
+		}();
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound),
+					$mdgriffith$elm_ui$Element$Background$color(
+					$author$project$Main$flowerBackgroundColor(context.polarity))
+				]),
+			A2(
 				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound),
-						$mdgriffith$elm_ui$Element$Background$color(
-						$author$project$Main$flowerBackgroundColor(context.polarity))
-					]),
-				A2(
-					$mdgriffith$elm_ui$Element$el,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$padding(10)
-							]),
-						closeAction),
-					A3(
-						$author$project$Main$viewGarden,
-						mode,
-						_Utils_update(
-							context,
-							{zipper: newZipper}),
-						petal)));
-		} else {
-			return _Debug_todo(
-				'Main',
-				{
-					start: {line: 616, column: 7},
-					end: {line: 616, column: 17}
-				})('');
-		}
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$padding(10)
+						]),
+					clickAction),
+				A3(
+					$author$project$Main$viewGarden,
+					model,
+					_Utils_update(
+						context,
+						{zipper: newZipper}),
+					petal)));
 	});
 var $author$project$Main$viewPistil = F4(
-	function (mode, context, pistil, petals) {
+	function (model, context, pistil, petals) {
 		var bouquet = pistil.a;
-		if (mode.$ === 'ProofMode') {
-			var newZipper = A2(
-				$elm$core$List$cons,
-				$author$project$Main$Pistil(petals),
-				context.zipper);
-			var unlockAction = function () {
+		var newZipper = A2(
+			$elm$core$List$cons,
+			$author$project$Main$Pistil(petals),
+			context.zipper);
+		var clickAction = function () {
+			var _v0 = model.mode;
+			if ((_v0.$ === 'ProofMode') && (_v0.a.$ === 'Justifying')) {
+				var _v1 = _v0.a;
 				var action = A2(
 					$elm$core$List$cons,
 					$mdgriffith$elm_ui$Element$Events$onClick(
-						A3($author$project$Main$ProofAction, $author$project$Main$Unlock, bouquet, newZipper)),
+						A3($author$project$Main$Action, $author$project$Main$Unlock, bouquet, newZipper)),
 					$author$project$Main$actionable);
 				if ($elm$core$List$isEmpty(bouquet)) {
-					var _v1 = context.zipper;
-					if ((_v1.b && _v1.b.b) && (_v1.b.a.$ === 'Pistil')) {
-						var _v2 = _v1.b;
+					var _v2 = context.zipper;
+					if ((_v2.b && _v2.b.b) && (_v2.b.a.$ === 'Pistil')) {
+						var _v3 = _v2.b;
 						return action;
 					} else {
 						return ($elm$core$List$length(petals) === 1) ? action : _List_Nil;
@@ -12768,116 +12795,115 @@ var $author$project$Main$viewPistil = F4(
 				} else {
 					return _List_Nil;
 				}
-			}();
-			return A2(
-				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound)
-					]),
-				A2(
-					$mdgriffith$elm_ui$Element$el,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$padding(10)
-							]),
-						unlockAction),
-					A3(
-						$author$project$Main$viewGarden,
-						mode,
-						_Utils_update(
-							context,
-							{
-								polarity: $author$project$Main$invert(context.polarity),
-								zipper: newZipper
-							}),
-						pistil)));
-		} else {
-			return _Debug_todo(
-				'Main',
-				{
-					start: {line: 582, column: 7},
-					end: {line: 582, column: 17}
-				})('');
-		}
-	});
-var $author$project$Main$viewGoal = function (model) {
-	var bouquetEls = function () {
-		var workingOnIt = A2(
+			} else {
+				return _List_Nil;
+			}
+		}();
+		return A2(
 			$mdgriffith$elm_ui$Element$el,
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$Background$color(
-					A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
+					$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound)
 				]),
 			A2(
 				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$centerY,
-						$mdgriffith$elm_ui$Element$Font$size(50)
-					]),
-				$mdgriffith$elm_ui$Element$text('Working on it!')));
-		var _v0 = model.mode;
-		if (_v0.$ === 'ProofMode') {
-			return A2(
-				$author$project$Utils$List$zipperMap,
-				F2(
-					function (_v1, flower) {
-						var l = _v1.a;
-						var r = _v1.b;
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$centerX,
-									$mdgriffith$elm_ui$Element$centerY
-								]),
-							A3(
-								$author$project$Main$viewFlower,
-								model.mode,
-								A2(
-									$author$project$Main$Context,
-									_List_fromArray(
-										[
-											A2($author$project$Main$Bouquet, l, r)
-										]),
-									$author$project$Main$Pos),
-								flower));
-					}),
-				model.goal);
-		} else {
-			return _List_fromArray(
-				[workingOnIt]);
-		}
-	}();
-	return A2(
-		$mdgriffith$elm_ui$Element$column,
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$padding(10)
+						]),
+					clickAction),
+				A3(
+					$author$project$Main$viewGarden,
+					model,
+					_Utils_update(
+						context,
+						{
+							polarity: $author$project$Main$invert(context.polarity),
+							zipper: newZipper
+						}),
+					pistil)));
+	});
+var $author$project$Main$viewGoal = function (model) {
+	var workingOnIt = A2(
+		$mdgriffith$elm_ui$Element$el,
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$scrollbarY,
-				$mdgriffith$elm_ui$Element$spacing(100),
 				$mdgriffith$elm_ui$Element$Background$color(
-				A3($mdgriffith$elm_ui$Element$rgb, 0.65, 0.65, 0.65))
+				A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
 			]),
-		bouquetEls);
+		A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$Font$size(50)
+				]),
+			$mdgriffith$elm_ui$Element$text('Working on it!')));
+	var bouquetEls = function (_v3) {
+		return A2(
+			$author$project$Utils$List$zipperMap,
+			F2(
+				function (_v2, flower) {
+					var l = _v2.a;
+					var r = _v2.b;
+					return A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$centerX,
+								$mdgriffith$elm_ui$Element$centerY
+							]),
+						A3(
+							$author$project$Main$viewFlower,
+							model,
+							A2(
+								$author$project$Main$Context,
+								_List_fromArray(
+									[
+										A2($author$project$Main$Bouquet, l, r)
+									]),
+								$author$project$Main$Pos),
+							flower));
+				}),
+			model.goal);
+	};
+	var bouquetEl = function (_v1) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$scrollbarY,
+					$mdgriffith$elm_ui$Element$spacing(100),
+					$mdgriffith$elm_ui$Element$Background$color(
+					A3($mdgriffith$elm_ui$Element$rgb, 0.65, 0.65, 0.65))
+				]),
+			bouquetEls(_Utils_Tuple0));
+	};
+	var _v0 = model.mode;
+	switch (_v0.$) {
+		case 'ProofMode':
+			return bouquetEl(_Utils_Tuple0);
+		case 'EditMode':
+			return bouquetEl(_Utils_Tuple0);
+		default:
+			return workingOnIt;
+	}
 };
 var $author$project$Main$ChangeUIMode = function (a) {
 	return {$: 'ChangeUIMode', a: a};
 };
-var $author$project$Main$EditMode = {$: 'EditMode'};
 var $author$project$Main$End = {$: 'End'};
 var $author$project$Main$Middle = {$: 'Middle'};
 var $author$project$Main$NavigationMode = {$: 'NavigationMode'};
@@ -13103,11 +13129,26 @@ var $author$project$Main$viewModeSelector = function (currentMode) {
 		function (mode, position) {
 			var isSelected = function () {
 				var _v5 = _Utils_Tuple2(mode, currentMode);
-				if ((_v5.a.$ === 'ProofMode') && (_v5.b.$ === 'ProofMode')) {
-					return true;
-				} else {
-					return _Utils_eq(mode, currentMode);
+				_v5$2:
+				while (true) {
+					switch (_v5.a.$) {
+						case 'ProofMode':
+							if (_v5.b.$ === 'ProofMode') {
+								return true;
+							} else {
+								break _v5$2;
+							}
+						case 'EditMode':
+							if (_v5.b.$ === 'EditMode') {
+								return true;
+							} else {
+								break _v5$2;
+							}
+						default:
+							break _v5$2;
+					}
 				}
+				return _Utils_eq(mode, currentMode);
 			}();
 			var changeAction = _List_fromArray(
 				[
@@ -13199,7 +13240,10 @@ var $author$project$Main$viewModeSelector = function (currentMode) {
 				item,
 				$author$project$Main$ProofMode($author$project$Main$Justifying),
 				$author$project$Main$Start),
-				A2(item, $author$project$Main$EditMode, $author$project$Main$Middle),
+				A2(
+				item,
+				$author$project$Main$EditMode($author$project$Main$Erasing),
+				$author$project$Main$Middle),
 				A2(item, $author$project$Main$NavigationMode, $author$project$Main$End)
 			]));
 };
