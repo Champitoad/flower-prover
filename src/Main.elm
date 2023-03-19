@@ -166,6 +166,10 @@ type ProofInteraction
   | Fencing Selection
 
 
+type EditAction
+  = Reordering FlowerDnD
+
+
 type UIMode
   = ProofMode ProofInteraction
   | EditMode
@@ -268,7 +272,7 @@ criticalPair =
 init : () -> (Model, Cmd Msg)
 init () =
   ( { goal = [ criticalPair ]
-    , mode = ProofMode Justifying }
+    , mode = EditMode }
   , Cmd.none )
 
 
@@ -300,9 +304,7 @@ update msg model =
               { model | goal = fillZipper [] zipper }
             
             (Import, _, _) ->
-              { model
-              | goal = fillZipper bouquet zipper
-              , mode = ProofMode Justifying }
+              { model | goal = fillZipper bouquet zipper }
 
             (Unlock, [], Pistil [Garden petal] :: parent)  ->
               { model | goal = fillZipper petal parent }
@@ -346,24 +348,25 @@ update msg model =
               let
                 ( newDragDrop, result ) =
                   DnD.update dndMsg dragDrop
-                
-                newModel =
-                  case result of
-                    Just (drag, drop, _) ->
-                      case drop of
-                        Just destination ->
+              in
+              case result of
+                Just (drag, drop, _) ->
+                  case drop of
+                    Just destination ->
+                      let
+                        newModel =
                           update
-                            ( ProofAction Import [drag.content] destination.target )
+                            (ProofAction Import [drag.content] destination.target)
                             model
                           |> Tuple.first
-                        
-                        Nothing ->
-                          model
+                      in
+                      { newModel | mode = ProofMode Justifying }
                     
                     Nothing ->
-                      model
-              in
-              { newModel | mode = ProofMode (Importing newDragDrop) }
+                      { model | mode = ProofMode Justifying }
+ 
+                Nothing ->
+                  { model | mode = ProofMode (Importing newDragDrop) }
             
             _ ->
               model
@@ -371,7 +374,6 @@ update msg model =
       (model_, cmd)
     
     ChangeUIMode mode ->
-      let _ = Debug.log "mode" mode in
       ({ model | mode = mode }, Cmd.none)
     
     DoNothing ->
@@ -509,46 +511,46 @@ nonSelectable =
 
 viewAtom : UIMode -> Context -> String -> Element Msg
 viewAtom mode context name =
-  case mode of
-    ProofMode _ ->
-      let
-        atom =
-          Atom name
+  let
+    atom =
+      Atom name
 
-        justifyAction =
+    clickAction =
+      case mode of
+        ProofMode Justifying ->
           if isHypothesis atom context.zipper then
             (Events.onClick (ProofAction Justify [atom] context.zipper))
             :: actionable
           else
             []
-      in
-      el
-        [ width fill
-        , height fill ]
-        ( el
-            ( [ width shrink
-              , height shrink
-              , centerX, centerY
-              , padding 10
-              , Font.color (flowerForegroundColor context.polarity)
-              , Font.size 50
-              , nonSelectable ]
-            ++ justifyAction )
-            ( text name ) )
 
-    _ ->
-      Debug.todo ""
+        _ ->
+          []
+  in
+  el
+    [ width fill
+    , height fill ]
+    ( el
+        ( [ width shrink
+          , height shrink
+          , centerX, centerY
+          , padding 10
+          , Font.color (flowerForegroundColor context.polarity)
+          , Font.size 50
+          , nonSelectable ]
+         ++ clickAction )
+        ( text name ) )
 
 
 viewPistil : UIMode -> Context -> Garden -> List Garden -> Element Msg
 viewPistil mode context (Garden bouquet as pistil) petals =
-  case mode of
-    ProofMode _ ->
-      let
-        newZipper =
-          Pistil petals :: context.zipper
+  let
+    newZipper =
+      Pistil petals :: context.zipper
 
-        unlockAction =
+    clickAction =
+      case mode of
+        ProofMode Justifying ->
           let
             action =
               (Events.onClick (ProofAction Unlock bouquet newZipper))
@@ -562,103 +564,100 @@ viewPistil mode context (Garden bouquet as pistil) petals =
                 if List.length petals == 1 then action else []
           else
             []
-      in
-      el
+        
+        _ ->
+          []
+  in
+  el
+    ( [ width fill
+      , height fill
+      , Border.rounded flowerBorderRound ])
+    ( el
         ( [ width fill
           , height fill
-          , Border.rounded flowerBorderRound ])
-        ( el
-            ( [ width fill
-              , height fill
-              , padding 10 ]
-             ++ unlockAction )
-            ( viewGarden
-              mode
-              { context
-              | zipper = newZipper
-              , polarity = invert context.polarity }
-              pistil ) )
-    _ ->
-      Debug.todo ""
+          , padding 10 ]
+         ++ clickAction )
+        ( viewGarden
+          mode
+          { context
+          | zipper = newZipper
+          , polarity = invert context.polarity }
+          pistil ) )
 
 
 viewPetal : UIMode -> Context -> Garden -> (List Garden, List Garden) -> Garden -> Element Msg
 viewPetal mode context pistil (leftPetals, rightPetals) (Garden bouquet as petal) =
-  case mode of
-    ProofMode _ ->
-      let
-        newZipper =
-          Petal pistil leftPetals rightPetals :: context.zipper
+  let
+    newZipper =
+      Petal pistil leftPetals rightPetals :: context.zipper
 
-        closeAction =
+    clickAction =
+      case mode of
+        ProofMode Justifying ->
           if List.isEmpty bouquet then
             (Events.onClick (ProofAction Close bouquet newZipper))
             :: actionable
           else
             []
-      in
-      el
-        [ width fill
-        , height fill
-        , Border.rounded flowerBorderRound
-        , Background.color (flowerBackgroundColor context.polarity) ]
-        ( el
-            ( [ width fill
-              , height fill
-              , padding 10 ]
-             ++ closeAction )
-            ( viewGarden
-                mode
-                { context
-                | zipper = newZipper }
-                petal ) )
-    _ ->
-      Debug.todo ""
+        
+        _ ->
+          []
+  in
+  el
+    [ width fill
+    , height fill
+    , Border.rounded flowerBorderRound
+    , Background.color (flowerBackgroundColor context.polarity) ]
+    ( el
+        ( [ width fill
+          , height fill
+          , padding 10 ]
+         ++ clickAction )
+        ( viewGarden
+            mode
+            { context
+            | zipper = newZipper }
+            petal ) )
 
 
 viewFlower : UIMode -> Context -> Flower -> Element Msg
 viewFlower mode context flower =
-  case mode of
-    ProofMode _ ->
-      case flower of
-        Atom name ->
-          viewAtom mode context name
-        
-        Flower pistil petals ->
-          let
-            pistilEl =
-              viewPistil mode context pistil petals
-            
-            petalsEl =
-              row
-                [ width fill
-                , height fill
-                , spacing flowerBorderWidth ]
-                ( Utils.List.zipperMap (viewPetal mode context pistil) petals )
-
-            importStartAction =
-              List.map htmlAttribute <|
-              DnD.draggable DragDropMsg
-                { source = context.zipper, content = flower }
-          in
-          column
-            ( [ width fill
-              , height fill
-              , padding flowerBorderWidth
-              , Background.color (flowerForegroundColor context.polarity)
-              , Border.color (flowerForegroundColor context.polarity)
-              , Border.rounded flowerBorderRound
-              , Border.shadow
-                  { offset = (0, 5)
-                  , size = 0.25
-                  , blur = 15
-                  , color = flowerForegroundColor context.polarity } ]
-            ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-            ++ importStartAction )
-            [ pistilEl, petalsEl ]
+  case flower of
+    Atom name ->
+      viewAtom mode context name
     
-    _ ->
-      Debug.todo ""
+    Flower pistil petals ->
+      let
+        pistilEl =
+          viewPistil mode context pistil petals
+        
+        petalsEl =
+          row
+            [ width fill
+            , height fill
+            , spacing flowerBorderWidth ]
+            ( Utils.List.zipperMap (viewPetal mode context pistil) petals )
+
+        importStartAction =
+          List.map htmlAttribute <|
+          DnD.draggable DragDropMsg
+            { source = context.zipper, content = flower }
+      in
+      column
+        ( [ width fill
+          , height fill
+          , padding flowerBorderWidth
+          , Background.color (flowerForegroundColor context.polarity)
+          , Border.color (flowerForegroundColor context.polarity)
+          , Border.rounded flowerBorderRound
+          , Border.shadow
+              { offset = (0, 5)
+              , size = 0.25
+              , blur = 15
+              , color = flowerForegroundColor context.polarity } ]
+        ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
+        ++ importStartAction )
+        [ pistilEl, petalsEl ]
 
 
 viewGarden : UIMode -> Context -> Garden -> Element Msg
@@ -692,13 +691,16 @@ viewGarden mode context (Garden bouquet) =
                 ( List.map htmlAttribute <|
                   DnD.droppable DragDropMsg
                     (Just { target = Bouquet left right :: context.zipper
-                          , content = [content] }) )
+                          , content = [] }) )
               else
                 []
             _ ->
               []
 
         ProofMode Justifying ->
+          []
+        
+        EditMode ->
           []
         
         _ ->
@@ -758,36 +760,41 @@ viewGoal : Model -> Element Msg
 viewGoal model =
   -- text (viewFlowerText model)
   let
-    bouquetEls =
-      let
-        workingOnIt =
-          el
-            [ width fill
-            , height fill
-            , Background.color (rgb 1 1 1) ]
-            ( el
-                [ centerX, centerY
-                , Font.size 50 ]
-                ( text "Working on it!" ) )
-      in
-      case model.mode of
-        ProofMode _ ->
-          (Utils.List.zipperMap
-            (\(l, r) flower ->
-              el [width fill, height fill, centerX, centerY]
-              (viewFlower model.mode (Context [Bouquet l r] Pos) flower))
-            model.goal)
+    bouquetEls () =
+      ( Utils.List.zipperMap
+          ( \(l, r) flower ->
+              el [ width fill, height fill, centerX, centerY ]
+              ( viewFlower model.mode (Context [Bouquet l r] Pos) flower ) )
+          model.goal )
+    
+    bouquetEl () =
+      column
+        [ width fill
+        , height fill
+        , scrollbarY
+        , spacing 100
+        , Background.color (rgb 0.65 0.65 0.65) ]
+        ( bouquetEls () )
 
-        _ ->
-          [workingOnIt]
+    workingOnIt =
+      el
+        [ width fill
+        , height fill
+        , Background.color (rgb 1 1 1) ]
+        ( el
+            [ centerX, centerY
+            , Font.size 50 ]
+            ( text "Working on it!" ) )
   in
-  column
-    [ width fill
-    , height fill
-    , scrollbarY
-    , spacing 100
-    , Background.color (rgb 0.65 0.65 0.65) ]
-    bouquetEls
+  case model.mode of
+    ProofMode _ ->
+      bouquetEl ()
+    
+    EditMode ->
+      bouquetEl ()
+
+    _ ->
+      workingOnIt
 
 
 type ModeSelectorPosition
