@@ -480,6 +480,7 @@ dropTarget =
     border =
       [ Border.width width
       , Border.dashed
+      , Border.rounded borderRound
       , Border.color (rgb 1 0.8 0) ]
   in
   { borderWidth = width

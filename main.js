@@ -11790,6 +11790,7 @@ var $author$project$Main$dropTarget = function () {
 		[
 			$mdgriffith$elm_ui$Element$Border$width(width),
 			$mdgriffith$elm_ui$Element$Border$dashed,
+			$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound),
 			$mdgriffith$elm_ui$Element$Border$color(
 			A3($mdgriffith$elm_ui$Element$rgb, 1, 0.8, 0))
 		]);
@@ -12218,8 +12219,8 @@ var $author$project$Main$viewAtom = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 526, column: 7},
-					end: {line: 526, column: 17}
+					start: {line: 527, column: 7},
+					end: {line: 527, column: 17}
 				})('');
 		}
 	});
@@ -12500,8 +12501,8 @@ var $author$project$Main$viewFlower = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 647, column: 7},
-					end: {line: 647, column: 17}
+					start: {line: 648, column: 7},
+					end: {line: 648, column: 17}
 				})('');
 		}
 	});
@@ -12592,8 +12593,8 @@ var $author$project$Main$viewGarden = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 691, column: 11},
-					end: {line: 691, column: 21}
+					start: {line: 692, column: 11},
+					end: {line: 692, column: 21}
 				})('');
 		};
 		var borderAttrs = _List_fromArray(
@@ -12711,8 +12712,8 @@ var $author$project$Main$viewPetal = F5(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 602, column: 7},
-					end: {line: 602, column: 17}
+					start: {line: 603, column: 7},
+					end: {line: 603, column: 17}
 				})('');
 		}
 	});
@@ -12774,8 +12775,8 @@ var $author$project$Main$viewPistil = F4(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 568, column: 7},
-					end: {line: 568, column: 17}
+					start: {line: 569, column: 7},
+					end: {line: 569, column: 17}
 				})('');
 		}
 	});
@@ -12815,8 +12816,8 @@ var $author$project$Main$viewGoal = function (model) {
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 756, column: 11},
-					end: {line: 756, column: 21}
+					start: {line: 757, column: 11},
+					end: {line: 757, column: 21}
 				})('');
 		}
 	}();
