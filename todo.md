@@ -53,3 +53,5 @@
 - View for partial proof term attached to flower
 
 - Analogy between Proof/Edit modes and Survival/Creative modes in Minecraft
+
+- Vocal recognition to input text (typically for atoms)
