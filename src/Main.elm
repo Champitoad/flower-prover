@@ -17,6 +17,7 @@ import Html.Attributes exposing (style)
 import Html5.DragDrop as DnD
 
 import Json.Decode exposing (Value)      
+import Element.Region exposing (description)
 
 
 -- MAIN
@@ -282,6 +283,7 @@ type ProofRule
 type Msg
   = ProofAction ProofRule Bouquet Zipper
   | DragDropMsg FlowerDnDMsg
+  | ChangeUIMode UIMode
   | DoNothing
 
 
@@ -366,6 +368,10 @@ update msg model =
       in
       (model_, cmd)
     
+    ChangeUIMode mode ->
+      let _ = Debug.log "mode" mode in
+      ({ model | mode = mode }, Cmd.none)
+    
     DoNothing ->
       (model, Cmd.none)
 
@@ -429,16 +435,16 @@ transparent =
   rgba 0 0 0 0
 
 
-fgColor : Polarity -> Color
-fgColor polarity =
+flowerForegroundColor : Polarity -> Color
+flowerForegroundColor polarity =
   case polarity of
     Pos ->
       rgb 0 0 0
     Neg ->
       rgb 1 1 1
 
-bgColor : Polarity -> Color
-bgColor polarity =
+flowerBackgroundColor : Polarity -> Color
+flowerBackgroundColor polarity =
   case polarity of
     Pos ->
       rgb 1 1 1
@@ -446,12 +452,12 @@ bgColor polarity =
       rgb 0 0 0
 
 
-borderWidth : Int
-borderWidth =
+flowerBorderWidth : Int
+flowerBorderWidth =
   3
 
-borderRound : Int
-borderRound =
+flowerBorderRound : Int
+flowerBorderRound =
   10
 
 
@@ -461,7 +467,7 @@ actionable =
   , Border.width 5
   , Border.color (rgb 0.3 0.9 0.3)
   , Border.dotted
-  , Border.rounded borderRound
+  , Border.rounded flowerBorderRound
   , Background.color (rgba 0.3 0.9 0.3 0.5) ]
 
 
@@ -480,7 +486,7 @@ dropTarget =
     border =
       [ Border.width width
       , Border.dashed
-      , Border.rounded borderRound
+      , Border.rounded flowerBorderRound
       , Border.color (rgb 1 0.8 0) ]
   in
   { borderWidth = width
@@ -492,6 +498,11 @@ stopPropagation : List (Attribute Msg)
 stopPropagation =
   [ onDragOver DoNothing
   , onMouseMove DoNothing ]
+
+
+nonSelectable : Attribute Msg
+nonSelectable =
+  htmlAttribute <| style "user-select" "none"
 
 
 viewAtom : UIMode -> Context -> String -> Element Msg
@@ -517,9 +528,9 @@ viewAtom mode context name =
               , height shrink
               , centerX, centerY
               , padding 10
-              , Font.color (fgColor context.polarity)
+              , Font.color (flowerForegroundColor context.polarity)
               , Font.size 50
-              , htmlAttribute <| style "user-select" "none" ]
+              , nonSelectable ]
             ++ justifyAction )
             ( text name ) )
 
@@ -553,7 +564,7 @@ viewPistil mode context (Garden bouquet as pistil) petals =
       el
         ( [ width fill
           , height fill
-          , Border.rounded borderRound ])
+          , Border.rounded flowerBorderRound ])
         ( el
             ( [ width fill
               , height fill
@@ -587,8 +598,8 @@ viewPetal mode context pistil (leftPetals, rightPetals) (Garden bouquet as petal
       el
         [ width fill
         , height fill
-        , Border.rounded borderRound
-        , Background.color (bgColor context.polarity) ]
+        , Border.rounded flowerBorderRound
+        , Background.color (flowerBackgroundColor context.polarity) ]
         ( el
             ( [ width fill
               , height fill
@@ -620,7 +631,7 @@ viewFlower mode context flower =
               row
                 [ width fill
                 , height fill
-                , spacing borderWidth ]
+                , spacing flowerBorderWidth ]
                 ( Utils.List.zipperMap (viewPetal mode context pistil) petals )
 
             importStartAction =
@@ -631,15 +642,15 @@ viewFlower mode context flower =
           column
             ( [ width fill
               , height fill
-              , padding borderWidth
-              , Background.color (fgColor context.polarity)
-              , Border.color (fgColor context.polarity)
-              , Border.rounded borderRound
+              , padding flowerBorderWidth
+              , Background.color (flowerForegroundColor context.polarity)
+              , Border.color (flowerForegroundColor context.polarity)
+              , Border.rounded flowerBorderRound
               , Border.shadow
                   { offset = (0, 5)
                   , size = 0.25
                   , blur = 15
-                  , color = fgColor context.polarity } ]
+                  , color = flowerForegroundColor context.polarity } ]
             ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
             ++ importStartAction )
             [ pistilEl, petalsEl ]
@@ -746,6 +757,17 @@ viewGoal model =
   -- text (viewFlowerText model)
   let
     bouquetEls =
+      let
+        workingOnIt =
+          el
+            [ width fill
+            , height fill
+            , Background.color (rgb 1 1 1) ]
+            ( el
+                [ centerX, centerY
+                , Font.size 50 ]
+                ( text "Working on it!" ) )
+      in
       case model.mode of
         ProofMode _ ->
           (Utils.List.zipperMap
@@ -755,16 +777,117 @@ viewGoal model =
             model.goal)
 
         _ ->
-          Debug.todo ""  
+          [workingOnIt]
   in
   column
     [ width fill
     , height fill
+    , scrollbarY
     , spacing 100
     , Background.color (rgb 0.65 0.65 0.65) ]
     bouquetEls
 
 
+type ModeSelectorPosition
+  = Start | Middle | End
+
+
+viewModeSelector : UIMode -> Element Msg
+viewModeSelector currentMode =
+  let
+    borderRoundSize = 10
+
+    item mode position =
+      let
+        isSelected =
+          case (mode, currentMode) of          
+            (ProofMode _, ProofMode _) -> True
+            _ -> mode == currentMode
+
+        icon =
+          let
+            (label, filename) =
+              case mode of
+                ProofMode _ -> ("Prove", "prove")
+                EditMode -> ("Edit", "pen")
+                NavigationMode -> ("Navigate", "navigate")
+          in
+          image
+            [ width fill 
+            , height fill
+            , nonSelectable ]
+            { src = "../assets/img/" ++ filename ++ ".svg"
+            , description = label }
+
+        (bgColor, fgColor) =
+          if isSelected
+          then (rgb255 58 134 255, rgb 1 1 1)
+          else (rgb 1 1 1, rgb 0 0 0)
+        
+        borderRound =
+          case position of
+            Start ->
+              { topLeft = borderRoundSize, bottomLeft = borderRoundSize
+              , topRight = 0, bottomRight = 0 }
+            Middle ->
+              { topLeft = 0, bottomLeft = 0
+              , topRight = 0, bottomRight = 0 }
+            End ->
+              { topLeft = 0, bottomLeft = 0
+              , topRight = borderRoundSize, bottomRight = borderRoundSize }
+
+        changeAction =
+          [ Events.onClick (ChangeUIMode mode)
+          , pointer ]
+      in
+      el
+        ( [ width (60 |> px)
+          , height fill
+          , padding 12
+          , Background.color bgColor
+          , Border.roundEach borderRound ]
+         ++ changeAction )
+        icon
+    
+    borderColor = rgb 0.6 0.6 0.6
+  in
+  row
+    [ width shrink
+    , height fill
+    , centerX, centerY
+    , spacing 1
+    , Border.width 0
+    , Border.rounded borderRoundSize
+    , Border.color borderColor
+    , Background.color borderColor ]
+    [ item (ProofMode Justifying) Start
+    , item EditMode Middle
+    , item NavigationMode End ]
+
+
+viewToolbar : Model -> Element Msg
+viewToolbar model =
+  row
+    [ width fill
+    , height shrink
+    , padding 15
+    , Background.color (rgb 0.9 0.9 0.9) ]
+    [ viewModeSelector model.mode ]
+
+
 view : Model -> Html Msg
 view model =
-  layout [] (viewGoal model)
+  let
+    goal =
+      viewGoal model
+    
+    toolbar =
+      viewToolbar model
+    
+    app =
+      column
+        [ width fill,
+          height fill ]
+        [goal, toolbar]
+  in
+  layout [] app

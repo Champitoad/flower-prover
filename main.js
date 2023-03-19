@@ -5339,6 +5339,7 @@ var $norpan$elm_html5_drag_drop$Html5$DragDrop$getDragstartEvent = function (msg
 };
 var $norpan$elm_html5_drag_drop$Html5$DragDrop$NotDragging = {$: 'NotDragging'};
 var $norpan$elm_html5_drag_drop$Html5$DragDrop$init = $norpan$elm_html5_drag_drop$Html5$DragDrop$NotDragging;
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
 		if (maybe.$ === 'Just') {
@@ -5660,40 +5661,24 @@ var $author$project$Main$update = F2(
 							$author$project$Main$dragstart),
 						$norpan$elm_html5_drag_drop$Html5$DragDrop$getDragstartEvent(dndMsg)));
 				return _Utils_Tuple2(model_, cmd);
+			case 'ChangeUIMode':
+				var mode = msg.a;
+				var _v22 = A2($elm$core$Debug$log, 'mode', mode);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{mode: mode}),
+					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
-var $mdgriffith$elm_ui$Internal$Model$Attr = function (a) {
-	return {$: 'Attr', a: a};
-};
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $mdgriffith$elm_ui$Internal$Model$htmlClass = function (cls) {
-	return $mdgriffith$elm_ui$Internal$Model$Attr(
-		$elm$html$Html$Attributes$class(cls));
-};
-var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
-	function (a, b) {
-		return {$: 'OnlyDynamic', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Model$StaticRootAndDynamic = F2(
-	function (a, b) {
-		return {$: 'StaticRootAndDynamic', a: a, b: b};
-	});
 var $mdgriffith$elm_ui$Internal$Model$Unkeyed = function (a) {
 	return {$: 'Unkeyed', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Model$AsEl = {$: 'AsEl'};
-var $mdgriffith$elm_ui$Internal$Model$asEl = $mdgriffith$elm_ui$Internal$Model$AsEl;
+var $mdgriffith$elm_ui$Internal$Model$AsColumn = {$: 'AsColumn'};
+var $mdgriffith$elm_ui$Internal$Model$asColumn = $mdgriffith$elm_ui$Internal$Model$AsColumn;
+var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
 var $mdgriffith$elm_ui$Internal$Model$Generic = {$: 'Generic'};
 var $mdgriffith$elm_ui$Internal$Model$div = $mdgriffith$elm_ui$Internal$Model$Generic;
 var $mdgriffith$elm_ui$Internal$Model$NoNearbyChildren = {$: 'NoNearbyChildren'};
@@ -5793,6 +5778,8 @@ var $mdgriffith$elm_ui$Internal$Model$addKeyedChildren = F3(
 							inFront)));
 		}
 	});
+var $mdgriffith$elm_ui$Internal$Model$AsEl = {$: 'AsEl'};
+var $mdgriffith$elm_ui$Internal$Model$asEl = $mdgriffith$elm_ui$Internal$Model$AsEl;
 var $mdgriffith$elm_ui$Internal$Model$AsParagraph = {$: 'AsParagraph'};
 var $mdgriffith$elm_ui$Internal$Model$asParagraph = $mdgriffith$elm_ui$Internal$Model$AsParagraph;
 var $mdgriffith$elm_ui$Internal$Flag$Flag = function (a) {
@@ -5809,6 +5796,15 @@ var $mdgriffith$elm_ui$Internal$Flag$alignBottom = $mdgriffith$elm_ui$Internal$F
 var $mdgriffith$elm_ui$Internal$Flag$alignRight = $mdgriffith$elm_ui$Internal$Flag$flag(40);
 var $mdgriffith$elm_ui$Internal$Flag$centerX = $mdgriffith$elm_ui$Internal$Flag$flag(42);
 var $mdgriffith$elm_ui$Internal$Flag$centerY = $mdgriffith$elm_ui$Internal$Flag$flag(43);
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$core$Set$Set_elm_builtin = function (a) {
 	return {$: 'Set_elm_builtin', a: a};
@@ -11270,6 +11266,53 @@ var $mdgriffith$elm_ui$Internal$Model$element = F4(
 				$mdgriffith$elm_ui$Internal$Model$NoNearbyChildren,
 				$elm$core$List$reverse(attributes)));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Height = function (a) {
+	return {$: 'Height', a: a};
+};
+var $mdgriffith$elm_ui$Element$height = $mdgriffith$elm_ui$Internal$Model$Height;
+var $mdgriffith$elm_ui$Internal$Model$Attr = function (a) {
+	return {$: 'Attr', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$htmlClass = function (cls) {
+	return $mdgriffith$elm_ui$Internal$Model$Attr(
+		$elm$html$Html$Attributes$class(cls));
+};
+var $mdgriffith$elm_ui$Internal$Model$Content = {$: 'Content'};
+var $mdgriffith$elm_ui$Element$shrink = $mdgriffith$elm_ui$Internal$Model$Content;
+var $mdgriffith$elm_ui$Internal$Model$Width = function (a) {
+	return {$: 'Width', a: a};
+};
+var $mdgriffith$elm_ui$Element$width = $mdgriffith$elm_ui$Internal$Model$Width;
+var $mdgriffith$elm_ui$Element$column = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asColumn,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentTop + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentLeft)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
+	return {$: 'Fill', a: a};
+};
+var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
+var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
+	function (a, b) {
+		return {$: 'OnlyDynamic', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$StaticRootAndDynamic = F2(
+	function (a, b) {
+		return {$: 'StaticRootAndDynamic', a: a, b: b};
+	});
 var $mdgriffith$elm_ui$Internal$Model$AllowHover = {$: 'AllowHover'};
 var $mdgriffith$elm_ui$Internal$Model$Layout = {$: 'Layout'};
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
@@ -11568,36 +11611,6 @@ var $mdgriffith$elm_ui$Element$Background$color = function (clr) {
 			'background-color',
 			clr));
 };
-var $mdgriffith$elm_ui$Internal$Model$AsColumn = {$: 'AsColumn'};
-var $mdgriffith$elm_ui$Internal$Model$asColumn = $mdgriffith$elm_ui$Internal$Model$AsColumn;
-var $mdgriffith$elm_ui$Internal$Model$Height = function (a) {
-	return {$: 'Height', a: a};
-};
-var $mdgriffith$elm_ui$Element$height = $mdgriffith$elm_ui$Internal$Model$Height;
-var $mdgriffith$elm_ui$Internal$Model$Content = {$: 'Content'};
-var $mdgriffith$elm_ui$Element$shrink = $mdgriffith$elm_ui$Internal$Model$Content;
-var $mdgriffith$elm_ui$Internal$Model$Width = function (a) {
-	return {$: 'Width', a: a};
-};
-var $mdgriffith$elm_ui$Element$width = $mdgriffith$elm_ui$Internal$Model$Width;
-var $mdgriffith$elm_ui$Element$column = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asColumn,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentTop + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentLeft)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
 var $mdgriffith$elm_ui$Element$el = F2(
 	function (attrs, child) {
 		return A4(
@@ -11615,14 +11628,22 @@ var $mdgriffith$elm_ui$Element$el = F2(
 				_List_fromArray(
 					[child])));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
-	return {$: 'Fill', a: a};
-};
-var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
 var $mdgriffith$elm_ui$Element$rgb = F3(
 	function (r, g, b) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
 	});
+var $mdgriffith$elm_ui$Internal$Model$Class = F2(
+	function (a, b) {
+		return {$: 'Class', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
+var $mdgriffith$elm_ui$Element$scrollbarY = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbarsY);
+var $mdgriffith$elm_ui$Element$Font$size = function (i) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontSize,
+		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
+};
 var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
 	function (a, b, c) {
 		return {$: 'SpacingStyle', a: a, b: b, c: c};
@@ -11642,7 +11663,12 @@ var $mdgriffith$elm_ui$Element$spacing = function (x) {
 			x,
 			x));
 };
-var $elm$core$Debug$todo = _Debug_todo;
+var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
+	return {$: 'Text', a: a};
+};
+var $mdgriffith$elm_ui$Element$text = function (content) {
+	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
 var $author$project$Main$Close = {$: 'Close'};
 var $author$project$Main$DragDropMsg = function (a) {
 	return {$: 'DragDropMsg', a: a};
@@ -11655,7 +11681,6 @@ var $author$project$Main$Pistil = function (a) {
 	return {$: 'Pistil', a: a};
 };
 var $author$project$Main$Unlock = {$: 'Unlock'};
-var $author$project$Main$borderRound = 10;
 var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
 var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 	return A2(
@@ -11667,12 +11692,9 @@ var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 			'border-color',
 			clr));
 };
-var $mdgriffith$elm_ui$Internal$Model$Class = F2(
-	function (a, b) {
-		return {$: 'Class', a: a, b: b};
-	});
 var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
 var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
+var $author$project$Main$flowerBorderRound = 10;
 var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
 var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
 var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
@@ -11710,18 +11732,10 @@ var $author$project$Main$actionable = _List_fromArray(
 		$mdgriffith$elm_ui$Element$Border$color(
 		A3($mdgriffith$elm_ui$Element$rgb, 0.3, 0.9, 0.3)),
 		$mdgriffith$elm_ui$Element$Border$dotted,
-		$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound),
+		$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound),
 		$mdgriffith$elm_ui$Element$Background$color(
 		A4($mdgriffith$elm_ui$Element$rgba, 0.3, 0.9, 0.3, 0.5))
 	]);
-var $author$project$Main$bgColor = function (polarity) {
-	if (polarity.$ === 'Pos') {
-		return A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
-	} else {
-		return A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0);
-	}
-};
-var $author$project$Main$borderWidth = 3;
 var $norpan$elm_html5_drag_drop$Html5$DragDrop$DragEnd = {$: 'DragEnd'};
 var $norpan$elm_html5_drag_drop$Html5$DragDrop$DragStart = F2(
 	function (a, b) {
@@ -11790,7 +11804,7 @@ var $author$project$Main$dropTarget = function () {
 		[
 			$mdgriffith$elm_ui$Element$Border$width(width),
 			$mdgriffith$elm_ui$Element$Border$dashed,
-			$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound),
+			$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound),
 			$mdgriffith$elm_ui$Element$Border$color(
 			A3($mdgriffith$elm_ui$Element$rgb, 1, 0.8, 0))
 		]);
@@ -11910,7 +11924,15 @@ var $norpan$elm_html5_drag_drop$Html5$DragDrop$droppable = F2(
 					$norpan$elm_html5_drag_drop$Html5$DragDrop$positionDecoder))
 			]);
 	});
-var $author$project$Main$fgColor = function (polarity) {
+var $author$project$Main$flowerBackgroundColor = function (polarity) {
+	if (polarity.$ === 'Pos') {
+		return A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
+	} else {
+		return A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0);
+	}
+};
+var $author$project$Main$flowerBorderWidth = 3;
+var $author$project$Main$flowerForegroundColor = function (polarity) {
 	if (polarity.$ === 'Pos') {
 		return A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0);
 	} else {
@@ -12117,6 +12139,7 @@ var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
 			'box-shadow',
 			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
 };
+var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$Main$transparent = A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0);
 var $author$project$Main$Justify = {$: 'Justify'};
 var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
@@ -12170,20 +12193,10 @@ var $author$project$Main$isHypothesis = F2(
 			flower,
 			$author$project$Main$hypsZipper(zipper));
 	});
-var $mdgriffith$elm_ui$Element$Font$size = function (i) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontSize,
-		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
-};
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
-	return {$: 'Text', a: a};
-};
-var $mdgriffith$elm_ui$Element$text = function (content) {
-	return $mdgriffith$elm_ui$Internal$Model$Text(content);
-};
+var $author$project$Main$nonSelectable = $mdgriffith$elm_ui$Element$htmlAttribute(
+	A2($elm$html$Html$Attributes$style, 'user-select', 'none'));
 var $author$project$Main$viewAtom = F3(
 	function (mode, context, name) {
 		if (mode.$ === 'ProofMode') {
@@ -12216,10 +12229,9 @@ var $author$project$Main$viewAtom = F3(
 								$mdgriffith$elm_ui$Element$centerY,
 								$mdgriffith$elm_ui$Element$padding(10),
 								$mdgriffith$elm_ui$Element$Font$color(
-								$author$project$Main$fgColor(context.polarity)),
+								$author$project$Main$flowerForegroundColor(context.polarity)),
 								$mdgriffith$elm_ui$Element$Font$size(50),
-								$mdgriffith$elm_ui$Element$htmlAttribute(
-								A2($elm$html$Html$Attributes$style, 'user-select', 'none'))
+								$author$project$Main$nonSelectable
 							]),
 						justifyAction),
 					$mdgriffith$elm_ui$Element$text(name)));
@@ -12227,8 +12239,8 @@ var $author$project$Main$viewAtom = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 527, column: 7},
-					end: {line: 527, column: 17}
+					start: {line: 538, column: 7},
+					end: {line: 538, column: 17}
 				})('');
 		}
 	});
@@ -12462,7 +12474,7 @@ var $author$project$Main$viewFlower = F3(
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing($author$project$Main$borderWidth)
+							$mdgriffith$elm_ui$Element$spacing($author$project$Main$flowerBorderWidth)
 						]),
 					A2(
 						$author$project$Utils$List$zipperMap,
@@ -12482,16 +12494,16 @@ var $author$project$Main$viewFlower = F3(
 							[
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$padding($author$project$Main$borderWidth),
+								$mdgriffith$elm_ui$Element$padding($author$project$Main$flowerBorderWidth),
 								$mdgriffith$elm_ui$Element$Background$color(
-								$author$project$Main$fgColor(context.polarity)),
+								$author$project$Main$flowerForegroundColor(context.polarity)),
 								$mdgriffith$elm_ui$Element$Border$color(
-								$author$project$Main$fgColor(context.polarity)),
-								$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound),
+								$author$project$Main$flowerForegroundColor(context.polarity)),
+								$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound),
 								$mdgriffith$elm_ui$Element$Border$shadow(
 								{
 									blur: 15,
-									color: $author$project$Main$fgColor(context.polarity),
+									color: $author$project$Main$flowerForegroundColor(context.polarity),
 									offset: _Utils_Tuple2(0, 5),
 									size: 0.25
 								})
@@ -12509,8 +12521,8 @@ var $author$project$Main$viewFlower = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 648, column: 7},
-					end: {line: 648, column: 17}
+					start: {line: 659, column: 7},
+					end: {line: 659, column: 17}
 				})('');
 		}
 	});
@@ -12601,8 +12613,8 @@ var $author$project$Main$viewGarden = F3(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 692, column: 11},
-					end: {line: 692, column: 21}
+					start: {line: 703, column: 11},
+					end: {line: 703, column: 21}
 				})('');
 		};
 		var borderAttrs = _List_fromArray(
@@ -12701,9 +12713,9 @@ var $author$project$Main$viewPetal = F5(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound),
+						$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound),
 						$mdgriffith$elm_ui$Element$Background$color(
-						$author$project$Main$bgColor(context.polarity))
+						$author$project$Main$flowerBackgroundColor(context.polarity))
 					]),
 				A2(
 					$mdgriffith$elm_ui$Element$el,
@@ -12726,8 +12738,8 @@ var $author$project$Main$viewPetal = F5(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 603, column: 7},
-					end: {line: 603, column: 17}
+					start: {line: 614, column: 7},
+					end: {line: 614, column: 17}
 				})('');
 		}
 	});
@@ -12763,7 +12775,7 @@ var $author$project$Main$viewPistil = F4(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$borderRound)
+						$mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$flowerBorderRound)
 					]),
 				A2(
 					$mdgriffith$elm_ui$Element$el,
@@ -12789,13 +12801,31 @@ var $author$project$Main$viewPistil = F4(
 			return _Debug_todo(
 				'Main',
 				{
-					start: {line: 569, column: 7},
-					end: {line: 569, column: 17}
+					start: {line: 580, column: 7},
+					end: {line: 580, column: 17}
 				})('');
 		}
 	});
 var $author$project$Main$viewGoal = function (model) {
 	var bouquetEls = function () {
+		var workingOnIt = A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color(
+					A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$centerY,
+						$mdgriffith$elm_ui$Element$Font$size(50)
+					]),
+				$mdgriffith$elm_ui$Element$text('Working on it!')));
 		var _v0 = model.mode;
 		if (_v0.$ === 'ProofMode') {
 			return A2(
@@ -12827,12 +12857,8 @@ var $author$project$Main$viewGoal = function (model) {
 					}),
 				model.goal);
 		} else {
-			return _Debug_todo(
-				'Main',
-				{
-					start: {line: 758, column: 11},
-					end: {line: 758, column: 21}
-				})('');
+			return _List_fromArray(
+				[workingOnIt]);
 		}
 	}();
 	return A2(
@@ -12841,17 +12867,221 @@ var $author$project$Main$viewGoal = function (model) {
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$scrollbarY,
 				$mdgriffith$elm_ui$Element$spacing(100),
 				$mdgriffith$elm_ui$Element$Background$color(
 				A3($mdgriffith$elm_ui$Element$rgb, 0.65, 0.65, 0.65))
 			]),
 		bouquetEls);
 };
-var $author$project$Main$view = function (model) {
+var $author$project$Main$ChangeUIMode = function (a) {
+	return {$: 'ChangeUIMode', a: a};
+};
+var $author$project$Main$EditMode = {$: 'EditMode'};
+var $author$project$Main$End = {$: 'End'};
+var $author$project$Main$Middle = {$: 'Middle'};
+var $author$project$Main$NavigationMode = {$: 'NavigationMode'};
+var $author$project$Main$Start = {$: 'Start'};
+var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
+var $elm$html$Html$Attributes$src = function (url) {
 	return A2(
-		$mdgriffith$elm_ui$Element$layout,
-		_List_Nil,
-		$author$project$Main$viewGoal(model));
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
+var $mdgriffith$elm_ui$Element$image = F2(
+	function (attrs, _v0) {
+		var src = _v0.src;
+		var description = _v0.description;
+		var imageAttributes = A2(
+			$elm$core$List$filter,
+			function (a) {
+				switch (a.$) {
+					case 'Width':
+						return true;
+					case 'Height':
+						return true;
+					default:
+						return false;
+				}
+			},
+			attrs);
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.imageContainer),
+				attrs),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[
+						A4(
+						$mdgriffith$elm_ui$Internal$Model$element,
+						$mdgriffith$elm_ui$Internal$Model$asEl,
+						$mdgriffith$elm_ui$Internal$Model$NodeName('img'),
+						_Utils_ap(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Internal$Model$Attr(
+									$elm$html$Html$Attributes$src(src)),
+									$mdgriffith$elm_ui$Internal$Model$Attr(
+									$elm$html$Html$Attributes$alt(description))
+								]),
+							imageAttributes),
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(_List_Nil))
+					])));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
+	});
+var $mdgriffith$elm_ui$Element$Border$roundEach = function (_v0) {
+	var topLeft = _v0.topLeft;
+	var topRight = _v0.topRight;
+	var bottomLeft = _v0.bottomLeft;
+	var bottomRight = _v0.bottomRight;
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + ($elm$core$String$fromInt(topLeft) + ('-' + ($elm$core$String$fromInt(topRight) + ($elm$core$String$fromInt(bottomLeft) + ('-' + $elm$core$String$fromInt(bottomRight)))))),
+			'border-radius',
+			$elm$core$String$fromInt(topLeft) + ('px ' + ($elm$core$String$fromInt(topRight) + ('px ' + ($elm$core$String$fromInt(bottomRight) + ('px ' + ($elm$core$String$fromInt(bottomLeft) + 'px'))))))));
+};
+var $author$project$Main$viewModeSelector = function (currentMode) {
+	var borderRoundSize = 10;
+	var item = F2(
+		function (mode, position) {
+			var isSelected = function () {
+				var _v4 = _Utils_Tuple2(mode, currentMode);
+				if ((_v4.a.$ === 'ProofMode') && (_v4.b.$ === 'ProofMode')) {
+					return true;
+				} else {
+					return _Utils_eq(mode, currentMode);
+				}
+			}();
+			var icon = function () {
+				var _v2 = function () {
+					switch (mode.$) {
+						case 'ProofMode':
+							return _Utils_Tuple2('Prove', 'prove');
+						case 'EditMode':
+							return _Utils_Tuple2('Edit', 'pen');
+						default:
+							return _Utils_Tuple2('Navigate', 'navigate');
+					}
+				}();
+				var label = _v2.a;
+				var filename = _v2.b;
+				return A2(
+					$mdgriffith$elm_ui$Element$image,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+							$author$project$Main$nonSelectable
+						]),
+					{description: label, src: '../assets/img/' + (filename + '.svg')});
+			}();
+			var changeAction = _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Events$onClick(
+					$author$project$Main$ChangeUIMode(mode)),
+					$mdgriffith$elm_ui$Element$pointer
+				]);
+			var borderRound = function () {
+				switch (position.$) {
+					case 'Start':
+						return {bottomLeft: borderRoundSize, bottomRight: 0, topLeft: borderRoundSize, topRight: 0};
+					case 'Middle':
+						return {bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0};
+					default:
+						return {bottomLeft: 0, bottomRight: borderRoundSize, topLeft: 0, topRight: borderRoundSize};
+				}
+			}();
+			var _v0 = isSelected ? _Utils_Tuple2(
+				A3($mdgriffith$elm_ui$Element$rgb255, 58, 134, 255),
+				A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)) : _Utils_Tuple2(
+				A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1),
+				A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0));
+			var bgColor = _v0.a;
+			var fgColor = _v0.b;
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(60)),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$padding(12),
+							$mdgriffith$elm_ui$Element$Background$color(bgColor),
+							$mdgriffith$elm_ui$Element$Border$roundEach(borderRound)
+						]),
+					changeAction),
+				icon);
+		});
+	var borderColor = A3($mdgriffith$elm_ui$Element$rgb, 0.6, 0.6, 0.6);
+	return A2(
+		$mdgriffith$elm_ui$Element$row,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$centerX,
+				$mdgriffith$elm_ui$Element$centerY,
+				$mdgriffith$elm_ui$Element$spacing(1),
+				$mdgriffith$elm_ui$Element$Border$width(0),
+				$mdgriffith$elm_ui$Element$Border$rounded(borderRoundSize),
+				$mdgriffith$elm_ui$Element$Border$color(borderColor),
+				$mdgriffith$elm_ui$Element$Background$color(borderColor)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				item,
+				$author$project$Main$ProofMode($author$project$Main$Justifying),
+				$author$project$Main$Start),
+				A2(item, $author$project$Main$EditMode, $author$project$Main$Middle),
+				A2(item, $author$project$Main$NavigationMode, $author$project$Main$End)
+			]));
+};
+var $author$project$Main$viewToolbar = function (model) {
+	return A2(
+		$mdgriffith$elm_ui$Element$row,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+				$mdgriffith$elm_ui$Element$padding(15),
+				$mdgriffith$elm_ui$Element$Background$color(
+				A3($mdgriffith$elm_ui$Element$rgb, 0.9, 0.9, 0.9))
+			]),
+		_List_fromArray(
+			[
+				$author$project$Main$viewModeSelector(model.mode)
+			]));
+};
+var $author$project$Main$view = function (model) {
+	var toolbar = $author$project$Main$viewToolbar(model);
+	var goal = $author$project$Main$viewGoal(model);
+	var app = A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+			]),
+		_List_fromArray(
+			[goal, toolbar]));
+	return A2($mdgriffith$elm_ui$Element$layout, _List_Nil, app);
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
