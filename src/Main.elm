@@ -2,6 +2,7 @@ port module Main exposing (..)
 
 import Utils.List
 import Utils.Events exposing (..)
+import Utils.Style exposing (htmlColor)
 
 import Browser
 
@@ -12,12 +13,13 @@ import Element.Font as Font
 import Element.Events as Events
 
 import Html exposing (Html)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (style, title)
 
 import Html5.DragDrop as DnD
 
 import Json.Decode exposing (Value)      
-import Element.Region exposing (description)
+
+import FeatherIcons as Icons
 
 
 -- MAIN
@@ -331,9 +333,9 @@ update msg model =
     DragDropMsg dndMsg ->
       let
         cmd =
-          DnD.getDragstartEvent dndMsg |>
-          Maybe.map (.event >> dragstart) |>
-          Maybe.withDefault Cmd.none
+          DnD.getDragstartEvent dndMsg
+          |> Maybe.map (.event >> dragstart)
+          |> Maybe.withDefault Cmd.none
         model_ =
           case (model.mode, DnD.getDragstartEvent dndMsg) of
             (ProofMode Justifying, Just _) ->
@@ -352,8 +354,8 @@ update msg model =
                         Just destination ->
                           update
                             ( ProofAction Import [drag.content] destination.target )
-                            model |>
-                          Tuple.first
+                            model
+                          |> Tuple.first
                         
                         Nothing ->
                           model
@@ -393,38 +395,38 @@ viewFlowerText flower =
           viewGardenText pistil
 
         petalsText =
-          petals |>
-          List.map viewGardenText |>
-          String.join "; "
+          petals
+          |> List.map viewGardenText
+          |> String.join "; "
       in
       "(" ++ pistilText ++ " ⫐ " ++ petalsText ++ ")"
 
 
 viewGardenText : Garden -> String
 viewGardenText (Garden bouquet) =
-  bouquet |>
-  List.map viewFlowerText |>
-  String.join ", "
+  bouquet
+  |> List.map viewFlowerText
+  |> String.join ", "
 
 
 viewZipperText : Zipper -> String
 viewZipperText zipper =
-  fillZipper [Atom "□"] zipper |>
-  List.map (viewFlowerText) |>
-  String.join ", "
+  fillZipper [Atom "□"] zipper
+  |> List.map (viewFlowerText)
+  |> String.join ", "
 
 logZipper : String -> Zipper -> String
 logZipper msg zipper =
-  zipper |>
-  viewZipperText |>
-  Debug.log msg
+  zipper
+  |> viewZipperText
+  |> Debug.log msg
 
 logBouquet : String -> Bouquet -> String
 logBouquet msg bouquet =
-  bouquet |>
-  List.map viewFlowerText |>
-  String.join ", " |>
-  Debug.log msg
+  bouquet
+  |> List.map viewFlowerText
+  |> String.join ", "
+  |> Debug.log msg
 
 
 ---- Graphics
@@ -804,25 +806,27 @@ viewModeSelector currentMode =
             (ProofMode _, ProofMode _) -> True
             _ -> mode == currentMode
 
-        icon =
-          let
-            (label, filename) =
-              case mode of
-                ProofMode _ -> ("Prove", "prove")
-                EditMode -> ("Edit", "pen")
-                NavigationMode -> ("Navigate", "navigate")
-          in
-          image
-            [ width fill 
-            , height fill
-            , nonSelectable ]
-            { src = "../assets/img/" ++ filename ++ ".svg"
-            , description = label }
-
         (bgColor, fgColor) =
           if isSelected
           then (rgb255 58 134 255, rgb 1 1 1)
           else (rgb 1 1 1, rgb 0 0 0)
+
+        (iconEl, titleText) =
+          let
+            (title, icon) =
+              case mode of
+                ProofMode _ -> ("Prove", Icons.checkSquare)
+                EditMode -> ("Edit", Icons.edit2)
+                NavigationMode -> ("Navigate", Icons.navigation)
+            elem =
+              el
+                [ centerX, centerY ]
+                ( icon
+                  |> Icons.withSize 30
+                  |> Icons.toHtml [ htmlColor fgColor ]
+                  |> html )
+          in
+          (elem, title)
         
         borderRound =
           case position of
@@ -842,12 +846,12 @@ viewModeSelector currentMode =
       in
       el
         ( [ width (60 |> px)
-          , height fill
-          , padding 12
+          , height (55 |> px)
           , Background.color bgColor
-          , Border.roundEach borderRound ]
+          , Border.roundEach borderRound
+          , htmlAttribute <| title titleText ]
          ++ changeAction )
-        icon
+        iconEl
     
     borderColor = rgb 0.6 0.6 0.6
   in
