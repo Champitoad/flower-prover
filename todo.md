@@ -1,3 +1,5 @@
+# Features
+
 - Add support for formulas, and their introduction rules by click
 
 - Implement Fencing proof interaction with multiselection
@@ -51,6 +53,10 @@
 - Name flowers
 
 - View for partial proof term attached to flower
+  - Highlight all flowers depending on a selected flower
+  - Highlight all flowers used in the partial proof of a selected flower
+  - Action in Edit mode for deleting unused positive flowers (with no other
+    flowers depending on it)
 
 - Analogy between Proof/Edit modes and Survival/Creative modes in Minecraft
 
