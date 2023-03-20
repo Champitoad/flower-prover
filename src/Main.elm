@@ -499,24 +499,35 @@ flowerBorderRound =
   10
 
 
-actionable : List (Attribute Msg)
-actionable =
-  [ pointer
-  , Border.width 5
-  , Border.color (rgb 0.3 0.9 0.3)
-  , Border.dotted
-  , Border.rounded flowerBorderRound
-  , Background.color (rgba 0.3 0.9 0.3 0.5) ]
-
-
-type alias DropStyle msg
+type alias ZoneStyle msg
   = { borderWidth : Int
     , active : List (Attribute msg)
     , inactive : List (Attribute msg) }
 
 
-dropTarget : DropStyle msg
-dropTarget =
+actionable : ZoneStyle msg
+actionable =
+  let
+    width =
+      3
+
+    border =
+      [ Border.width 5
+      , Border.dotted
+      , Border.rounded flowerBorderRound ]
+  in
+  { borderWidth = width
+  , active =
+      Border.color (rgb 0.3 0.9 0.3) ::
+      Background.color (rgba 0.3 0.9 0.3 0.5) ::
+      border
+  , inactive =
+      Border.color transparent ::
+      border }
+
+
+droppable : ZoneStyle msg
+droppable =
   let
     width =
       3
@@ -554,12 +565,12 @@ viewAtom model context name =
         ProofMode Justifying ->
           if isHypothesis atom context.zipper then
             (Events.onClick (Action Justify [atom] context.zipper))
-            :: actionable
+            :: actionable.active
           else
-            []
+            actionable.inactive
 
         _ ->
-          []
+          actionable.inactive
   in
   el
     [ width fill
@@ -588,19 +599,22 @@ viewPistil model context (Garden bouquet as pistil) petals =
           let
             action =
               (Events.onClick (Action Unlock bouquet newZipper))
-              :: actionable
+              :: actionable.active
           in
           if List.isEmpty bouquet then
             case context.zipper of
               _ :: Pistil _ :: _ ->
                 action
               _ ->
-                if List.length petals == 1 then action else []
+                if List.length petals == 1 then
+                  action
+                else
+                  actionable.inactive
           else
-            []
+            actionable.inactive
         
         _ ->
-          []
+          actionable.inactive
   in
   el
     ( [ width fill
@@ -630,12 +644,12 @@ viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as peta
         ProofMode Justifying ->
           if List.isEmpty bouquet then
             (Events.onClick (Action Close bouquet newZipper))
-            :: actionable
+            :: actionable.active
           else
-            []
+            actionable.inactive
         
         _ ->
-          []
+          actionable.inactive
   in
   el
     [ width fill
@@ -673,9 +687,11 @@ viewFlower model context flower =
             ( Utils.List.zipperMap (viewPetal model context pistil) petals )
 
         dragAction =
-          List.map htmlAttribute <|
-          DnD.draggable DragDropMsg
-            { source = context.zipper, content = flower }
+          if List.length context.zipper <= 1 then []
+          else
+            List.map htmlAttribute <|
+            DnD.draggable DragDropMsg
+              { source = context.zipper, content = flower }
         
         dropAction =
           case (model.mode, DnD.getDragId model.dragDrop) of
@@ -763,11 +779,11 @@ viewGarden model context (Garden bouquet) =
                     case DnD.getDropId model.dragDrop of
                       Just (Just { target }) ->
                         if Bouquet left right :: context.zipper == target
-                        then dropTarget.active
-                        else dropTarget.inactive
+                        then droppable.active
+                        else droppable.inactive
                     
                       _ ->
-                        dropTarget.inactive
+                        droppable.inactive
                 in
                 dropTargetStyle ++
                 ( List.map htmlAttribute <|
@@ -793,7 +809,7 @@ viewGarden model context (Garden bouquet) =
       , height fill ]
     
     borderAttrs =
-      [ Border.width dropTarget.borderWidth
+      [ Border.width droppable.borderWidth
       , Border.color transparent ]
 
     intersticial () =

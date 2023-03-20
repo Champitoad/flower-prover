@@ -1,5 +1,9 @@
 # Features
 
+- Reordering interaction
+  - Works also on atoms
+  - Better visual feedback
+
 - Add support for formulas, and their introduction rules by click
 
 - Implement Fencing proof interaction with multiselection
