@@ -387,7 +387,7 @@ update msg model =
                             
                             EditMode Reordering ->
                               Action Reorder
-                                [drag.content] destination.target
+                                destination.content destination.target
                             
                             _ ->
                               DoNothing
@@ -672,10 +672,57 @@ viewFlower model context flower =
             , spacing flowerBorderWidth ]
             ( Utils.List.zipperMap (viewPetal model context pistil) petals )
 
-        importStartAction =
+        dragAction =
           List.map htmlAttribute <|
           DnD.draggable DragDropMsg
             { source = context.zipper, content = flower }
+        
+        dropAction =
+          case (model.mode, DnD.getDragId model.dragDrop) of
+            (EditMode Reordering, Just { source, content }) ->
+              case (source, context.zipper) of
+                ( Bouquet sourceLeft sourceRight :: sourceParent,
+                  Bouquet left right :: parent ) ->
+                  if sourceParent == parent then
+                    let
+                      (sourceIndex, index) =
+                        (List.length sourceLeft, List.length left)
+                      whole =
+                        left ++ flower :: right
+                    in
+                    if sourceIndex == index then []
+                    else
+                      let
+                        bouquet =
+                          if sourceIndex < index then
+                            let
+                              middle =
+                                Utils.List.slice (sourceIndex + 1) (index - 1) whole
+                            in
+                            sourceLeft ++ middle ++ content :: flower :: right
+                          else
+                            let
+                              middle =
+                                Utils.List.slice (index + 1) (sourceIndex - 1) whole
+                            in
+                            left ++ content :: flower :: (middle ++ sourceRight)
+                      in
+                      [ inFront
+                        ( el
+                          ( [ width fill
+                            , height fill
+                            , Border.rounded flowerBorderRound
+                            , Background.color (rgba 1 1 1 0.7) ]
+                           ++ ( List.map htmlAttribute <|
+                                  DnD.droppable DragDropMsg
+                                    ( Just { target = parent, content = bouquet } ) ) )
+                          none ) ]
+                  else
+                    []
+                _ ->
+                  []
+            _ ->
+              []
       in
       column
         ( [ width fill
@@ -690,7 +737,8 @@ viewFlower model context flower =
               , blur = 15
               , color = flowerForegroundColor context.polarity } ]
         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-        ++ importStartAction )
+        ++ dragAction
+        ++ dropAction )
         [ pistilEl, petalsEl ]
 
 
@@ -707,7 +755,7 @@ viewGarden model context (Garden bouquet) =
       case model.mode of
         ProofMode Importing ->
           case DnD.getDragId model.dragDrop of
-            Just { source, content } ->
+            Just { source } ->
               -- if isHypothesis content context.zipper then
               if justifies source context.zipper then
                 let

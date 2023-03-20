@@ -49,3 +49,17 @@ longestCommonSuffix : List a -> List a -> List a
 longestCommonSuffix l1 l2 =
   let (suffix, _, _) = forkSuffix l1 l2 in
   suffix
+
+
+slice : Int -> Int -> List a -> List a
+slice start end list =
+  let
+    aux acc i l =
+      case l of
+        [] -> acc
+        x :: t -> 
+          if i < start then aux acc (i + 1) t
+          else if i > end then acc
+          else aux (x :: acc) (i + 1) t
+  in
+  aux [] 0 list |> List.reverse
