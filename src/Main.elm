@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Utils.List
 import Utils.Events exposing (..)
-import Utils.Style exposing (htmlColor)
+import Utils.Color as Color
 
 import Browser
 
@@ -331,8 +331,8 @@ update msg model =
             (Close, [], Petal _ _ _ :: parent) ->
               fillZipper [] parent
             
-            (Reorder, _, _) ->
-              fillZipper bouquet zipper
+            (Reorder, _, _ :: parent) ->
+              fillZipper bouquet parent
 
             _ ->
               model.goal
@@ -518,6 +518,7 @@ actionable =
   in
   { borderWidth = width
   , active =
+      pointer ::
       Border.color (rgb 0.3 0.9 0.3) ::
       Background.color (rgba 0.3 0.9 0.3 0.5) ::
       border
@@ -526,8 +527,8 @@ actionable =
       border }
 
 
-droppable : ZoneStyle msg
-droppable =
+droppable : Color.Color -> ZoneStyle msg
+droppable color =
   let
     width =
       3
@@ -536,10 +537,13 @@ droppable =
       [ Border.width width
       , Border.dashed
       , Border.rounded flowerBorderRound
-      , Border.color (rgb 1 0.8 0) ]
+      , Border.color (Color.toElement color) ]
+    
+    bgColor =
+      Color.withAlpha 0.5 color |> Color.toElement
   in
   { borderWidth = width
-  , active = Background.color (rgba 1 0.8 0 0.5) :: border
+  , active = Background.color bgColor :: border
   , inactive = border }
 
 
@@ -573,18 +577,13 @@ viewAtom model context name =
           actionable.inactive
   in
   el
-    [ width fill
-    , height fill ]
-    ( el
-        ( [ width shrink
-          , height shrink
-          , centerX, centerY
-          , padding 10
-          , Font.color (flowerForegroundColor context.polarity)
-          , Font.size 50
-          , nonSelectable ]
-         ++ clickAction )
-        ( text name ) )
+    ( [ centerX, centerY
+      , padding 10
+      , Font.color (flowerForegroundColor context.polarity)
+      , Font.size 50
+      , nonSelectable ]
+      ++ clickAction )
+    ( text name )
 
 
 viewPistil : Model -> Context -> Garden -> List Garden -> Element Msg
@@ -692,53 +691,6 @@ viewFlower model context flower =
             List.map htmlAttribute <|
             DnD.draggable DragDropMsg
               { source = context.zipper, content = flower }
-        
-        dropAction =
-          case (model.mode, DnD.getDragId model.dragDrop) of
-            (EditMode Reordering, Just { source, content }) ->
-              case (source, context.zipper) of
-                ( Bouquet sourceLeft sourceRight :: sourceParent,
-                  Bouquet left right :: parent ) ->
-                  if sourceParent == parent then
-                    let
-                      (sourceIndex, index) =
-                        (List.length sourceLeft, List.length left)
-                      whole =
-                        left ++ flower :: right
-                    in
-                    if sourceIndex == index then []
-                    else
-                      let
-                        bouquet =
-                          if sourceIndex < index then
-                            let
-                              middle =
-                                Utils.List.slice (sourceIndex + 1) (index - 1) whole
-                            in
-                            sourceLeft ++ middle ++ content :: flower :: right
-                          else
-                            let
-                              middle =
-                                Utils.List.slice (index + 1) (sourceIndex - 1) whole
-                            in
-                            left ++ content :: flower :: (middle ++ sourceRight)
-                      in
-                      [ inFront
-                        ( el
-                          ( [ width fill
-                            , height fill
-                            , Border.rounded flowerBorderRound
-                            , Background.color (rgba 1 1 1 0.7) ]
-                           ++ ( List.map htmlAttribute <|
-                                  DnD.droppable DragDropMsg
-                                    ( Just { target = parent, content = bouquet } ) ) )
-                          none ) ]
-                  else
-                    []
-                _ ->
-                  []
-            _ ->
-              []
       in
       column
         ( [ width fill
@@ -753,8 +705,7 @@ viewFlower model context flower =
               , blur = 15
               , color = flowerForegroundColor context.polarity } ]
         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-        ++ dragAction
-        ++ dropAction )
+        ++ dragAction )
         [ pistilEl, petalsEl ]
 
 
@@ -775,15 +726,18 @@ viewGarden model context (Garden bouquet) =
               -- if isHypothesis content context.zipper then
               if justifies source context.zipper then
                 let
+                  dropStyle =
+                    droppable (Color.fromRgb { red = 1, green = 0.8, blue = 0 })
+
                   dropTargetStyle =
                     case DnD.getDropId model.dragDrop of
                       Just (Just { target }) ->
                         if Bouquet left right :: context.zipper == target
-                        then droppable.active
-                        else droppable.inactive
+                        then dropStyle.active
+                        else dropStyle.inactive
                     
                       _ ->
-                        droppable.inactive
+                        dropStyle.inactive
                 in
                 dropTargetStyle ++
                 ( List.map htmlAttribute <|
@@ -795,63 +749,141 @@ viewGarden model context (Garden bouquet) =
             _ ->
               []
 
-        ProofMode Justifying ->
-          []
-        
-        EditMode _ ->
-          []
-        
+        EditMode Reordering ->
+          case DnD.getDragId model.dragDrop of
+            Just { source, content } ->
+              case source of
+                Bouquet sourceLeft sourceRight :: sourceParent ->
+                  if sourceParent == context.zipper then
+                    let
+                      (sourceIndex, index) =
+                        (List.length sourceLeft, List.length left)
+                    in
+                    if sourceIndex == index || index == sourceIndex + 1 then []
+                    else
+                      let
+                        whole =
+                          left ++ right
+
+                        newBouquet =
+                          if sourceIndex < index then
+                            let
+                              middle =
+                                Utils.List.slice (sourceIndex + 1) (index - 1) whole
+                            in
+                            sourceLeft ++ middle ++ content :: right
+                          else
+                            let
+                              middle =
+                                Utils.List.slice index (sourceIndex - 1) whole
+                            in
+                            left ++ content :: (middle ++ sourceRight)
+
+                        dropStyle =
+                          droppable (Color.fromRgb { red = 0.7, green = 0.7, blue = 0.7 })
+
+                        dropTargetStyle =
+                          case DnD.getDropId model.dragDrop of
+                            Just (Just { target }) ->
+                              let _ = Debug.log "source index" sourceIndex in
+                              let _ = Debug.log "target index" index in
+                              if Bouquet left right :: context.zipper == target
+                              then dropStyle.active
+                              else dropStyle.inactive
+
+                            _ ->
+                              dropStyle.inactive
+                      in
+                      dropTargetStyle ++
+                      ( List.map htmlAttribute <|
+                        DnD.droppable DragDropMsg
+                          (Just { target = Bouquet left right :: context.zipper
+                                , content = newBouquet }) )
+                  else
+                    []
+                _ ->
+                  []
+            _ ->
+              []
         _ ->
-          Debug.todo ""
+          []
+
+    spaceSize = 30
     
     layoutAttrs =
-      [ width fill
-      , height fill ]
+      [ (width (fill |> minimum spaceSize))
+      , (height (fill |> minimum spaceSize))
+      , padding spaceSize
+      , spacing spaceSize ]
     
     borderAttrs =
-      [ Border.width droppable.borderWidth
+      [ Border.width (droppable Color.transparent).borderWidth
       , Border.color transparent ]
+
+    length flower =
+      case flower of
+        Atom _ -> shrink
+        Flower _ _ -> fill
 
     intersticial () =
       let
         attrs =
           layoutAttrs ++
-          [ spacing 10 ]
+          borderAttrs
 
         dropZone lr =
           el
-            ( [ width fill
-              , height fill ]
+            ( [ width (spaceSize |> px)
+              , height (fill |> minimum spaceSize) ]
             ++ borderAttrs
             ++ dropAction lr )
             none
 
-        els =
+        sperse ((left, right) as lr) flower =
           let
-            sperse ((left, right) as lr) flower =
-              [dropZone (left, flower :: right), flowerEl lr flower]
+            lastDropzone =
+              if List.isEmpty right
+              then [onRight (dropZone (left ++ [flower], right))]
+              else []
           in
-          ( bouquet |> Utils.List.zipperMap sperse |> List.concat ) ++
-          [ dropZone (bouquet, []) ]
+          el
+            ( [ width (length flower)
+              , height fill
+              , centerX, centerY
+              , onLeft (dropZone (left, flower :: right)) ]
+              ++ lastDropzone )
+            ( flowerEl lr flower )
+
+        els =
+          Utils.List.zipperMap sperse bouquet
       in
       wrappedRow attrs els
         
     normal () =
       let
         attrs =
-          (width (fill |> minimum 30)) ::
-          (height (fill |> minimum 30)) ::
-          spacing 30 ::
-          padding 30 ::
+          layoutAttrs ++
           borderAttrs ++
           dropAction (bouquet, [])
+        
+        sperse lr flower =
+          el
+            [ width (length flower)
+            , height fill
+            , centerX, centerY ]
+            ( flowerEl lr flower )
 
         els =
-          bouquet |> Utils.List.zipperMap flowerEl
+          Utils.List.zipperMap sperse bouquet
       in
       wrappedRow attrs els
   in
-  normal ()
+  case model.mode of
+    EditMode _ ->
+      intersticial ()
+
+    _ ->
+      normal ()
 
 
 viewGoal : Model -> Element Msg
@@ -929,7 +961,7 @@ viewModeSelector currentMode =
                 [ centerX, centerY ]
                 ( icon
                   |> Icons.withSize 30
-                  |> Icons.toHtml [ htmlColor fgColor ]
+                  |> Icons.toHtml [ fgColor |> Color.fromElement |> Color.toHtml ]
                   |> html )
           in
           (elem, title)
