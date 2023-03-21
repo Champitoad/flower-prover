@@ -558,6 +558,15 @@ nonSelectable =
   htmlAttribute <| style "user-select" "none"
 
 
+dragAction : Zipper -> Flower -> List (Attribute Msg)
+dragAction zipper flower =
+  if List.length zipper <= 1 then []
+  else
+    List.map htmlAttribute <|
+    DnD.draggable DragDropMsg
+      { source = zipper, content = flower }
+
+
 viewAtom : Model -> Context -> String -> Element Msg
 viewAtom model context name =
   let
@@ -575,6 +584,15 @@ viewAtom model context name =
 
         _ ->
           actionable.inactive
+    
+    reorderDragAction =
+      case model.mode of
+        EditMode _ ->
+          dragAction context.zipper (Atom name)
+        
+        _ ->
+          []
+        
   in
   el
     ( [ centerX, centerY
@@ -582,7 +600,8 @@ viewAtom model context name =
       , Font.color (flowerForegroundColor context.polarity)
       , Font.size 50
       , nonSelectable ]
-      ++ clickAction )
+      ++ clickAction
+      ++ reorderDragAction )
     ( text name )
 
 
@@ -684,13 +703,6 @@ viewFlower model context flower =
             , height fill
             , spacing flowerBorderWidth ]
             ( Utils.List.zipperMap (viewPetal model context pistil) petals )
-
-        dragAction =
-          if List.length context.zipper <= 1 then []
-          else
-            List.map htmlAttribute <|
-            DnD.draggable DragDropMsg
-              { source = context.zipper, content = flower }
       in
       column
         ( [ width fill
@@ -705,7 +717,7 @@ viewFlower model context flower =
               , blur = 15
               , color = flowerForegroundColor context.polarity } ]
         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-        ++ dragAction )
+        ++ dragAction context.zipper flower )
         [ pistilEl, petalsEl ]
 
 
