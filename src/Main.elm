@@ -46,8 +46,15 @@ subscriptions _ =
 -- MODEL
 
 
-type Flower
+type Formula
   = Atom String
+  | Truth | Falsity
+  | And Formula Formula
+  | Or Formula Formula
+  | Implies Formula Formula
+
+type Flower
+  = Formula Formula
   | Flower Garden (List Garden)
 
 type alias Bouquet
@@ -192,8 +199,8 @@ yinyang =
 identity : Flower
 identity =
   Flower
-    (Garden [Atom "a"])
-    [Garden [Atom "a"]]
+    (Garden [Formula (Atom "a")])
+    [Garden [Formula (Atom "a")]]
 
 
 yvonne : Flower
@@ -201,57 +208,57 @@ yvonne =
   Flower
     ( Garden
         [ Flower
-            (Garden [Atom "b"])
-            [Garden [Atom "c"]] ] )
+            (Garden [Formula (Atom "b")])
+            [Garden [Formula (Atom "c")]] ] )
     [ Garden
-        [ Atom "a"
+        [ Formula (Atom "a")
         , Flower
-            (Garden [Atom "b"])
-            [Garden [Atom "c"]] ]]
+            (Garden [Formula (Atom "b")])
+            [Garden [Formula (Atom "c")]] ]]
 
 
 bigFlower : Flower
 bigFlower =
   Flower
     ( Garden
-        [ Atom "a"
+        [ Formula (Atom "a")
         , Flower
             ( Garden
-                [ Atom "a" ] )
+                [ Formula (Atom "a") ] )
             [ Garden
-                [ Atom "b" ],
+                [ Formula (Atom "b") ],
               Garden
                 [ Flower
                     ( Garden
-                        [ Atom "b" ] )
+                        [ Formula (Atom "b") ] )
                     [ Garden
-                        [ Atom "c" ] ],
-                  Atom "b" ] ]
+                        [ Formula (Atom "c") ] ],
+                  Formula (Atom "b") ] ]
         , Flower
             ( Garden
-                [ Atom "d"] )
+                [ Formula (Atom "d")] )
             [ Garden
-                [ Atom "e" ] ] ] )
+                [ Formula (Atom "e") ] ] ] )
     [ Garden
-        [ Atom "b"
-        , Atom "a" ]
+        [ Formula (Atom "b")
+        , Formula (Atom "a") ]
     , Garden
-      [ Atom "c" ] ]
+      [ Formula (Atom "c") ] ]
 
 
-implies : String -> String -> Flower
-implies a b =
+entails : String -> String -> Flower
+entails a b =
   Flower
     ( Garden
-        [ Atom a ] )
+        [ Formula (Atom a) ] )
     [ Garden
-        [ Atom b ] ]
+        [ Formula (Atom b) ] ]
 
 modusPonensCurryfied : Flower
 modusPonensCurryfied =
   Flower
-    ( Garden [ implies "a" "b" ] ) 
-    [ Garden [ implies "a" "b" ] ]
+    ( Garden [ entails "a" "b" ] ) 
+    [ Garden [ entails "a" "b" ] ]
 
 
 notFalse : Flower
@@ -265,11 +272,11 @@ criticalPair =
     ( Garden
         [ Flower
             ( Garden [] )
-            [ Garden [ Atom "a" ]
-            , Garden [ Atom "b" ] ]
-        , implies "a" "c"
-        , implies "b" "c" ] )
-    [ Garden [ Atom "c" ] ]
+            [ Garden [ Formula (Atom "a") ]
+            , Garden [ Formula (Atom "b") ] ]
+        , entails "a" "c"
+        , entails "b" "c" ] )
+    [ Garden [ Formula (Atom "c") ] ]
 
 
 init : () -> (Model, Cmd Msg)
@@ -419,11 +426,33 @@ update msg model =
 ---- Text
 
 
+viewFormulaText : Formula -> String
+viewFormulaText formula =
+  case formula of
+    Atom name ->
+      name
+    
+    Truth ->
+      "⊤"
+    
+    Falsity ->
+      "⊥"
+    
+    And f1 f2 ->
+      viewFormulaText f1 ++ " ∧ " ++ viewFormulaText f2
+
+    Or f1 f2 ->
+      viewFormulaText f1 ++ " ∨ " ++ viewFormulaText f2
+
+    Implies f1 f2 ->
+      viewFormulaText f1 ++ " ⇒ " ++ viewFormulaText f2
+
+
 viewFlowerText : Flower -> String
 viewFlowerText flower =
   case flower of
-    Atom name ->
-      name    
+    Formula formula ->
+      viewFormulaText formula
     
     Flower pistil petals ->
       let
@@ -447,7 +476,7 @@ viewGardenText (Garden bouquet) =
 
 viewZipperText : Zipper -> String
 viewZipperText zipper =
-  fillZipper [Atom "□"] zipper
+  fillZipper [Formula (Atom "□")] zipper
   |> List.map (viewFlowerText)
   |> String.join ", "
 
@@ -567,17 +596,17 @@ dragAction zipper flower =
       { source = zipper, content = flower }
 
 
-viewAtom : Model -> Context -> String -> Element Msg
-viewAtom model context name =
+viewFormula : Model -> Context -> Formula -> Element Msg
+viewFormula model context formula =
   let
-    atom =
-      Atom name
+    form =
+      Formula formula
 
     clickAction =
       case model.mode of
         ProofMode Justifying ->
-          if isHypothesis atom context.zipper then
-            (Events.onClick (Action Justify [atom] context.zipper))
+          if isHypothesis form context.zipper then
+            (Events.onClick (Action Justify [form] context.zipper))
             :: actionable.active
           else
             actionable.inactive
@@ -588,7 +617,7 @@ viewAtom model context name =
     reorderDragAction =
       case model.mode of
         EditMode _ ->
-          dragAction context.zipper (Atom name)
+          dragAction context.zipper form
         
         _ ->
           []
@@ -602,7 +631,7 @@ viewAtom model context name =
       , nonSelectable ]
       ++ clickAction
       ++ reorderDragAction )
-    ( text name )
+    ( text (viewFormulaText formula) )
 
 
 viewPistil : Model -> Context -> Garden -> List Garden -> Element Msg
@@ -689,8 +718,8 @@ viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as peta
 viewFlower : Model -> Context -> Flower -> Element Msg
 viewFlower model context flower =
   case flower of
-    Atom name ->
-      viewAtom model context name
+    Formula formula ->
+      viewFormula model context formula
     
     Flower pistil petals ->
       let
@@ -797,8 +826,6 @@ viewGarden model context (Garden bouquet) =
                         dropTargetStyle =
                           case DnD.getDropId model.dragDrop of
                             Just (Just { target }) ->
-                              let _ = Debug.log "source index" sourceIndex in
-                              let _ = Debug.log "target index" index in
                               if Bouquet left right :: context.zipper == target
                               then dropStyle.active
                               else dropStyle.inactive
@@ -834,7 +861,7 @@ viewGarden model context (Garden bouquet) =
 
     length flower =
       case flower of
-        Atom _ -> shrink
+        Formula _ -> shrink
         Flower _ _ -> fill
 
     intersticial () =
