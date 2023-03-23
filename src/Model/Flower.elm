@@ -1,6 +1,6 @@
-module Flower exposing (..)
+module Model.Flower exposing (..)
 
-import Formula exposing (..)
+import Model.Formula as Formula exposing (..)
 
 import Utils.List
 

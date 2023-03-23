@@ -4,7 +4,6 @@
   - Better visual feedback emphasizing main connective and direct subformulas
     (like click-and-collect)
 
-
 - Implement Fencing proof interaction with multiselection
   - Selection mode when maintaining shift key pressed
   - Mobile support:

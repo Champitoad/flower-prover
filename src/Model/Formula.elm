@@ -1,4 +1,4 @@
-module Formula exposing (..)
+module Model.Formula exposing (..)
 
 
 type Formula
