@@ -1,6 +1,9 @@
 # Features
 
-- Add support for formulas, and their introduction rules by click
+- Add support for formulas
+  - Better visual feedback emphasizing main connective and direct subformulas
+    (like click-and-collect)
+
 
 - Implement Fencing proof interaction with multiselection
   - Selection mode when maintaining shift key pressed
@@ -54,6 +57,12 @@
   - Highlight all flowers used in the partial proof of a selected flower
   - Action in Edit mode for deleting unused positive flowers (with no other
     flowers depending on it)
+
+- Curry-Howard correspondance: proof term = simply typed λ-term
+  - Structural editor for functional languages with ML type system (like Elm!)
+  - Should work well because of *variarity*
+  - Only lacks recursive types
+  - Bottom type?
 
 - Analogy between Proof/Edit modes and Survival/Creative modes in Minecraft
 

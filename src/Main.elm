@@ -1,5 +1,7 @@
 port module Main exposing (..)
 
+import Formula exposing (..)
+
 import Utils.List
 import Utils.Events exposing (..)
 import Utils.Color as Color
@@ -46,13 +48,6 @@ subscriptions _ =
 -- MODEL
 
 
-type Formula
-  = Atom String
-  | Truth | Falsity
-  | And Formula Formula
-  | Or Formula Formula
-  | Implies Formula Formula
-
 type Flower
   = Formula Formula
   | Flower Garden (List Garden)
@@ -62,6 +57,33 @@ type alias Bouquet
 
 type Garden
   = Garden Bouquet
+
+
+decompose : Formula -> Bouquet
+decompose formula =
+  case formula of
+    Atom _ ->
+      [Formula formula]
+
+    Truth ->
+      []
+    
+    Falsity ->
+      [Flower (Garden []) []]
+    
+    And f1 f2 ->
+      [Formula f1, Formula f2]
+    
+    Or f1 f2 ->
+      [ Flower
+          ( Garden [] )
+          [ Garden [Formula f1]
+          , Garden [Formula f2] ] ]
+    
+    Implies f1 f2 ->
+      [ Flower
+          ( Garden [Formula f1] )
+          [ Garden [Formula f2] ] ]
 
 
 type Zip
@@ -244,7 +266,7 @@ bigFlower =
         , Formula (Atom "a") ]
     , Garden
       [ Formula (Atom "c") ] ]
-
+ 
 
 entails : String -> String -> Flower
 entails a b =
@@ -279,9 +301,24 @@ criticalPair =
     [ Garden [ Formula (Atom "c") ] ]
 
 
+orElimInvertible : Flower
+orElimInvertible =
+  let
+    formula =
+      Implies
+        ( Implies
+          ( Or (Atom "a") (Atom "b") )
+          ( Atom "c" ) )
+        ( And
+          ( Implies (Atom "a") (Atom "c") )
+          ( Implies (Atom "b") (Atom "c") ) )
+  in
+  Flower (Garden []) [Garden [Formula formula]]
+
+
 init : () -> (Model, Cmd Msg)
 init () =
-  ( { goal = [ criticalPair ]
+  ( { goal = [ orElimInvertible ]
     , mode = EditMode Erasing
     , dragDrop = DnD.init }
   , Cmd.none )
@@ -290,7 +327,8 @@ init () =
 -- UPDATE
 
 type Rule
-  = Justify -- down pollination
+  = Decompose -- introduction of connective
+  | Justify -- down pollination
   | Import -- up pollination
   | Unlock -- empty pistil
   | Close -- empty petal
@@ -312,6 +350,9 @@ update msg model =
       let
         newGoal =
           case (rule, bouquet, zipper) of
+            (Decompose, [Formula formula], _) ->
+              fillZipper (decompose formula) zipper
+
             (Justify, _, _) ->
               fillZipper [] zipper
             
@@ -420,39 +461,18 @@ update msg model =
     DoNothing ->
       (model, Cmd.none)
 
+
 -- VIEW
 
 
 ---- Text
 
 
-viewFormulaText : Formula -> String
-viewFormulaText formula =
-  case formula of
-    Atom name ->
-      name
-    
-    Truth ->
-      "⊤"
-    
-    Falsity ->
-      "⊥"
-    
-    And f1 f2 ->
-      viewFormulaText f1 ++ " ∧ " ++ viewFormulaText f2
-
-    Or f1 f2 ->
-      viewFormulaText f1 ++ " ∨ " ++ viewFormulaText f2
-
-    Implies f1 f2 ->
-      viewFormulaText f1 ++ " ⇒ " ++ viewFormulaText f2
-
-
 viewFlowerText : Flower -> String
 viewFlowerText flower =
   case flower of
     Formula formula ->
-      viewFormulaText formula
+      Formula.toString formula
     
     Flower pistil petals ->
       let
@@ -534,8 +554,8 @@ type alias ZoneStyle msg
     , inactive : List (Attribute msg) }
 
 
-actionable : ZoneStyle msg
-actionable =
+actionable : Color.Color -> ZoneStyle msg
+actionable color =
   let
     width =
       3
@@ -544,16 +564,32 @@ actionable =
       [ Border.width 5
       , Border.dotted
       , Border.rounded flowerBorderRound ]
+    
+    bgColor =
+      Color.withAlpha 0.5 color |> Color.toElement
   in
   { borderWidth = width
   , active =
       pointer ::
-      Border.color (rgb 0.3 0.9 0.3) ::
-      Background.color (rgba 0.3 0.9 0.3 0.5) ::
+      Border.color (Color.toElement color) ::
+      Background.color bgColor ::
       border
   , inactive =
       Border.color transparent ::
       border }
+
+
+greenActionable : ZoneStyle msg
+greenActionable =
+  actionable (Color.fromRgb { red = 0.3, green = 0.9, blue = 0.3 })
+
+pinkActionable : ZoneStyle msg
+pinkActionable =
+  actionable (Color.fromRgb { red = 1, green = 0.1, blue = 0.8 })
+
+orangeActionable : ZoneStyle msg
+orangeActionable =
+  actionable (Color.fromRgb { red = 1, green = 0.6, blue = 0 })
 
 
 droppable : Color.Color -> ZoneStyle msg
@@ -603,16 +639,30 @@ viewFormula model context formula =
       Formula formula
 
     clickAction =
+      let
+        actionableStyle =
+          case formula of
+            Atom _ -> greenActionable
+            _ -> pinkActionable
+      in
       case model.mode of
         ProofMode Justifying ->
-          if isHypothesis form context.zipper then
-            (Events.onClick (Action Justify [form] context.zipper))
-            :: actionable.active
-          else
-            actionable.inactive
+          case formula of
+            Atom _ ->
+              if isHypothesis form context.zipper then
+                (Events.onClick (Action Justify [form] context.zipper))
+                :: (htmlAttribute <| title "Justify")
+                :: actionableStyle.active
+              else
+                actionableStyle.inactive
+            
+            _ ->
+              (Events.onClick (Action Decompose [form] context.zipper))
+                :: (htmlAttribute <| title "Decompose")
+              :: actionableStyle.active
 
         _ ->
-          actionable.inactive
+          actionableStyle.inactive
     
     reorderDragAction =
       case model.mode of
@@ -621,7 +671,6 @@ viewFormula model context formula =
         
         _ ->
           []
-        
   in
   el
     ( [ centerX, centerY
@@ -631,7 +680,7 @@ viewFormula model context formula =
       , nonSelectable ]
       ++ clickAction
       ++ reorderDragAction )
-    ( text (viewFormulaText formula) )
+    ( text (Formula.toString formula) )
 
 
 viewPistil : Model -> Context -> Garden -> List Garden -> Element Msg
@@ -641,43 +690,52 @@ viewPistil model context (Garden bouquet as pistil) petals =
       Pistil petals :: context.zipper
 
     clickAction =
+      let actionableStyle = orangeActionable in
       case model.mode of
         ProofMode Justifying ->
           let
-            action =
+            action name =
               (Events.onClick (Action Unlock bouquet newZipper))
-              :: actionable.active
+              :: (htmlAttribute <| title name)
+              :: actionableStyle.active
           in
           if List.isEmpty bouquet then
             case context.zipper of
               _ :: Pistil _ :: _ ->
-                action
+                let
+                  name =
+                    case List.length petals of
+                      0 -> "Ex falso quodlibet"
+                      1 -> "Unlock"
+                      _ -> "Case"
+                in
+                action name
               _ ->
                 if List.length petals == 1 then
-                  action
+                  action "Unlock"
                 else
-                  actionable.inactive
+                  actionableStyle.inactive
           else
-            actionable.inactive
+            actionableStyle.inactive
         
         _ ->
-          actionable.inactive
+          actionableStyle.inactive
   in
   el
     ( [ width fill
       , height fill
-      , Border.rounded flowerBorderRound ])
+      , Border.rounded flowerBorderRound ] )
     ( el
         ( [ width fill
           , height fill
           , padding 10 ]
          ++ clickAction )
         ( viewGarden
-          model
-          { context
-          | zipper = newZipper
-          , polarity = invert context.polarity }
-          pistil ) )
+            model
+            { context
+            | zipper = newZipper
+            , polarity = invert context.polarity }
+            pistil ) )
 
 
 viewPetal : Model -> Context -> Garden -> (List Garden, List Garden) -> Garden -> Element Msg
@@ -687,16 +745,18 @@ viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as peta
       Petal pistil leftPetals rightPetals :: context.zipper
 
     clickAction =
+      let actionableStyle = greenActionable in
       case model.mode of
         ProofMode Justifying ->
           if List.isEmpty bouquet then
             (Events.onClick (Action Close bouquet newZipper))
-            :: actionable.active
+            :: (htmlAttribute <| title "QED")
+            :: actionableStyle.active
           else
-            actionable.inactive
+            actionableStyle.inactive
         
         _ ->
-          actionable.inactive
+          actionableStyle.inactive
   in
   el
     [ width fill
@@ -1069,6 +1129,6 @@ view model =
       column
         [ width fill,
           height fill ]
-        [goal, toolbar]
+        [ goal, toolbar ]
   in
   layout [] app
