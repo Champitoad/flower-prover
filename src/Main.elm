@@ -1,6 +1,7 @@
 port module Main exposing (..)
 
 import Formula exposing (..)
+import Flower exposing (..)
 
 import Utils.List
 import Utils.Events exposing (..)
@@ -26,6 +27,7 @@ import FeatherIcons as Icons
 
 -- MAIN
 
+
 port dragstart : Value -> Cmd msg
 
 
@@ -40,6 +42,7 @@ main =
 
 -- SUBSCRIPTIONS
 
+
 subscriptions : Model -> Sub Msg
 subscriptions _ =
   Sub.none      
@@ -48,133 +51,15 @@ subscriptions _ =
 -- MODEL
 
 
-type Flower
-  = Formula Formula
-  | Flower Garden (List Garden)
-
-type alias Bouquet
-  = List Flower
-
-type Garden
-  = Garden Bouquet
-
-
-decompose : Formula -> Bouquet
-decompose formula =
-  case formula of
-    Atom _ ->
-      [Formula formula]
-
-    Truth ->
-      []
-    
-    Falsity ->
-      [Flower (Garden []) []]
-    
-    And f1 f2 ->
-      [Formula f1, Formula f2]
-    
-    Or f1 f2 ->
-      [ Flower
-          ( Garden [] )
-          [ Garden [Formula f1]
-          , Garden [Formula f2] ] ]
-    
-    Implies f1 f2 ->
-      [ Flower
-          ( Garden [Formula f1] )
-          [ Garden [Formula f2] ] ]
-
-
-type Zip
-  = Bouquet Bouquet Bouquet
-  | Pistil (List Garden)
-  | Petal Garden (List Garden) (List Garden)
-
-type alias Zipper
-  = List Zip
-
--- We encode zippers as lists, where the head is the innermost context
-
-
-fillZip : Zip -> Bouquet -> Bouquet
-fillZip zip bouquet =
-  case zip of
-    Bouquet left right ->
-      left ++ bouquet ++ right
-
-    Pistil petals ->
-      [Flower (Garden bouquet) petals]
-
-    Petal pistil leftPetals rightPetals ->
-      [Flower pistil (leftPetals ++ Garden bouquet :: rightPetals)]
-
-
-fillZipper : Bouquet -> Zipper -> Bouquet
-fillZipper =
-  List.foldl fillZip
-
-
-hypsZip : Zip -> Bouquet
-hypsZip zip =
-  case zip of
-    Bouquet left right ->
-      left ++ right
-
-    Pistil _ ->
-      []
-    
-    Petal (Garden bouquet) _ _ ->
-      bouquet
-
-
-hypsZipper : Zipper -> Bouquet
-hypsZipper zipper =
-  List.foldl (\zip acc -> hypsZip zip ++ acc) [] zipper
-
-
-isHypothesis : Flower -> Zipper -> Bool
-isHypothesis flower zipper =
-  List.member flower (hypsZipper zipper)
-
-
-justifies : Zipper -> Zipper -> Bool
-justifies source destination =
-  let lca = Utils.List.longestCommonSuffix source destination in
-  case source of
-    -- Self pollination
-    Bouquet _ _ :: (Pistil _ :: grandParent as parent) ->
-      lca == grandParent ||
-      lca == parent
-
-    -- Wind pollination
-    Bouquet _ _ :: parent ->
-      lca == parent
-    
-    _ ->
-      False
-
-
-type Polarity
-  = Pos
-  | Neg
-
-
-invert : Polarity -> Polarity
-invert polarity =
-  case polarity of
-    Pos -> Neg
-    Neg -> Pos
-
-
-type alias Context
-  = { zipper : Zipper,
-      polarity : Polarity }
+--- Selection
 
 
 type alias Selection
   = List Zipper
- 
+
+
+--- Drag-and-Drop
+
 
 type alias FlowerDragId
   = { source : Zipper, content : Flower }
@@ -187,6 +72,9 @@ type alias FlowerDnD
 
 type alias FlowerDnDMsg
   = DnD.Msg FlowerDragId FlowerDropId
+
+
+--- Modal UI
 
 
 type ProofInteraction
@@ -207,124 +95,65 @@ type UIMode
   | NavigationMode
 
 
+--- Full application state
+
+
 type alias Model
   = { goal : Bouquet
     , mode : UIMode
-    , dragDrop : FlowerDnD }
-
-
-yinyang : Flower
-yinyang =
-  Flower (Garden []) [Garden []]
-
-
-identity : Flower
-identity =
-  Flower
-    (Garden [Formula (Atom "a")])
-    [Garden [Formula (Atom "a")]]
-
-
-yvonne : Flower
-yvonne =
-  Flower
-    ( Garden
-        [ Flower
-            (Garden [Formula (Atom "b")])
-            [Garden [Formula (Atom "c")]] ] )
-    [ Garden
-        [ Formula (Atom "a")
-        , Flower
-            (Garden [Formula (Atom "b")])
-            [Garden [Formula (Atom "c")]] ]]
-
-
-bigFlower : Flower
-bigFlower =
-  Flower
-    ( Garden
-        [ Formula (Atom "a")
-        , Flower
-            ( Garden
-                [ Formula (Atom "a") ] )
-            [ Garden
-                [ Formula (Atom "b") ],
-              Garden
-                [ Flower
-                    ( Garden
-                        [ Formula (Atom "b") ] )
-                    [ Garden
-                        [ Formula (Atom "c") ] ],
-                  Formula (Atom "b") ] ]
-        , Flower
-            ( Garden
-                [ Formula (Atom "d")] )
-            [ Garden
-                [ Formula (Atom "e") ] ] ] )
-    [ Garden
-        [ Formula (Atom "b")
-        , Formula (Atom "a") ]
-    , Garden
-      [ Formula (Atom "c") ] ]
- 
-
-entails : String -> String -> Flower
-entails a b =
-  Flower
-    ( Garden
-        [ Formula (Atom a) ] )
-    [ Garden
-        [ Formula (Atom b) ] ]
-
-modusPonensCurryfied : Flower
-modusPonensCurryfied =
-  Flower
-    ( Garden [ entails "a" "b" ] ) 
-    [ Garden [ entails "a" "b" ] ]
-
-
-notFalse : Flower
-notFalse =
-  Flower (Garden [Flower (Garden []) []]) []
-
-
-criticalPair : Flower
-criticalPair =
-  Flower
-    ( Garden
-        [ Flower
-            ( Garden [] )
-            [ Garden [ Formula (Atom "a") ]
-            , Garden [ Formula (Atom "b") ] ]
-        , entails "a" "c"
-        , entails "b" "c" ] )
-    [ Garden [ Formula (Atom "c") ] ]
-
-
-orElimInvertible : Flower
-orElimInvertible =
-  let
-    formula =
-      Implies
-        ( Implies
-          ( Or (Atom "a") (Atom "b") )
-          ( Atom "c" ) )
-        ( And
-          ( Implies (Atom "a") (Atom "c") )
-          ( Implies (Atom "b") (Atom "c") ) )
-  in
-  Flower (Garden []) [Garden [Formula formula]]
+    , dragDrop : FlowerDnD
+    , history : History }
 
 
 init : () -> (Model, Cmd Msg)
 init () =
   ( { goal = [ orElimInvertible ]
     , mode = EditMode Erasing
-    , dragDrop = DnD.init }
+    , dragDrop = DnD.init
+    , history = History { prev = Nothing, next = Nothing } }
   , Cmd.none )
 
 
+---- History of the full state mutually defined
+
+
+type History
+  = History { prev : Maybe Model
+            , next : Maybe Model }
+
+
+getHistory : Model ->  { prev : Maybe Model, next : Maybe Model }
+getHistory model =
+  let (History history) = model.history in
+  history
+
+
+setHistory : { prev : Maybe Model, next : Maybe Model } -> Model -> Model
+setHistory history model =
+  { model | history = History history }
+
+
+undo : Model -> Model
+undo model =
+  case (getHistory model).prev of
+    Just prevModel ->
+      let prevHistory = getHistory prevModel in
+      setHistory { prevHistory | next = Just model } prevModel
+    Nothing ->
+      model
+
+
+redo : Model -> Model
+redo model =
+  case (getHistory model).next of
+    Just nextModel ->
+      nextModel
+    Nothing ->
+      model
+
+
 -- UPDATE
+
 
 type Rule
   = Decompose -- introduction of connective
@@ -340,123 +169,140 @@ type Msg
   = Action Rule Bouquet Zipper
   | DragDropMsg FlowerDnDMsg
   | ChangeUIMode UIMode
+  | Undo
+  | Redo
   | DoNothing
+
+
+applyAction : Rule -> Bouquet -> Zipper -> Bouquet
+applyAction rule bouquet zipper =
+  case (rule, bouquet, zipper) of
+    (Decompose, [Formula formula], _) ->
+      fillZipper (decompose formula) zipper
+
+    (Justify, _, _) ->
+      fillZipper [] zipper
+    
+    (Import, _, _) ->
+      fillZipper bouquet zipper
+
+    (Unlock, [], Pistil [Garden petal] :: parent)  ->
+      fillZipper petal parent
+    
+    (Unlock, [], Pistil branches :: Bouquet left right :: Pistil petals :: parent) ->
+      let
+        case_ : Garden -> Flower
+        case_ branch =
+          Flower branch petals
+        
+        pistil =
+          Garden (left ++ right)
+        
+        cases =
+          List.map case_ branches  
+      in
+      fillZipper [Flower pistil [Garden cases]] parent
+    
+    (Close, [], Petal _ _ _ :: parent) ->
+      fillZipper [] parent
+    
+    (Reorder, _, _ :: parent) ->
+      fillZipper bouquet parent
+
+    _ ->
+      Debug.todo "Unsupported action"
+
+
+handleDragDropMsg : FlowerDnDMsg -> Model -> (Model, Cmd Msg)
+handleDragDropMsg dndMsg model =
+  let
+    dragStart = 
+      DnD.getDragstartEvent dndMsg
+
+    cmd =
+      dragStart
+      |> Maybe.map (.event >> dragstart)
+      |> Maybe.withDefault Cmd.none
+
+    ( newDragDrop, result ) =
+      DnD.update dndMsg model.dragDrop
+
+    model_ =
+      case dragStart of
+        Just _ ->
+          case model.mode of
+            ProofMode Justifying ->
+              { model | dragDrop = newDragDrop, mode = ProofMode Importing }
+
+            EditMode Erasing ->
+              { model | dragDrop = newDragDrop, mode = EditMode Reordering }
+            
+            _ ->
+              model
+
+        Nothing ->
+          let
+            defaultMode =
+              case model.mode of
+                ProofMode _ -> ProofMode Justifying
+                EditMode _ -> EditMode Erasing
+                _ -> model.mode
+          in
+          case result of
+            Just (drag, drop, _) ->
+              case drop of
+                -- Dropping on target
+                Just destination ->
+                  let
+                    action =
+                      case model.mode of
+                        ProofMode Importing ->
+                          Action Import
+                            [drag.content] destination.target
+                        
+                        EditMode Reordering ->
+                          Action Reorder
+                            destination.content destination.target
+                        
+                        _ ->
+                          DoNothing
+                    
+                    newModel =
+                      update action model |> Tuple.first
+                  in
+                  { newModel | dragDrop = newDragDrop, mode = defaultMode }
+
+                -- Dropping on non-target
+                Nothing ->
+                  { model | dragDrop = newDragDrop, mode = defaultMode }
+        
+            -- Dragging
+            Nothing ->
+              { model | dragDrop = newDragDrop }
+  in
+  (model_, cmd)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Action rule bouquet zipper ->
-      let
-        newGoal =
-          case (rule, bouquet, zipper) of
-            (Decompose, [Formula formula], _) ->
-              fillZipper (decompose formula) zipper
-
-            (Justify, _, _) ->
-              fillZipper [] zipper
-            
-            (Import, _, _) ->
-              fillZipper bouquet zipper
-
-            (Unlock, [], Pistil [Garden petal] :: parent)  ->
-              fillZipper petal parent
-            
-            (Unlock, [], Pistil branches :: Bouquet left right :: Pistil petals :: parent) ->
-              let
-                case_ : Garden -> Flower
-                case_ branch =
-                  Flower branch petals
-                
-                pistil =
-                  Garden (left ++ right)
-                
-                cases =
-                  List.map case_ branches  
-              in
-              fillZipper [Flower pistil [Garden cases]] parent
-            
-            (Close, [], Petal _ _ _ :: parent) ->
-              fillZipper [] parent
-            
-            (Reorder, _, _ :: parent) ->
-              fillZipper bouquet parent
-
-            _ ->
-              model.goal
-      in
-      ({ model | goal = newGoal }, Cmd.none)
+      ( { model
+        | goal = applyAction rule bouquet zipper
+        , history = History { prev = Just model, next = Nothing } }
+      , Cmd.none )
 
     DragDropMsg dndMsg ->
-      let
-        dragStart = 
-          DnD.getDragstartEvent dndMsg
-
-        cmd =
-          dragStart
-          |> Maybe.map (.event >> dragstart)
-          |> Maybe.withDefault Cmd.none
-
-        ( newDragDrop, result ) =
-          DnD.update dndMsg model.dragDrop
-
-        model_ =
-          case dragStart of
-            Just _ ->
-              case model.mode of
-                ProofMode Justifying ->
-                  { model | dragDrop = newDragDrop, mode = ProofMode Importing }
-
-                EditMode Erasing ->
-                  { model | dragDrop = newDragDrop, mode = EditMode Reordering }
-                
-                _ ->
-                  model
-
-            Nothing ->
-              let
-                defaultMode =
-                  case model.mode of
-                    ProofMode _ -> ProofMode Justifying
-                    EditMode _ -> EditMode Erasing
-                    _ -> model.mode
-              in
-              case result of
-                Just (drag, drop, _) ->
-                  case drop of
-                    -- Dropping on target
-                    Just destination ->
-                      let
-                        action =
-                          case model.mode of
-                            ProofMode Importing ->
-                              Action Import
-                                [drag.content] destination.target
-                            
-                            EditMode Reordering ->
-                              Action Reorder
-                                destination.content destination.target
-                            
-                            _ ->
-                              DoNothing
-                        
-                        newModel =
-                          update action model |> Tuple.first
-                      in
-                      { newModel | dragDrop = newDragDrop, mode = defaultMode }
-
-                    -- Dropping on non-target
-                    Nothing ->
-                      { model | dragDrop = newDragDrop, mode = defaultMode }
-            
-                -- Dragging
-                Nothing ->
-                  { model | dragDrop = newDragDrop }
-      in
-      (model_, cmd)
+      handleDragDropMsg dndMsg model
     
     ChangeUIMode mode ->
       ({ model | mode = mode }, Cmd.none)
+    
+    Undo ->
+      (undo model, Cmd.none)
+
+    Redo ->
+      (redo model, Cmd.none)
     
     DoNothing ->
       (model, Cmd.none)
@@ -465,56 +311,7 @@ update msg model =
 -- VIEW
 
 
----- Text
-
-
-viewFlowerText : Flower -> String
-viewFlowerText flower =
-  case flower of
-    Formula formula ->
-      Formula.toString formula
-    
-    Flower pistil petals ->
-      let
-        pistilText =
-          viewGardenText pistil
-
-        petalsText =
-          petals
-          |> List.map viewGardenText
-          |> String.join "; "
-      in
-      "(" ++ pistilText ++ " ⫐ " ++ petalsText ++ ")"
-
-
-viewGardenText : Garden -> String
-viewGardenText (Garden bouquet) =
-  bouquet
-  |> List.map viewFlowerText
-  |> String.join ", "
-
-
-viewZipperText : Zipper -> String
-viewZipperText zipper =
-  fillZipper [Formula (Atom "□")] zipper
-  |> List.map (viewFlowerText)
-  |> String.join ", "
-
-logZipper : String -> Zipper -> String
-logZipper msg zipper =
-  zipper
-  |> viewZipperText
-  |> Debug.log msg
-
-logBouquet : String -> Bouquet -> String
-logBouquet msg bouquet =
-  bouquet
-  |> List.map viewFlowerText
-  |> String.join ", "
-  |> Debug.log msg
-
-
----- Graphics
+---- Common styling
 
 
 transparent : Color
@@ -612,15 +409,18 @@ droppable color =
   , inactive = border }
 
 
+nonSelectable : Attribute Msg
+nonSelectable =
+  htmlAttribute <| style "user-select" "none"
+
+
+---- Common events
+
+
 stopPropagation : List (Attribute Msg)
 stopPropagation =
   [ onDragOver DoNothing
   , onMouseMove DoNothing ]
-
-
-nonSelectable : Attribute Msg
-nonSelectable =
-  htmlAttribute <| style "user-select" "none"
 
 
 dragAction : Zipper -> Flower -> List (Attribute Msg)
@@ -630,6 +430,9 @@ dragAction zipper flower =
     List.map htmlAttribute <|
     DnD.draggable DragDropMsg
       { source = zipper, content = flower }
+
+
+---- Goal
 
 
 viewFormula : Model -> Context -> Formula -> Element Msg
@@ -987,7 +790,6 @@ viewGarden model context (Garden bouquet) =
 
 viewGoal : Model -> Element Msg
 viewGoal model =
-  -- text (viewFlowerText model)
   let
     bouquetEls () =
       ( Utils.List.zipperMap
@@ -1024,6 +826,9 @@ viewGoal model =
 
     _ ->
       workingOnIt
+
+
+---- Toolbar
 
 
 type ModeSelectorPosition
@@ -1106,6 +911,25 @@ viewModeSelector currentMode =
     , item NavigationMode End ]
 
 
+viewUndoRedo : Element Msg
+viewUndoRedo =
+  let
+    undoAction =
+      [Events.onClick Undo]
+  in
+  row
+    [ width shrink
+    , height shrink ]
+    [ el
+        ( [ width (60 |> px)
+          , height (60 |> px) ]
+         ++ undoAction )
+        ( Icons.arrowLeftCircle
+          |> Icons.withSize 30
+          |> Icons.toHtml []
+          |> html ) ]
+
+
 viewToolbar : Model -> Element Msg
 viewToolbar model =
   row
@@ -1113,7 +937,11 @@ viewToolbar model =
     , height shrink
     , padding 15
     , Background.color (rgb 0.9 0.9 0.9) ]
-    [ viewModeSelector model.mode ]
+    [ viewModeSelector model.mode
+    , viewUndoRedo ]
+
+
+---- Full application
 
 
 view : Model -> Html Msg
