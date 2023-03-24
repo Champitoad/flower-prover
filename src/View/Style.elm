@@ -94,6 +94,25 @@ orangeActionable =
   actionable (Color.fromRgb { red = 1, green = 0.6, blue = 0 })
 
 
+draggable : Color.Color -> ZoneStyle msg
+draggable color =
+  let
+    width =
+      3
+
+    border =
+      [ Border.width width
+      , Border.solid
+      , Border.rounded flowerBorderRound ]
+    
+    borderColor =
+      color |> Color.toElement
+  in
+  { borderWidth = width
+  , active = Border.color borderColor :: border
+  , inactive = Border.color transparent :: border }
+
+
 droppable : Color.Color -> ZoneStyle msg
 droppable color =
   let

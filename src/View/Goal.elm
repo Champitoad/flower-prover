@@ -23,6 +23,16 @@ import Html.Attributes exposing (title)
 import Html5.DragDrop as DnD
 
 
+reorderColor : Color.Color
+reorderColor =
+  Color.fromRgb { red = 0.7, green = 0.7, blue = 0.7 }
+
+
+importColor : Color.Color
+importColor =
+  Color.fromRgb { red = 1, green = 0.8, blue = 0 }
+
+
 viewFormula : Model -> Context -> Formula -> Element Msg
 viewFormula model context formula =
   let
@@ -58,7 +68,7 @@ viewFormula model context formula =
     reorderDragAction =
       case model.mode of
         EditMode _ ->
-          dragAction context.zipper form
+          dragAction reorderColor model.dragDrop context.zipper form
         
         _ ->
           []
@@ -183,6 +193,12 @@ viewFlower model context flower =
             , height fill
             , spacing flowerBorderWidth ]
             ( Utils.List.zipperMap (viewPetal model context pistil) petals )
+        
+        color =
+          case model.mode of
+            ProofMode _ -> importColor
+            EditMode _ -> reorderColor
+            _ -> Color.transparent
       in
       column
         ( [ width fill
@@ -197,7 +213,7 @@ viewFlower model context flower =
               , blur = 15
               , color = flowerForegroundColor context.polarity } ]
         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-        ++ dragAction context.zipper flower )
+        ++ dragAction color model.dragDrop context.zipper flower )
         [ pistilEl, petalsEl ]
 
 
@@ -219,7 +235,7 @@ viewGarden model context (Garden bouquet) =
               if justifies source context.zipper then
                 let
                   dropStyle =
-                    droppable (Color.fromRgb { red = 1, green = 0.8, blue = 0 })
+                    droppable importColor
 
                   dropTargetStyle =
                     case DnD.getDropId model.dragDrop of
@@ -272,7 +288,7 @@ viewGarden model context (Garden bouquet) =
                             left ++ content :: (middle ++ sourceRight)
 
                         dropStyle =
-                          droppable (Color.fromRgb { red = 0.7, green = 0.7, blue = 0.7 })
+                          droppable reorderColor
 
                         dropTargetStyle =
                           case DnD.getDropId model.dragDrop of

@@ -62,9 +62,9 @@ type alias Model
 init : Model
 init =
   { goal = [ orElimInvertible ]
-    , mode = EditMode Erasing
-    , dragDrop = DnD.init
-    , history = History { prev = Nothing, next = Nothing } }
+  , mode = EditMode Erasing
+  , dragDrop = DnD.init
+  , history = History { prev = Nothing, next = Nothing } }
 
 
 -- History of the full state mutually defined
