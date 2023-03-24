@@ -14,10 +14,6 @@
     selection is empty, and hidden outside of selection mode), or shortkey (like
     `!`)
 
-- Undo/redo history
-  - Usual shortkeys
-  - Fix bug with history state when changing UI mode (leftover drop zones)
-
 - Implement Edit mode
   - The drop zones of Importing turn into `add flower` zones in positive gardens
   - `add petal` zones at the start, end and between petals of negative flowers
@@ -62,6 +58,9 @@
   - Should work well because of *variarity*
   - Only lacks recursive types
   - Bottom type?
+
+- Full tree structure for undo/redo history, navigable from/identified with the
+  partial proof term view
 
 - Analogy between Proof/Edit modes and Survival/Creative modes in Minecraft
 

@@ -7,6 +7,8 @@ import Json.Decode exposing (Value)
 
 import Html5.DragDrop as DnD
 
+import Keyboard.Event exposing (KeyboardEvent)
+
 
 port dragstart : Value -> Cmd msg
 
@@ -27,6 +29,7 @@ type Msg
   | ChangeUIMode UIMode
   | Undo
   | Redo
+  | HandleKeyboardEvent KeyboardEvent
   | DoNothing
 
 
@@ -159,6 +162,18 @@ update msg model =
 
     Redo ->
       (redo model, Cmd.none)
+    
+    HandleKeyboardEvent { ctrlKey, key } ->
+      let
+        newModel =
+          let _ = Debug.log "ctrlKey" ctrlKey in
+          let _ = Debug.log "key" key in
+          case (ctrlKey, key) of
+            (True, Just "z") -> update Undo model |> Tuple.first
+            (True, Just "y") -> update Redo model |> Tuple.first
+            _ -> model
+      in
+      (newModel, Cmd.none)
     
     DoNothing ->
       (model, Cmd.none)

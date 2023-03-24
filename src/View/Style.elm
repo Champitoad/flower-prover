@@ -14,6 +14,11 @@ import Element.Border as Border
 import Html.Attributes exposing (style)
 
 
+fillXY : List (Attribute msg)
+fillXY =
+  [width fill, height fill]
+
+
 centered : Element msg -> Element msg
 centered elem =
   el [centerX, centerY] elem
