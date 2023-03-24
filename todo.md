@@ -15,8 +15,8 @@
     `!`)
 
 - Undo/redo history
-  - Works for the entire state, thus switching freely between different UI modes
-  - Buttons at the bottom of the screen + usual shortkeys
+  - Usual shortkeys
+  - Fix bug with history state when changing UI mode (leftover drop zones)
 
 - Implement Edit mode
   - The drop zones of Importing turn into `add flower` zones in positive gardens

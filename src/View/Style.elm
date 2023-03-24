@@ -14,6 +14,11 @@ import Element.Border as Border
 import Html.Attributes exposing (style)
 
 
+centered : Element msg -> Element msg
+centered elem =
+  el [centerX, centerY] elem
+
+
 transparent : Color
 transparent =
   rgba 0 0 0 0
