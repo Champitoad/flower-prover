@@ -6,16 +6,21 @@ import Model.App exposing (..)
 
 import Update.App exposing (..)
 
-import Utils.Color as Color
+import Utils.Color
 import Utils.Maybe exposing (..)
 
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
-import Element.Input as Input
 
+import Html
 import Html.Attributes exposing (title)
+
+import Css
+import Html.Styled exposing (fromUnstyled, toUnstyled)
+import Html.Styled.Events
+import Html.Styled.Attributes exposing (css)
 
 import FeatherIcons as Icons
 import FeatherIcons exposing (Icon)
@@ -25,47 +30,65 @@ type ModeSelectorPosition
   = Start | Middle | End
 
 
-borderRoundSize : Int
-borderRoundSize =
+buttonBorderRadius : number
+buttonBorderRadius =
   10
 
 
-buttonHeight : Length
+buttonHeight : number
 buttonHeight =
-  55 |> px
+  55
 
 
 button : msg -> Icon -> Bool -> Element msg
 button msg icon enabled =
   let
-    iconColor =
-      if enabled then
-        rgb 0 0 0
-      else
-        rgb 0.5 0.5 0.5
+    iconStyledHtml =
+      let
+        iconColor =
+          if enabled then
+            Css.rgb 0 0 0
+          else
+            Css.rgb 127 127 127
+        iconHtml =
+          icon
+          |> Icons.withSize 30
+          |> Icons.toHtml []
+          |> fromUnstyled
+      in
+      Html.Styled.div
+        [ css [ Css.color iconColor ] ]
+        [ iconHtml ]
+    
+    style =
+      Css.width (Css.px buttonHeight) ::
+      Css.height (Css.px buttonHeight) ::
 
-    iconEl =
-      icon
-      |> Icons.withSize 30
-      |> Icons.toHtml [ iconColor |> Color.fromElement |> Color.toHtml ]
-      |> html
+      Css.borderStyle Css.solid ::
+      Css.borderRadius (Css.px buttonBorderRadius) ::
+      Css.borderWidth (Css.px 1) ::
+
+      Css.displayFlex ::
+      Css.alignItems Css.center ::
+      Css.justifyContent Css.center ::
+
+      if enabled then
+        [ Css.cursor Css.pointer
+        , Css.borderColor (Css.rgb 180 180 180)
+        , Css.backgroundColor (Css.rgb 240 240 240)
+        , Css.hover [Css.backgroundColor (Css.rgb 250 250 250)]
+        , Css.active [Css.backgroundColor (Css.rgb 180 180 180)] ]
+      else
+        [ Css.borderColor Css.transparent ]
     
-    enabledStyle =
-      [ Background.color (rgb 0.925 0.925 0.925)
-      , mouseOver [Background.color (rgb 1 1 1)]
-      , Border.rounded borderRoundSize
-      , Border.color (rgb 0.6 0.6 0.6)
-      , Border.width 1 ]
-    
-    disabledStyle =
-      [focused []]
+    action =
+      if enabled then [Html.Styled.Events.onClick msg] else []
   in
-  Input.button
-    ( [ width buttonHeight
-      , height buttonHeight ]
-     ++ if enabled then enabledStyle else disabledStyle )
-    { onPress = if enabled then Just msg else Nothing
-    , label = centered iconEl }
+  Html.Styled.div
+    ( css style :: action )
+    [ iconStyledHtml ]
+  |> toUnstyled
+  |> html
 
 
 viewModeSelector : UIMode -> Element Msg
@@ -96,7 +119,9 @@ viewModeSelector currentMode =
                 [ centerX, centerY ]
                 ( icon
                   |> Icons.withSize 30
-                  |> Icons.toHtml [ fgColor |> Color.fromElement |> Color.toHtml ]
+                  |> Icons.toHtml [ fgColor 
+                                    |> Utils.Color.fromElement
+                                    |> Utils.Color.toHtml ]
                   |> html )
           in
           (elem, title)
@@ -104,14 +129,14 @@ viewModeSelector currentMode =
         borderRound =
           case position of
             Start ->
-              { topLeft = borderRoundSize, bottomLeft = borderRoundSize
+              { topLeft = buttonBorderRadius, bottomLeft = buttonBorderRadius
               , topRight = 0, bottomRight = 0 }
             Middle ->
               { topLeft = 0, bottomLeft = 0
               , topRight = 0, bottomRight = 0 }
             End ->
               { topLeft = 0, bottomLeft = 0
-              , topRight = borderRoundSize, bottomRight = borderRoundSize }
+              , topRight = buttonBorderRadius, bottomRight = buttonBorderRadius }
 
         changeAction =
           [ Events.onClick (ChangeUIMode mode)
@@ -119,7 +144,7 @@ viewModeSelector currentMode =
       in
       el
         ( [ width (60 |> px)
-          , height buttonHeight
+          , height (buttonHeight |> px)
           , Background.color bgColor
           , Border.roundEach borderRound
           , htmlAttribute <| title titleText ]
@@ -133,7 +158,7 @@ viewModeSelector currentMode =
     , height shrink
     , spacing 1
     , Border.width 0
-    , Border.rounded borderRoundSize
+    , Border.rounded buttonBorderRadius
     , Border.color borderColor
     , Background.color borderColor ]
     [ item (ProofMode Justifying) Start
