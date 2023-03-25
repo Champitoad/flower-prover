@@ -61,7 +61,7 @@ type alias Model
 
 init : Model
 init =
-  { goal = [ kreiselPutnam ]
+  { goal = [ orElimInvertible ]
   , mode = EditMode Erasing
   , dragDrop = DnD.init
   , history = History { prev = Nothing, next = Nothing } }

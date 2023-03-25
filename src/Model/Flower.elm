@@ -270,31 +270,37 @@ criticalPair =
     [ Garden [ Formula (Atom "c") ] ]
 
 
+orElim : Flower
+orElim =
+  Formula
+    ( Implies
+        ( And
+          ( Implies (Atom "a") (Atom "c") )
+          ( Implies (Atom "b") (Atom "c") ) )
+        ( Implies
+          ( Or (Atom "a") (Atom "b") )
+          ( Atom "c" ) ) )
+
+
 orElimInvertible : Flower
 orElimInvertible =
-  let
-    formula =
-      Implies
+  Formula
+    ( Implies
         ( Implies
           ( Or (Atom "a") (Atom "b") )
           ( Atom "c" ) )
         ( And
           ( Implies (Atom "a") (Atom "c") )
-          ( Implies (Atom "b") (Atom "c") ) )
-  in
-  entails [] [Formula formula]
+          ( Implies (Atom "b") (Atom "c") ) ) )
 
 
 kreiselPutnam : Flower
 kreiselPutnam =
-  let
-    formula =
-      Implies
+  Formula
+    ( Implies
         ( Implies
             ( Not (Atom "a") )
             ( Or (Atom "b") (Atom "c") ) )
         ( Or
             ( Implies (Not (Atom "a")) (Atom "b") )
-            ( Implies (Not (Atom "a")) (Atom "c") ) )
-  in
-  entails [] [Formula formula]
+            ( Implies (Not (Atom "a")) (Atom "c") ) ) )
