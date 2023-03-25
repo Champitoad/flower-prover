@@ -184,30 +184,33 @@ logBouquet msg bouquet =
 -- Examples
 
 
+atom : String -> Flower
+atom name =
+  Formula (Atom name)
+
+
+entails : Bouquet -> Bouquet -> Flower
+entails phi psi =
+  Flower
+    ( Garden phi )
+    [ Garden psi ]
+
+
 yinyang : Flower
 yinyang =
-  Flower (Garden []) [Garden []]
+  entails [] []
 
 
 identity : Flower
 identity =
-  Flower
-    (Garden [Formula (Atom "a")])
-    [Garden [Formula (Atom "a")]]
+  entails [atom "a"] [atom "a"]
 
 
 testFlower : Flower
 testFlower =
-  Flower
-    ( Garden
-        [ Flower
-            (Garden [Formula (Atom "b")])
-            [Garden [Formula (Atom "c")]] ] )
-    [ Garden
-        [ Formula (Atom "a")
-        , Flower
-            (Garden [Formula (Atom "b")])
-            [Garden [Formula (Atom "c")]] ]]
+  entails
+    [entails [atom "b"] [atom "c"]]
+    [atom "a", entails [atom "b"] [atom "c"]]
 
 
 bigFlower : Flower
@@ -239,20 +242,11 @@ bigFlower =
       [ Formula (Atom "c") ] ]
  
 
-entails : String -> String -> Flower
-entails a b =
-  Flower
-    ( Garden
-        [ Formula (Atom a) ] )
-    [ Garden
-        [ Formula (Atom b) ] ]
-
-
 modusPonensCurryfied : Flower
 modusPonensCurryfied =
-  Flower
-    ( Garden [ entails "a" "b" ] ) 
-    [ Garden [ entails "a" "b" ] ]
+  entails
+    [entails [atom "a"] [atom "b"]]
+    [entails [atom "a"] [atom "b"]]
 
 
 notFalse : Flower
@@ -266,10 +260,10 @@ criticalPair =
     ( Garden
         [ Flower
             ( Garden [] )
-            [ Garden [ Formula (Atom "a") ]
-            , Garden [ Formula (Atom "b") ] ]
-        , entails "a" "c"
-        , entails "b" "c" ] )
+            [ Garden [ atom "a" ]
+            , Garden [ atom "b"  ] ]
+        , entails [atom "a"] [atom "c"]
+        , entails [atom "b"] [atom "c"] ] )
     [ Garden [ Formula (Atom "c") ] ]
 
 
@@ -285,4 +279,19 @@ orElimInvertible =
           ( Implies (Atom "a") (Atom "c") )
           ( Implies (Atom "b") (Atom "c") ) )
   in
-  Flower (Garden []) [Garden [Formula formula]]
+  entails [] [Formula formula]
+
+
+kreiselPutnam : Flower
+kreiselPutnam =
+  let
+    formula =
+      Implies
+        ( Implies
+            ( Implies (Atom "a") Falsity )
+            ( Or (Atom "b") (Atom "c") ) )
+        ( Or
+            ( Implies (Implies (Atom "a") Falsity) (Atom "b") )
+            ( Implies (Implies (Atom "a") Falsity) (Atom "c") ) )
+  in
+  entails [] [Formula formula]
