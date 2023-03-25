@@ -16,8 +16,7 @@
     - There is a function `applicableRules : Context -> Bouquet -> List Rule`
     - Pick some garden in the goal with context `X` and bouquet `Φ`:
     - Let 𝒜 = `applicableRules X Φ`
-    - If ℛ ∩ 𝒜 ≠ ∅, pick a random rule `R` ∈ ℛ ∩ 𝒜 and return
-      `update (R Φ X) model`
+    - If ℛ ∩ 𝒜 ≠ ∅, pick a random rule `R` ∈ ℛ ∩ 𝒜 and return `applyAction R Φ X`
     - Otherwise pick another garden and try again
   - Automation is run systematically after each action in Proof mode
   - One can run it manually with an additional button inside the
