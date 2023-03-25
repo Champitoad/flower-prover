@@ -7,6 +7,7 @@ type Formula
   | And Formula Formula
   | Or Formula Formula
   | Implies Formula Formula
+  | Not Formula
 
 
 toString : Formula -> String
@@ -29,3 +30,6 @@ toString formula =
 
     Implies f1 f2 ->
       "(" ++ toString f1 ++ " ⇒ " ++ toString f2 ++ ")"
+    
+    Not f1 ->
+      "¬ (" ++ toString f1 ++ ")"

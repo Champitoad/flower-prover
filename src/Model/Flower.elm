@@ -41,6 +41,9 @@ decompose formula =
       [ Flower
           ( Garden [Formula f1] )
           [ Garden [Formula f2] ] ]
+    
+    Not f1 ->
+      [ Flower (Garden [Formula f1]) [] ]
 
 
 -- Flower zippers
@@ -288,10 +291,10 @@ kreiselPutnam =
     formula =
       Implies
         ( Implies
-            ( Implies (Atom "a") Falsity )
+            ( Not (Atom "a") )
             ( Or (Atom "b") (Atom "c") ) )
         ( Or
-            ( Implies (Implies (Atom "a") Falsity) (Atom "b") )
-            ( Implies (Implies (Atom "a") Falsity) (Atom "c") ) )
+            ( Implies (Not (Atom "a")) (Atom "b") )
+            ( Implies (Not (Atom "a")) (Atom "c") ) )
   in
   entails [] [Formula formula]
