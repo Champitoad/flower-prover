@@ -37,6 +37,17 @@ importColor =
   Color.fromRgb { red = 1, green = 0.8, blue = 0 }
 
 
+cropAction : Surgery -> Context -> Flower -> List (Attribute Msg)
+cropAction surgery context flower =
+  let actionableStyle = redActionable in
+  if croppable surgery context then
+    Events.onClick (Action Crop context.zipper [flower])
+    :: (htmlAttribute <| title "Remove Flower")
+    :: actionableStyle.active
+  else
+    actionableStyle.inactive
+
+
 viewFormula : Model -> Context -> Formula -> Element Msg
 viewFormula model context formula =
   let
@@ -63,8 +74,11 @@ viewFormula model context formula =
             
             _ ->
               (Events.onClick (Action Decompose context.zipper [form]))
-                :: (htmlAttribute <| title "Decompose")
+              :: (htmlAttribute <| title "Decompose")
               :: actionableStyle.active
+        
+        EditMode Operating surgery ->
+          cropAction surgery context (Formula formula)
 
         _ ->
           actionableStyle.inactive
@@ -83,8 +97,8 @@ viewFormula model context formula =
       , Font.color (flowerForegroundColor context.polarity)
       , Font.size 50
       , nonSelectable ]
-      ++ clickAction
-      ++ reorderDragAction )
+      ++ reorderDragAction
+      ++ clickAction )
     ( text (Formula.toString formula) )
 
 
@@ -95,10 +109,11 @@ viewPistil model context (Garden bouquet as pistil) petals =
       Pistil petals :: context.zipper
 
     clickAction =
-      let actionableStyle = orangeActionable in
       case model.mode of
         ProofMode Justifying ->
           let
+            actionableStyle = orangeActionable
+
             action rule name =
               (Events.onClick (Action rule newZipper bouquet))
               :: (htmlAttribute <| title name)
@@ -123,8 +138,11 @@ viewPistil model context (Garden bouquet as pistil) petals =
           else
             actionableStyle.inactive
         
+        EditMode Operating surgery ->
+          cropAction surgery context (Flower pistil petals)
+
         _ ->
-          actionableStyle.inactive
+          (actionable Color.transparent).inactive
   in
   el
     ( [ width fill
@@ -263,7 +281,6 @@ viewFlower model context flower =
       column
         ( [ width fill
           , height fill
-          , padding flowerBorderWidth
           , Background.color (flowerForegroundColor context.polarity)
           , Border.color (flowerForegroundColor context.polarity)
           , Border.rounded flowerBorderRound

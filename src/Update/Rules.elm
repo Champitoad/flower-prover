@@ -114,9 +114,15 @@ croppable =
 
 operate : Rule -> Zipper -> Bouquet -> Surgery -> Surgery
 operate rule zipper bouquet surgery =
-  case rule of
-    Grow ->
+  case (rule, bouquet, zipper) of
+    (Grow, _, _) ->
       { surgery | growing = zipper :: surgery.growing }
+    
+    (Crop, [flower], _) ->
+      { surgery | cropped = Just flower }
+
+    -- (Pull, _, ) ->
+    --   { surgery | cropped = Just flower }
     
     _ ->
       surgery
@@ -167,7 +173,7 @@ apply rule zipper bouquet =
       fillZipper bouquet zipper
     
     (Crop, _, _) ->
-      fillZipper bouquet zipper
+      fillZipper [] zipper
 
     (Pull, _, _) ->
       fillZipper bouquet zipper

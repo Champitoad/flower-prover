@@ -91,12 +91,16 @@ greenActionable =
   actionable (Color.fromRgb { red = 0.3, green = 0.9, blue = 0.3 })
 
 pinkActionable : ZoneStyle msg
-pinkActionable =
+pinkActionable =  
   actionable (Color.fromRgb { red = 1, green = 0.1, blue = 0.8 })
 
 orangeActionable : ZoneStyle msg
 orangeActionable =
   actionable (Color.fromRgb { red = 1, green = 0.6, blue = 0 })
+
+redActionable : ZoneStyle msg
+redActionable =
+  actionable (Color.fromRgb { red = 1, green = 0, blue = 0 })
 
 
 draggable : Color.Color -> ZoneStyle msg
