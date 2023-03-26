@@ -14,12 +14,12 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
 
-import Html.Attributes exposing (title)
+import Html.Attributes
 
 import Css
 import Html.Styled exposing (fromUnstyled, toUnstyled)
 import Html.Styled.Events
-import Html.Styled.Attributes exposing (css)
+import Html.Styled.Attributes exposing (title, css)
 
 import FeatherIcons as Icons
 import FeatherIcons exposing (Icon)
@@ -39,8 +39,8 @@ buttonHeight =
   55
 
 
-button : msg -> Icon -> Bool -> Element msg
-button msg icon enabled =
+button : msg -> String ->  Icon -> Bool -> Element msg
+button msg name icon enabled =
   let
     iconStyledHtml =
       let
@@ -84,7 +84,7 @@ button msg icon enabled =
       if enabled then [Html.Styled.Events.onClick msg] else []
   in
   Html.Styled.div
-    ( css style :: action )
+    ( css style :: title name :: action )
     [ iconStyledHtml ]
   |> toUnstyled
   |> html
@@ -98,7 +98,7 @@ viewAutoButton mode =
         ProofMode _ -> True
         _ -> False
   in
-  button Auto Icons.settings enabled
+  button Auto "Auto" Icons.settings enabled
 
 
 viewModeSelector : UIMode -> Element Msg
@@ -157,7 +157,7 @@ viewModeSelector currentMode =
           , height (buttonHeight |> px)
           , Background.color bgColor
           , Border.roundEach borderRound
-          , htmlAttribute <| title titleText ]
+          , htmlAttribute <| Html.Attributes.title titleText ]
          ++ changeAction )
         iconEl
     
@@ -183,8 +183,8 @@ viewUndoRedo (History history) =
       Tuple.mapBoth isSomething isSomething (history.prev, history.next)
   in
   row []
-    [ button Undo Icons.arrowLeft undoEnabled
-    , button Redo Icons.arrowRight redoEnabled ]
+    [ button Undo "Undo" Icons.arrowLeft undoEnabled
+    , button Redo "Redo" Icons.arrowRight redoEnabled ]
 
 
 viewToolbar : Model -> Element Msg
