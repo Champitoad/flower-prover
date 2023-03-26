@@ -1,7 +1,6 @@
 # Features
 
 - Automation of some proof actions
-  - Button with a gear logo on left of toolbar (only in proof mode?)
   - Click on it opens either:
     - A dialog with a list of checkboxes to enable/disable automation for each
       action
@@ -9,15 +8,6 @@
   - Actions to automate (in order of priority, starting from the most desirable/
     harmless): `Unlock`, `Decompose`, `Close`, `Justify`, `Case` (then we need
     to split `Case` apart from `Unlock`)
-  - Automation is triggered by a separate `Auto` rule
-  - Automation is computed as the fixpoint of the following (recursive terminal)
-    function:
-    - Let ℛ be the set of rules we want to automate
-    - There is a function `applicableRules : Context -> Bouquet -> List Rule`
-    - Pick some garden in the goal with context `X` and bouquet `Φ`:
-    - Let 𝒜 = `applicableRules X Φ`
-    - If ℛ ∩ 𝒜 ≠ ∅, pick a random rule `R` ∈ ℛ ∩ 𝒜 and return `applyAction R Φ X`
-    - Otherwise pick another garden and try again
   - Automation is run systematically after each action in Proof mode
   - One can run it manually with an additional button inside the
     dialog/dropdown (then in this scenario a dropdown is better to keep the

@@ -17,6 +17,18 @@ zipperMap f list =
   aux [] list
 
 
+zipperFoldl : (Zipper a -> a -> b -> b) -> b -> List a -> b
+zipperFoldl f init list =
+  let
+    aux left l =
+      case l of
+        [] -> init
+        head :: tail ->
+          f (left, tail) head (aux (left ++ [head]) tail)
+  in
+  aux [] list
+
+
 forkPrefix : List a -> List a -> (List a, List a, List a)
 forkPrefix list1 list2 =
   let
@@ -38,6 +50,7 @@ forkSuffix : List a -> List a -> (List a, List a, List a)
 forkSuffix list1 list2 =
   let (l, l1, l2) = forkPrefix (List.reverse list1) (List.reverse list2) in
   (List.reverse l, List.reverse l1, List.reverse l2)
+
 
 longestCommonPrefix : List a -> List a -> List a
 longestCommonPrefix l1 l2 =
@@ -63,3 +76,8 @@ slice start end list =
           else aux (x :: acc) (i + 1) t
   in
   aux [] 0 list |> List.reverse
+
+
+forall : (a -> Bool) -> List a -> Bool
+forall p l =
+  List.foldl (\x acc -> acc && p x) True l

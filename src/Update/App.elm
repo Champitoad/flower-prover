@@ -1,5 +1,7 @@
 port module Update.App exposing (..)
 
+import Update.Rules exposing (..)
+
 import Model.Flower exposing (..)
 import Model.App exposing (..)
 
@@ -13,63 +15,15 @@ import Keyboard.Event exposing (KeyboardEvent)
 port dragstart : Value -> Cmd msg
 
 
-type Rule
-  = Decompose -- introduction of connective
-  | Justify -- down pollination
-  | Import -- up pollination
-  | Unlock -- empty pistil
-  | Close -- empty petal
-  | Fence -- fencing
-  | Reorder -- multiset
-
-
 type Msg
-  = Action Rule Bouquet Zipper
-  | DragDropMsg FlowerDnDMsg
+  = Action Rule Zipper Bouquet
+  | Auto
   | ChangeUIMode UIMode
   | Undo
   | Redo
+  | DragDropMsg FlowerDnDMsg
   | HandleKeyboardEvent KeyboardEvent
   | DoNothing
-
-
-applyAction : Rule -> Bouquet -> Zipper -> Bouquet
-applyAction rule bouquet zipper =
-  case (rule, bouquet, zipper) of
-    (Decompose, [Formula formula], _) ->
-      fillZipper (decompose formula) zipper
-
-    (Justify, _, _) ->
-      fillZipper [] zipper
-    
-    (Import, _, _) ->
-      fillZipper bouquet zipper
-
-    (Unlock, [], Pistil [Garden petal] :: parent)  ->
-      fillZipper petal parent
-    
-    (Unlock, [], Pistil branches :: Bouquet left right :: Pistil petals :: parent) ->
-      let
-        case_ : Garden -> Flower
-        case_ branch =
-          Flower branch petals
-        
-        pistil =
-          Garden (left ++ right)
-        
-        cases =
-          List.map case_ branches  
-      in
-      fillZipper [Flower pistil [Garden cases]] parent
-    
-    (Close, [], Petal _ _ _ :: parent) ->
-      fillZipper [] parent
-    
-    (Reorder, _, _ :: parent) ->
-      fillZipper bouquet parent
-
-    _ ->
-      Debug.todo "Unsupported action"
 
 
 handleDragDropMsg : FlowerDnDMsg -> Model -> (Model, Cmd Msg)
@@ -117,11 +71,11 @@ handleDragDropMsg dndMsg model =
                       case model.mode of
                         ProofMode Importing ->
                           Action Import
-                            [drag.content] destination.target
+                            destination.target [drag.content]
                         
                         EditMode Reordering ->
                           Action Reorder
-                            destination.content destination.target
+                            destination.target destination.content
                         
                         _ ->
                           DoNothing
@@ -145,14 +99,17 @@ handleDragDropMsg dndMsg model =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Action rule bouquet zipper ->
+    Action rule zipper bouquet ->
       ( { model
-        | goal = applyAction rule bouquet zipper
+        | goal = applyRule rule zipper bouquet
         , history = History { prev = Just model, next = Nothing } }
       , Cmd.none )
-
-    DragDropMsg dndMsg ->
-      handleDragDropMsg dndMsg model
+    
+    Auto ->
+      ( { model
+        | goal = auto [Unlock, Decompose, Close, Justify] model.goal
+        , history = History { prev = Just model, next = Nothing } }
+      , Cmd.none )
     
     ChangeUIMode mode ->
       ({ model | mode = mode }, Cmd.none)
@@ -162,12 +119,13 @@ update msg model =
 
     Redo ->
       (redo model, Cmd.none)
+
+    DragDropMsg dndMsg ->
+      handleDragDropMsg dndMsg model
     
     HandleKeyboardEvent { ctrlKey, key } ->
       let
         newModel =
-          let _ = Debug.log "ctrlKey" ctrlKey in
-          let _ = Debug.log "key" key in
           case (ctrlKey, key) of
             (True, Just "z") -> update Undo model |> Tuple.first
             (True, Just "y") -> update Redo model |> Tuple.first

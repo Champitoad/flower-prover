@@ -7,6 +7,7 @@ import Model.Formula as Formula exposing (..)
 import Model.Flower exposing (..)
 import Model.App exposing (..)
 
+import Update.Rules exposing (..)
 import Update.App exposing (..)
 
 import Utils.List
@@ -51,14 +52,14 @@ viewFormula model context formula =
           case formula of
             Atom _ ->
               if isHypothesis form context.zipper then
-                (Events.onClick (Action Justify [form] context.zipper))
+                (Events.onClick (Action Justify context.zipper [form]))
                 :: (htmlAttribute <| title "Justify")
                 :: actionableStyle.active
               else
                 actionableStyle.inactive
             
             _ ->
-              (Events.onClick (Action Decompose [form] context.zipper))
+              (Events.onClick (Action Decompose context.zipper [form]))
                 :: (htmlAttribute <| title "Decompose")
               :: actionableStyle.active
 
@@ -95,8 +96,8 @@ viewPistil model context (Garden bouquet as pistil) petals =
       case model.mode of
         ProofMode Justifying ->
           let
-            action name =
-              (Events.onClick (Action Unlock bouquet newZipper))
+            action rule name =
+              (Events.onClick (Action rule newZipper bouquet))
               :: (htmlAttribute <| title name)
               :: actionableStyle.active
           in
@@ -104,16 +105,16 @@ viewPistil model context (Garden bouquet as pistil) petals =
             case context.zipper of
               _ :: Pistil _ :: _ ->
                 let
-                  name =
+                  (rule, name) =
                     case List.length petals of
-                      0 -> "Ex falso quodlibet"
-                      1 -> "Unlock"
-                      _ -> "Case"
+                      0 -> (Close, "Ex falso quodlibet")
+                      1 -> (Unlock, "Unlock")
+                      _ -> (Case, "Case")
                 in
-                action name
+                action rule name
               _ ->
                 if List.length petals == 1 then
-                  action "Unlock"
+                  action Unlock "Unlock"
                 else
                   actionableStyle.inactive
           else
@@ -150,7 +151,7 @@ viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as peta
       case model.mode of
         ProofMode Justifying ->
           if List.isEmpty bouquet then
-            (Events.onClick (Action Close bouquet newZipper))
+            (Events.onClick (Action Close newZipper bouquet))
             :: (htmlAttribute <| title "QED")
             :: actionableStyle.active
           else

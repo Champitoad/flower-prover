@@ -14,7 +14,6 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
 
-import Html
 import Html.Attributes exposing (title)
 
 import Css
@@ -89,6 +88,17 @@ button msg icon enabled =
     [ iconStyledHtml ]
   |> toUnstyled
   |> html
+
+
+viewAutoButton : UIMode -> Element Msg
+viewAutoButton mode =
+  let
+    enabled =
+      case mode of
+        ProofMode _ -> True
+        _ -> False
+  in
+  button Auto Icons.settings enabled
 
 
 viewModeSelector : UIMode -> Element Msg
@@ -180,8 +190,9 @@ viewUndoRedo (History history) =
 viewToolbar : Model -> Element Msg
 viewToolbar model =
   let
+    autoButton = viewAutoButton model.mode
     modeSelector = viewModeSelector model.mode
-    undoRedo = viewUndoRedo
+    undoRedo = viewUndoRedo model.history
   in
   row
     [ width fill
@@ -190,10 +201,14 @@ viewToolbar model =
     , Background.gradient
         { angle = 0
         , steps = [ rgb 0.8 0.8 0.8, rgb 0.9 0.9 0.9 ] } ]
-    [ el [ width fill ] none
+    [ el
+        [ width fill ]
+        ( el
+            [ alignLeft ]
+            ( autoButton ) )
     , modeSelector
     , el
         [ width fill ]
         ( el
             [ alignRight ]
-            ( undoRedo model.history ) ) ]
+            ( undoRedo ) ) ]
