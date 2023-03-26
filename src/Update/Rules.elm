@@ -112,8 +112,18 @@ croppable =
   operable Neg
 
 
-applyRule : Rule -> Zipper -> Bouquet -> Bouquet
-applyRule rule zipper bouquet =
+operate : Rule -> Zipper -> Bouquet -> Surgery -> Surgery
+operate rule zipper bouquet surgery =
+  case rule of
+    Grow ->
+      { surgery | growing = zipper :: surgery.growing }
+    
+    _ ->
+      surgery
+
+
+apply : Rule -> Zipper -> Bouquet -> Bouquet
+apply rule zipper bouquet =
   case (rule, bouquet, zipper) of
     (Decompose, [Formula formula], _) ->
       fillZipper (decompose formula) zipper
@@ -149,6 +159,18 @@ applyRule rule zipper bouquet =
     
     (Reorder, _, _ :: parent) ->
       fillZipper bouquet parent
+    
+    (Grow, _, _) ->
+      fillZipper bouquet zipper
+    
+    (Glue, _, _) ->
+      fillZipper bouquet zipper
+    
+    (Crop, _, _) ->
+      fillZipper bouquet zipper
+
+    (Pull, _, _) ->
+      fillZipper bouquet zipper
 
     _ ->
       Debug.todo "Unsupported action"
@@ -163,7 +185,7 @@ tryRules candidates allowed zipper bouquet =
       if not (List.member rule allowed) then
         tryRules rules allowed zipper bouquet
       else
-        Just (applyRule rule zipper bouquet)
+        Just (apply rule zipper bouquet)
 
 
 autoFlower : List Rule -> Zipper -> Flower -> Maybe Bouquet

@@ -109,8 +109,17 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Action rule zipper bouquet ->
+      let
+        mode =
+          case model.mode of
+            EditMode interaction surgery ->
+              EditMode interaction (operate rule zipper bouquet surgery)
+            _ ->
+              model.mode
+      in
       ( { model
-        | goal = applyRule rule zipper bouquet
+        | goal = apply rule zipper bouquet
+        , mode = mode
         , history = History { prev = Just model, next = Nothing } }
       , Cmd.none )
     

@@ -1,6 +1,7 @@
 module View.Goal exposing (..)
 
 import View.Style as Style exposing (..)
+import View.Widgets exposing (..)
 import View.Events exposing (..)
 
 import Model.Formula as Formula exposing (..)
@@ -22,6 +23,8 @@ import Element.Font as Font
 import Html.Attributes exposing (title)
 
 import Html5.DragDrop as DnD
+
+import FeatherIcons as Icons
 
 
 reorderColor : Color.Color
@@ -177,9 +180,48 @@ viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as peta
             petal ) )
 
 
-addPetalZone : Zipper -> Element Msg
-addPetalZone zipper =
-  Debug.todo ""
+viewAddPetalZone : Context -> Garden -> List Garden -> Element Msg
+viewAddPetalZone context pistil petals =
+  let
+    newFlower =
+      Flower pistil (petals ++ [Garden []])
+
+    addPetalButton =
+      el
+        [ centerX
+        , centerY ]
+        ( button
+            (Action Glue context.zipper
+            [newFlower]) "Add Petal" Icons.plusCircle True )
+  in
+  column
+    [ width shrink
+    , height fill
+    , padding 10
+    , Background.color (flowerBackgroundColor (invert context.polarity)) ]
+    [ addPetalButton ]
+
+
+-- viewAddFlowerZone : Context -> Bouquet -> Element Msg
+-- viewAddFlowerZone context bouquet =
+--   let
+--     newFlower =
+--       Flower pistil (petals ++ [Garden []])
+
+--     addPetalButton =
+--       el
+--         [ centerX
+--         , centerY ]
+--         ( button
+--             (Action Glue context.zipper
+--             [newFlower]) "Add Petal" Icons.plusCircle True )
+--   in
+--   column
+--     [ width shrink
+--     , height fill
+--     , padding 10
+--     , Background.color (flowerBackgroundColor (invert context.polarity)) ]
+--     [ addPetalButton ]
 
 
 viewFlower : Model -> Context -> Flower -> Element Msg
@@ -195,9 +237,11 @@ viewFlower model context flower =
         
         addPetalEl =
           case model.mode of 
-            EditMode _ _ ->
-              Debug.todo ""
-            
+            EditMode _ surgery ->
+              if glueable surgery context then
+                [viewAddPetalZone context pistil petals]
+              else
+                []
             _ ->
               []
         
@@ -378,6 +422,10 @@ viewGarden model context (Garden bouquet) =
 
         els =
           Utils.List.zipperMap sperse bouquet
+        
+        addFlowerButton () =
+          Debug.todo ""
+          
       in
       wrappedRow attrs els
         

@@ -53,6 +53,8 @@
     - `add variable` zones in all gardens, regardless of polarity
     - In a typed setting, one can imagine that it opens a custom GUI to choose a
       type (locally, or even in an online data base)
+  - Add Reordering interaction for petals
+    - Then to reorder a flower, one must drag from the pistil
 
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers

@@ -74,7 +74,7 @@ type alias Model
 
 init : Model
 init =
-  { goal = [ orElimInvertible ]
+  { goal = [ bigFlower ]
   , mode = EditMode Operating initialSurgery
   , dragDrop = DnD.init
   , history = History { prev = Nothing, next = Nothing } }
