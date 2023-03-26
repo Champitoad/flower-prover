@@ -109,7 +109,7 @@ viewModeSelector currentMode =
         isSelected =
           case (mode, currentMode) of          
             (ProofMode _, ProofMode _) -> True
-            (EditMode _, EditMode _) -> True
+            (EditMode _ _, EditMode _ _) -> True
             _ -> mode == currentMode
 
         (bgColor, fgColor) =
@@ -122,7 +122,7 @@ viewModeSelector currentMode =
             (title, icon) =
               case mode of
                 ProofMode _ -> ("Prove", Icons.checkSquare)
-                EditMode _ -> ("Edit", Icons.edit2)
+                EditMode _ _ -> ("Edit", Icons.edit2)
                 NavigationMode -> ("Navigate", Icons.navigation)
             elem =
               el
@@ -172,7 +172,7 @@ viewModeSelector currentMode =
     , Border.color borderColor
     , Background.color borderColor ]
     [ item (ProofMode Justifying) Start
-    , item (EditMode Erasing) Middle
+    , item (EditMode Operating initialSurgery) Middle
     , item NavigationMode End ]
 
 

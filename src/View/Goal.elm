@@ -68,7 +68,7 @@ viewFormula model context formula =
     
     reorderDragAction =
       case model.mode of
-        EditMode _ ->
+        EditMode _ _ ->
           dragAction reorderColor model.dragDrop context.zipper form
         
         _ ->
@@ -177,6 +177,11 @@ viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as peta
             petal ) )
 
 
+addPetalZone : Zipper -> Element Msg
+addPetalZone zipper =
+  Debug.todo ""
+
+
 viewFlower : Model -> Context -> Flower -> Element Msg
 viewFlower model context flower =
   case flower of
@@ -188,17 +193,27 @@ viewFlower model context flower =
         pistilEl =
           viewPistil model context pistil petals
         
+        addPetalEl =
+          case model.mode of 
+            EditMode _ _ ->
+              Debug.todo ""
+            
+            _ ->
+              []
+        
         petalsEl =
           row
             [ width fill
             , height fill
             , spacing flowerBorderWidth ]
-            ( Utils.List.zipperMap (viewPetal model context pistil) petals )
+            ( Utils.List.zipperMap (viewPetal model context pistil) petals
+              ++ addPetalEl )
+
         
         color =
           case model.mode of
             ProofMode _ -> importColor
-            EditMode _ -> reorderColor
+            EditMode _ _ -> reorderColor
             _ -> Color.transparent
       in
       column
@@ -258,7 +273,7 @@ viewGarden model context (Garden bouquet) =
             _ ->
               []
 
-        EditMode Reordering ->
+        EditMode Reordering _ ->
           case DnD.getDragId model.dragDrop of
             Just { source, content } ->
               case source of
@@ -386,7 +401,7 @@ viewGarden model context (Garden bouquet) =
       wrappedRow attrs els
   in
   case model.mode of
-    EditMode _ ->
+    EditMode _ _ ->
       intersticial ()
 
     _ ->
@@ -426,7 +441,7 @@ viewGoal model =
     ProofMode _ ->
       bouquetEl ()
     
-    EditMode _ ->
+    EditMode _ _ ->
       bouquetEl ()
 
     _ ->

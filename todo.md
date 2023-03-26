@@ -36,7 +36,7 @@
 - Implement Edit mode
   - The drop zones of Importing turn into `add flower` zones in positive gardens
   - `add petal` zones at the start, end and between petals of negative flowers
-  - Negative flowers and positive petals can cropped/pulled (that is, removed)
+  - Negative flowers and positive petals can be cropped/pulled (that is, removed)
     by clicking on them (scissors cursor icon)
   - Two clipboards, one for cropped flowers and one for pulled petals
   - `add flower/petal` zones have:

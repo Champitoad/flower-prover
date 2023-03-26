@@ -37,15 +37,28 @@ type ProofInteraction
   | Fencing Selection
 
 
+type alias Surgery =
+  { growing : List Zipper
+  , cropped : Maybe Flower
+  , pulled : Maybe Garden }
+
+
+initialSurgery : Surgery
+initialSurgery =
+  { growing = []
+  , cropped = Nothing
+  , pulled = Nothing }
+
+
 type EditInteraction
-  = Erasing
+  = Operating
   | Adding Zipper
   | Reordering
 
 
 type UIMode
   = ProofMode ProofInteraction
-  | EditMode EditInteraction
+  | EditMode EditInteraction Surgery
   | NavigationMode
 
 
@@ -62,7 +75,7 @@ type alias Model
 init : Model
 init =
   { goal = [ orElimInvertible ]
-  , mode = EditMode Erasing
+  , mode = EditMode Operating initialSurgery
   , dragDrop = DnD.init
   , history = History { prev = Nothing, next = Nothing } }
 

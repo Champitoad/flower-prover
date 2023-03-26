@@ -81,3 +81,19 @@ slice start end list =
 forall : (a -> Bool) -> List a -> Bool
 forall p l =
   List.foldl (\x acc -> acc && p x) True l
+
+
+hasPrefix : (List a -> Bool) -> List a -> Bool
+hasPrefix p l =
+  let
+    (_, result) =
+      List.foldl
+        (\x (pre, acc) -> (pre ++ [x], acc || p pre))
+        ([], False) l
+  in
+  result
+
+
+hasSuffix : (List a -> Bool) -> List a -> Bool
+hasSuffix p l =
+  hasPrefix p (List.reverse l)

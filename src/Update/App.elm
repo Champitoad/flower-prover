@@ -45,10 +45,14 @@ handleDragDropMsg dndMsg model =
         Just _ ->
           case model.mode of
             ProofMode Justifying ->
-              { model | dragDrop = newDragDrop, mode = ProofMode Importing }
+              { model
+              | dragDrop = newDragDrop
+              , mode = ProofMode Importing }
 
-            EditMode Erasing ->
-              { model | dragDrop = newDragDrop, mode = EditMode Reordering }
+            EditMode _ surgery ->
+              { model
+              | dragDrop = newDragDrop
+              , mode = EditMode Reordering surgery }
             
             _ ->
               model
@@ -57,9 +61,14 @@ handleDragDropMsg dndMsg model =
           let
             defaultMode =
               case model.mode of
-                ProofMode _ -> ProofMode Justifying
-                EditMode _ -> EditMode Erasing
-                _ -> model.mode
+                ProofMode _ ->
+                  ProofMode Justifying
+
+                EditMode _ surgery ->
+                  EditMode Operating surgery
+
+                _ ->
+                  model.mode
           in
           case result of
             Just (drag, drop, _) ->
@@ -73,7 +82,7 @@ handleDragDropMsg dndMsg model =
                           Action Import
                             destination.target [drag.content]
                         
-                        EditMode Reordering ->
+                        EditMode Reordering _ ->
                           Action Reorder
                             destination.target destination.content
                         

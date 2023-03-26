@@ -4,6 +4,7 @@ import Utils.List exposing (forall, zipperFoldl)
 
 import Model.Formula exposing (..)
 import Model.Flower exposing (..)
+import Model.App exposing (..)
 
 
 type Rule
@@ -15,6 +16,10 @@ type Rule
   | Close -- empty petal / empty pistil with no petal
   | Fence -- fencing
   | Reorder -- multiset
+  | Grow -- add flower
+  | Glue -- add petal
+  | Crop -- remove flower
+  | Pull -- remove petal
 
 
 decomposable : Zipper -> Bouquet -> Bool
@@ -77,6 +82,34 @@ autoRules zipper bouquet =
     (\(rule, pred) acc ->
       if pred zipper bouquet then rule :: acc else acc)
     [] rulePreds
+
+
+operable : Polarity -> Surgery -> Context -> Bool
+operable polarity surgery context =
+  context.polarity == polarity ||
+  Utils.List.hasSuffix
+    (\ancestor -> List.member ancestor surgery.growing)
+    context.zipper
+
+
+growable : Surgery -> Context -> Bool
+growable =
+  operable Pos
+
+
+glueable : Surgery -> Context -> Bool
+glueable =
+  operable Neg
+
+
+pullable : Surgery -> Context -> Bool
+pullable =
+  operable Pos
+
+
+croppable : Surgery -> Context -> Bool
+croppable =
+  operable Neg
 
 
 applyRule : Rule -> Zipper -> Bouquet -> Bouquet
