@@ -12,7 +12,7 @@ import Update.Rules exposing (..)
 import Update.App exposing (..)
 
 import Utils.List
-import Utils.Color as Color
+import Utils.Color
 
 import Element exposing (..)
 import Element.Background as Background
@@ -24,17 +24,21 @@ import Html.Attributes exposing (title)
 
 import Html5.DragDrop as DnD
 
+import Css
+
 import FeatherIcons as Icons
+
+import Color
 
 
 reorderColor : Color.Color
 reorderColor =
-  Color.fromRgb { red = 0.7, green = 0.7, blue = 0.7 }
+  Utils.Color.fromRgb { red = 0.7, green = 0.7, blue = 0.7 }
 
 
 importColor : Color.Color
 importColor =
-  Color.fromRgb { red = 1, green = 0.8, blue = 0 }
+  Utils.Color.fromRgb { red = 1, green = 0.8, blue = 0 }
 
 
 cropAction : Surgery -> Context -> Flower -> List (Attribute Msg)
@@ -142,7 +146,7 @@ viewPistil model context (Garden bouquet as pistil) petals =
           cropAction surgery context (Flower pistil petals)
 
         _ ->
-          (actionable Color.transparent).inactive
+          (actionable Utils.Color.transparent).inactive
   in
   el
     ( [ width fill
@@ -198,6 +202,19 @@ viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as peta
             petal ) )
 
 
+addButton : ButtonParams msg -> Element msg
+addButton params =
+  let
+    style =
+      { width = Css.px defaultButtonSize
+      , height = Css.pct 100
+      , color = Color.rgb255 58 134 255
+      , iconColorEnabled = Color.white
+      , iconColorDisabled = Color.darkGray }
+  in
+  button style params
+
+
 viewAddPetalZone : Context -> Garden -> List Garden -> Element Msg
 viewAddPetalZone context pistil petals =
   let
@@ -205,12 +222,11 @@ viewAddPetalZone context pistil petals =
       Flower pistil (petals ++ [Garden []])
 
     addPetalButton =
-      el
-        [ centerX
-        , centerY ]
-        ( button
-            (Action Glue context.zipper
-            [newFlower]) "Add Petal" Icons.plusCircle True )
+        ( addButton
+            { msg =  Action Glue context.zipper [newFlower]
+            , title = "Add Petal"
+            , icon = Icons.plus
+            , enabled = True } )
   in
   column
     [ width shrink
@@ -276,7 +292,7 @@ viewFlower model context flower =
           case model.mode of
             ProofMode _ -> importColor
             EditMode _ _ -> reorderColor
-            _ -> Color.transparent
+            _ -> Utils.Color.transparent
       in
       column
         ( [ width fill
@@ -400,7 +416,7 @@ viewGarden model context (Garden bouquet) =
       , spacing spaceSize ]
     
     borderAttrs =
-      [ Border.width (droppable Color.transparent).borderWidth
+      [ Border.width (droppable Utils.Color.transparent).borderWidth
       , Border.color Style.transparent ]
 
     length flower =

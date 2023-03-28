@@ -1,9 +1,19 @@
 module Utils.Color exposing (..)
 
 import Element
+
 import Html
 import Html.Attributes exposing (style)
+
+import Css
+
 import Color exposing (..)
+
+
+type alias Color = Color.Color
+
+
+-- Color model conversions
 
 
 fromRgba : { red : Float, green : Float, blue : Float, alpha : Float } -> Color
@@ -27,7 +37,17 @@ toRgb color =
   { red = red, green = green, blue = blue }
 
 
-type alias Color = Color.Color
+toRgba255 : Color -> { red : Int, green : Int, blue : Int, alpha : Float }
+toRgba255 color =
+  let { red, green, blue, alpha } = toRgba color in
+  let int f = round (f * 255) in
+  { red = int red
+  , green = int green
+  , blue = int blue
+  , alpha = alpha }
+
+
+-- Library conversions
 
 
 toElement : Color -> Element.Color
@@ -40,10 +60,24 @@ fromElement color =
   color |> Element.toRgb |> Color.fromRgba
 
 
-toHtml : Color -> Html.Attribute msg
-toHtml color =
+toHtmlAttr : Color -> Html.Attribute msg
+toHtmlAttr color =
   let value = color |> Color.toCssString in
   style "color" value
+
+
+toCss : Color -> Css.Color
+toCss color =
+  let { red, green, blue, alpha } = toRgba255 color in
+  Css.rgba red green blue alpha
+
+
+-- Utility functions
+
+
+transparent : Color
+transparent =
+  Color.fromRgba { red = 1, green = 1, blue = 1, alpha = 1 }
 
 
 withAlpha : Float -> Color -> Color
@@ -52,6 +86,7 @@ withAlpha alpha color =
   Color.fromRgba { rgba | alpha = alpha }
 
 
-transparent : Color
-transparent =
-  Color.fromRgba { red = 1, green = 1, blue = 1, alpha = 1 }
+changeLight : Float -> Color -> Color
+changeLight factor color =
+  let ({ lightness } as hsla) = Color.toHsla color in
+  Color.fromHsla { hsla | lightness = factor * lightness }

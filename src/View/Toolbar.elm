@@ -32,7 +32,11 @@ viewAutoButton mode =
         ProofMode _ -> True
         _ -> False
   in
-  button Auto "Auto" Icons.settings enabled
+  defaultButton
+    { msg = Auto
+    , title = "Auto"
+    , icon = Icons.settings
+    , enabled = enabled }
 
 
 viewModeSelector : UIMode -> Element Msg
@@ -65,7 +69,7 @@ viewModeSelector currentMode =
                   |> Icons.withSize 30
                   |> Icons.toHtml [ fgColor 
                                     |> Utils.Color.fromElement
-                                    |> Utils.Color.toHtml ]
+                                    |> Utils.Color.toHtmlAttr ]
                   |> html )
           in
           (elem, title)
@@ -88,7 +92,7 @@ viewModeSelector currentMode =
       in
       el
         ( [ width (60 |> px)
-          , height (buttonHeight |> px)
+          , height (defaultButtonSize |> px)
           , Background.color bgColor
           , Border.roundEach borderRound
           , htmlAttribute <| Html.Attributes.title titleText ]
@@ -117,8 +121,16 @@ viewUndoRedo (History history) =
       Tuple.mapBoth isSomething isSomething (history.prev, history.next)
   in
   row []
-    [ button Undo "Undo" Icons.arrowLeft undoEnabled
-    , button Redo "Redo" Icons.arrowRight redoEnabled ]
+    [ defaultButton
+        { msg = Undo
+        , title = "Undo"
+        , icon = Icons.arrowLeft
+        , enabled = undoEnabled }
+    , defaultButton
+        { msg = Redo
+        , title = "Redo"
+        , icon = Icons.arrowRight
+        , enabled = redoEnabled } ]
 
 
 viewToolbar : Model -> Element Msg

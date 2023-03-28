@@ -1,14 +1,18 @@
 module View.Widgets exposing (..)
 
+import Utils.Color
+
 import Element exposing (..)
 
 import Css
 import Html.Styled exposing (fromUnstyled, toUnstyled)
 import Html.Styled.Events
-import Html.Styled.Attributes exposing (title, css)
+import Html.Styled.Attributes as Attrs exposing (css)
 
 import FeatherIcons as Icons
 import FeatherIcons exposing (Icon)
+
+import Color
 
 
 buttonBorderRadius : number
@@ -16,21 +20,31 @@ buttonBorderRadius =
   10
 
 
-buttonHeight : number
-buttonHeight =
-  55
+type alias ButtonStyle widthUnit heightUnit
+  = { width : Css.LengthOrAuto widthUnit
+    , height : Css.LengthOrAuto heightUnit
+    , color : Color.Color
+    , iconColorEnabled : Color.Color
+    , iconColorDisabled : Color.Color }
 
 
-button : msg -> String ->  Icon -> Bool -> Element msg
-button msg name icon enabled =
+type alias ButtonParams msg
+  = { msg : msg
+    , title : String
+    , icon : Icon
+    , enabled : Bool }
+
+
+button : ButtonStyle widthUnit heightUnit -> ButtonParams msg -> Element msg
+button style { msg, title, icon, enabled } =
   let
     iconStyledHtml =
       let
         iconColor =
           if enabled then
-            Css.rgb 0 0 0
+            style.iconColorEnabled
           else
-            Css.rgb 127 127 127
+            style.iconColorDisabled
         iconHtml =
           icon
           |> Icons.withSize 30
@@ -38,12 +52,12 @@ button msg name icon enabled =
           |> fromUnstyled
       in
       Html.Styled.div
-        [ css [ Css.color iconColor ] ]
+        [ css [ Css.color (iconColor |> Utils.Color.toCss) ] ]
         [ iconHtml ]
     
-    style =
-      Css.width (Css.px buttonHeight) ::
-      Css.height (Css.px buttonHeight) ::
+    styleAttrs =
+      Css.width style.width ::
+      Css.height style.height ::
 
       Css.borderStyle Css.solid ::
       Css.borderRadius (Css.px buttonBorderRadius) ::
@@ -55,18 +69,40 @@ button msg name icon enabled =
 
       if enabled then
         [ Css.cursor Css.pointer
-        , Css.borderColor (Css.rgb 180 180 180)
-        , Css.backgroundColor (Css.rgb 240 240 240)
-        , Css.hover [Css.backgroundColor (Css.rgb 250 250 250)]
-        , Css.active [Css.backgroundColor (Css.rgb 180 180 180)] ]
+        , Css.borderColor (style.color |> Utils.Color.changeLight 0.7 |> Utils.Color.toCss)
+        , Css.backgroundColor (style.color |> Utils.Color.toCss)
+        , Css.hover [Css.backgroundColor
+            (style.color |> Utils.Color.changeLight 1.15 |> Utils.Color.toCss)]
+        , Css.active [Css.backgroundColor
+            (style.color |> Utils.Color.changeLight 0.7 |> Utils.Color.toCss)] ]
       else
-        [ Css.borderColor Css.transparent ]
+        [ Css.borderColor Css.transparent
+        , Css.backgroundColor Css.transparent ]
     
     action =
       if enabled then [Html.Styled.Events.onClick msg] else []
   in
   Html.Styled.div
-    ( css style :: title name :: action )
+    ( css styleAttrs :: Attrs.title title :: action )
     [ iconStyledHtml ]
   |> toUnstyled
   |> html
+
+
+defaultButtonSize : number
+defaultButtonSize =
+  55
+
+
+defaultButtonStyle : ButtonStyle Css.Px Css.Px
+defaultButtonStyle =
+  { width = Css.px defaultButtonSize
+  , height = Css.px defaultButtonSize
+  , color = Color.rgb 0.92 0.92 0.92
+  , iconColorEnabled = Color.black
+  , iconColorDisabled = Color.rgb 0.5 0.5 0.5 }
+
+
+defaultButton : ButtonParams msg -> Element msg
+defaultButton =
+  button defaultButtonStyle

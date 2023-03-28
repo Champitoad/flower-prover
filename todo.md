@@ -54,6 +54,7 @@
       type (locally, or even in an online data base)
   - Add Reordering interaction for petals
     - Then to reorder a flower, one must drag from the pistil
+  - Grown flowers/petals should be highlighted in blue
 
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers
