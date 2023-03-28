@@ -16,8 +16,7 @@ type Rule
   | Close -- empty petal / empty pistil with no petal
   | Fence -- fencing
   | Reorder -- multiset
-  | Grow -- add flower
-  | Glue -- add petal
+  | Grow -- add flower/petal
   | Crop -- remove flower
   | Pull -- remove petal
 
@@ -118,11 +117,11 @@ operate rule zipper bouquet surgery =
     (Grow, _, _) ->
       { surgery | growing = zipper :: surgery.growing }
     
-    (Crop, [flower], _) ->
+    (Crop, [flower], Bouquet _ _ :: _) ->
       { surgery | cropped = Just flower }
 
-    -- (Pull, _, ) ->
-    --   { surgery | cropped = Just flower }
+    (Pull, _, Petal _ _ _ :: _) ->
+      { surgery | pulled = Just (Garden bouquet) }
     
     _ ->
       surgery
@@ -169,14 +168,11 @@ apply rule zipper bouquet =
     (Grow, _, _) ->
       fillZipper bouquet zipper
     
-    (Glue, _, _) ->
-      fillZipper bouquet zipper
-    
     (Crop, _, _) ->
       fillZipper [] zipper
 
-    (Pull, _, _) ->
-      fillZipper bouquet zipper
+    (Pull, _, Petal pistil left right :: parent) ->
+      fillZipper [Flower pistil (left ++ right)] parent
 
     _ ->
       Debug.todo "Unsupported action"

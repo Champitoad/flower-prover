@@ -52,6 +52,17 @@ cropAction surgery context flower =
     actionableStyle.inactive
 
 
+pullAction : Surgery -> Context -> Bouquet -> List (Attribute Msg)
+pullAction surgery context bouquet =
+  let actionableStyle = redActionable in
+  if pullable surgery context then
+    Events.onClick (Action Pull context.zipper bouquet)
+    :: (htmlAttribute <| title "Remove Petal")
+    :: actionableStyle.active
+  else
+    actionableStyle.inactive
+
+
 viewFormula : Model -> Context -> Formula -> Element Msg
 viewFormula model context formula =
   let
@@ -182,6 +193,9 @@ viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as peta
           else
             actionableStyle.inactive
         
+        EditMode Operating surgery ->
+          pullAction surgery { context | zipper = newZipper } bouquet
+
         _ ->
           actionableStyle.inactive
   in
@@ -223,7 +237,7 @@ viewAddPetalZone context pistil petals =
 
     addPetalButton =
         ( addButton
-            { msg =  Action Glue context.zipper [newFlower]
+            { msg =  Action Grow context.zipper [newFlower]
             , title = "Add Petal"
             , icon = Icons.plus
             , enabled = True } )
