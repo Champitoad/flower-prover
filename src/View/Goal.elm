@@ -12,6 +12,7 @@ import Update.Rules exposing (..)
 import Update.App exposing (..)
 
 import Utils.List
+import Utils.Events
 import Utils.Color
 
 import Element exposing (..)
@@ -45,7 +46,7 @@ cropAction : Surgery -> Context -> Flower -> List (Attribute Msg)
 cropAction surgery context flower =
   let actionableStyle = redActionable in
   if croppable surgery context then
-    Events.onClick (Action Crop context.zipper [flower])
+    Utils.Events.onClick (Action Crop context.zipper [flower])
     :: (htmlAttribute <| title "Remove Flower")
     :: actionableStyle.active
   else
@@ -56,7 +57,7 @@ pullAction : Surgery -> Context -> Bouquet -> List (Attribute Msg)
 pullAction surgery context bouquet =
   let actionableStyle = redActionable in
   if pullable surgery context then
-    Events.onClick (Action Pull context.zipper bouquet)
+    Utils.Events.onClick (Action Pull context.zipper bouquet)
     :: (htmlAttribute <| title "Remove Petal")
     :: actionableStyle.active
   else
@@ -250,26 +251,32 @@ viewAddPetalZone context pistil petals =
     [ addPetalButton ]
 
 
--- viewAddFlowerZone : Context -> Bouquet -> Element Msg
--- viewAddFlowerZone context bouquet =
---   let
---     newFlower =
---       Flower pistil (petals ++ [Garden []])
+viewAddFlowerZone : Context -> Bouquet -> Element Msg
+viewAddFlowerZone context bouquet =
+  let
+    newFlower =
+      yinyang
 
---     addPetalButton =
---       el
---         [ centerX
---         , centerY ]
---         ( button
---             (Action Glue context.zipper
---             [newFlower]) "Add Petal" Icons.plusCircle True )
---   in
---   column
---     [ width shrink
---     , height fill
---     , padding 10
---     , Background.color (flowerBackgroundColor (invert context.polarity)) ]
---     [ addPetalButton ]
+    newZipper =
+      Bouquet bouquet [] :: context.zipper
+
+    addFlowerButton =
+      el
+        [ width shrink
+        , height fill ]
+        ( addButton
+            { msg = Action Grow newZipper [newFlower]
+            , title = "Add Flower"
+            , icon = Icons.plus
+            , enabled = True } )
+  in
+  column
+    [ width shrink
+    , height fill
+    , centerX
+    , Border.rounded flowerBorderRound
+    , Background.color (flowerBackgroundColor context.polarity) ]
+    [ addFlowerButton ]
 
 
 viewFlower : Model -> Context -> Flower -> Element Msg
@@ -283,7 +290,7 @@ viewFlower model context flower =
         pistilEl =
           viewPistil model context pistil petals
         
-        addPetalEl =
+        addPetalZone =
           case model.mode of 
             EditMode _ surgery ->
               if glueable surgery context then
@@ -299,7 +306,7 @@ viewFlower model context flower =
             , height fill
             , spacing flowerBorderWidth ]
             ( Utils.List.zipperMap (viewPetal model context pistil) petals
-              ++ addPetalEl )
+              ++ addPetalZone )
 
         
         color =
@@ -470,11 +477,17 @@ viewGarden model context (Garden bouquet) =
         els =
           Utils.List.zipperMap sperse bouquet
         
-        addFlowerButton () =
-          Debug.todo ""
-          
+        addFlowerZone =
+          case model.mode of 
+            EditMode _ surgery ->
+              if growable surgery context then
+                [viewAddFlowerZone context bouquet]
+              else
+                []
+            _ ->
+              []
       in
-      wrappedRow attrs els
+      wrappedRow attrs (els ++ addFlowerZone)
         
     normal () =
       let

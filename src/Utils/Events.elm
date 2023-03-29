@@ -5,10 +5,18 @@ import Json.Decode as Json
 
 import Element exposing (..)
 
+import Html.Styled
+import Html.Styled.Events
+
 
 onClick : msg -> Attribute msg
 onClick =
   alwaysStopPropagationOn "onclick"
+
+
+onClickStyled : msg -> Html.Styled.Attribute msg
+onClickStyled =
+  alwaysStopPropagationOnStyled "onclick"
 
 
 onMouseDown : msg -> Attribute msg
@@ -36,3 +44,9 @@ alwaysStopPropagationOn event msg =
   let always m = ( m, True ) in
   Html.Events.stopPropagationOn event (Json.map always (Json.succeed msg)) |>
   htmlAttribute
+
+
+alwaysStopPropagationOnStyled : String -> msg -> Html.Styled.Attribute msg
+alwaysStopPropagationOnStyled event msg =
+  let always m = ( m, True ) in
+  Html.Styled.Events.stopPropagationOn event (Json.map always (Json.succeed msg))

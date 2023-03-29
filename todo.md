@@ -1,5 +1,7 @@
 # Features
 
+- Top-level is a garden instead of a bouquet
+
 - Automation of some proof actions
   - Click on it opens either:
     - A dialog with a list of checkboxes to enable/disable automation for each
@@ -34,20 +36,17 @@
   - Selection restricted to flowers in the same garden
 
 - Implement Edit mode
-  - The drop zones of Importing turn into `add flower` zones in positive gardens
-  - positive petals can be pulled (that is, removed) by clicking on them
-    (scissors cursor icon)
-  - Two clipboards, one for cropped flowers and one for pulled petals
+  - Fix logic of `Surgery.growing`
+    - Instead of identifying by zipper, which gets invalidated when adding more
+      elements, we should have unique identifiers attached to flowers (and maybe
+      gardens?)
+  - Fix click event propagation for cropping/pulling conflicting with adding
   - `add flower/petal` zones have:
     - text edit to grow atom
       - one can imagine instead a button that launches/inlines a domain-specific
         GUI to build statements/objects in a custom domain, i.e. euclidian
         geometry
-    - `grow` buttons to grow a flower/petal
-    - free space to:
-      - paste clipboard by clicking
-  - Flowers/petals created by `grow` buttons don't have polarity restrictions:
-    everything can be removed, and things can be added anywhere
+    - free space to paste clipboard by clicking
   - First-order:
     - `add variable` zones in all gardens, regardless of polarity
     - In a typed setting, one can imagine that it opens a custom GUI to choose a
@@ -55,6 +54,15 @@
   - Add Reordering interaction for petals
     - Then to reorder a flower, one must drag from the pistil
   - Grown flowers/petals should be highlighted in blue
+  - Alternative version for Edit mode based on submodes:
+    - Submode picker on left of toolbar
+    - Submodes are: `Add Formula` ('T' text icon), `Add Space` (plus square
+      icon?), `Erase` (eraser icon)
+    - Highlight only zones activable in the corresponding submode
+    - In `Add ...` submodes, instead of having additional zones at the end or in
+      between elements, use the entire parent space:
+      - the garden when adding flowers
+      - the flower when adding petals (but where on the flower??)
 
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers

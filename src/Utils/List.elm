@@ -1,6 +1,11 @@
 module Utils.List exposing (..)
 
 
+toString : (a -> String) -> List a -> String
+toString print l =
+  "[" ++ (l |> List.map print |> String.join ", ") ++ "]"
+
+
 type alias Zipper a
   = (List a, List a)
 
@@ -96,4 +101,4 @@ hasPrefix p l =
 
 hasSuffix : (List a -> Bool) -> List a -> Bool
 hasSuffix p l =
-  hasPrefix p (List.reverse l)
+  hasPrefix (\pre -> p (List.reverse pre)) (List.reverse l)

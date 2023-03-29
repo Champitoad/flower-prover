@@ -87,7 +87,8 @@ operable : Polarity -> Surgery -> Context -> Bool
 operable polarity surgery context =
   context.polarity == polarity ||
   Utils.List.hasSuffix
-    (\ancestor -> List.member ancestor surgery.growing)
+    (\ancestor ->
+      List.member ancestor surgery.growing)
     context.zipper
 
 
@@ -114,7 +115,7 @@ croppable =
 operate : Rule -> Zipper -> Bouquet -> Surgery -> Surgery
 operate rule zipper bouquet surgery =
   case (rule, bouquet, zipper) of
-    (Grow, _, _) ->
+    (Grow, [_], Bouquet _ [] :: _) ->
       { surgery | growing = zipper :: surgery.growing }
     
     (Crop, [flower], Bouquet _ _ :: _) ->

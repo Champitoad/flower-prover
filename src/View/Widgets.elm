@@ -20,6 +20,11 @@ buttonBorderRadius =
   10
 
 
+defaultButtonSize : number
+defaultButtonSize =
+  55
+
+
 type alias ButtonStyle widthUnit heightUnit
   = { width : Css.LengthOrAuto widthUnit
     , height : Css.LengthOrAuto heightUnit
@@ -58,6 +63,8 @@ button style { msg, title, icon, enabled } =
     styleAttrs =
       Css.width style.width ::
       Css.height style.height ::
+      Css.minWidth (Css.px defaultButtonSize) ::
+      Css.minHeight (Css.px defaultButtonSize) ::
 
       Css.borderStyle Css.solid ::
       Css.borderRadius (Css.px buttonBorderRadius) ::
@@ -87,11 +94,6 @@ button style { msg, title, icon, enabled } =
     [ iconStyledHtml ]
   |> toUnstyled
   |> html
-
-
-defaultButtonSize : number
-defaultButtonSize =
-  55
 
 
 defaultButtonStyle : ButtonStyle Css.Px Css.Px
