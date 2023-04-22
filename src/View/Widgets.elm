@@ -1,12 +1,12 @@
 module View.Widgets exposing (..)
 
 import Utils.Color
+import Utils.Events
 
 import Element exposing (..)
 
 import Css
 import Html.Styled exposing (fromUnstyled, toUnstyled)
-import Html.Styled.Events
 import Html.Styled.Attributes as Attrs exposing (css)
 
 import FeatherIcons as Icons
@@ -87,7 +87,7 @@ button style { msg, title, icon, enabled } =
         , Css.backgroundColor Css.transparent ]
     
     action =
-      if enabled then [Html.Styled.Events.onClick msg] else []
+      if enabled then [Utils.Events.onClickStyled msg] else []
   in
   Html.Styled.div
     ( css styleAttrs :: Attrs.title title :: action )

@@ -40,7 +40,6 @@
     - Instead of identifying by zipper, which gets invalidated when adding more
       elements, we should have unique identifiers attached to flowers (and maybe
       gardens?)
-  - Fix click event propagation for cropping/pulling conflicting with adding
   - `add flower/petal` zones have:
     - text edit to grow atom
       - one can imagine instead a button that launches/inlines a domain-specific

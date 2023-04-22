@@ -10,6 +10,26 @@ type alias Zipper a
   = (List a, List a)
 
 
+nth : Int -> List a -> Maybe a
+nth n l =
+  case (l, n) of
+    (x :: _, 0) -> Just x
+    (_ :: tail, _) -> nth (n - 1) tail
+    _ -> Nothing
+
+
+pivot : Int -> List a -> Zipper a
+pivot n l =
+  let
+    aux acc n_ l_ =
+      case (l_, n_) of
+        (x :: t, _) -> aux (x :: acc) (n - 1) t
+        (_, 0) -> (List.reverse acc, l_)
+        ([], _) -> (List.reverse acc, l_)
+  in
+  aux [] n l
+
+
 zipperMap : (Zipper a -> a -> b) -> List a -> List b
 zipperMap f list =
   let

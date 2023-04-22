@@ -135,6 +135,53 @@ type alias Context
       polarity : Polarity }
 
 
+-- Paths are a more abstract version of zippers where we only remember the
+-- position as an integer, instead of the full surrounding context
+
+type alias Path
+  = List Int
+
+
+-- This is useful to maintain the identity of flowers by keeping track of their
+-- position, without having to remember the content of their context, nor adding
+-- a stateful identifier in the model.
+
+-- A zipper can be reconstructed by "walking down" a path in a bouquet. The path
+-- does not always denote a valid branch of the bouquet, thus this operation is
+-- partial.
+
+walk : Bouquet -> Path -> Maybe (Zipper, Bouquet)
+walk bouquet path =
+  let
+    walkFlower acc flower path_ =
+      case path_ of
+        [] -> Just (List.reverse acc, [flower])
+        n :: tail ->
+          case flower of
+            Formula _ -> Nothing
+            Flower (Garden bouquet_ as pistil) petals ->
+              if n == 0 then
+                walkBouquet (Pistil petals :: acc) bouquet_ tail
+              else
+                case Utils.List.pivot (n - 1) petals of
+                  (l, Garden petal :: r) ->
+                    walkBouquet (Petal pistil l r :: acc) petal tail
+                  _ ->
+                    Nothing
+    
+    walkBouquet acc bouquet_ path_ =
+      case path_ of
+        [] -> Just (List.reverse acc, bouquet_)
+        n :: tail ->
+          case Utils.List.pivot (n - 1) bouquet_ of
+            (l, flower :: r) ->
+              walkFlower (Bouquet l r :: acc) flower tail
+            _ ->
+              Nothing
+  in
+  walkBouquet [] bouquet path
+
+
 -- String representation
 
 
