@@ -11,12 +11,12 @@ import Html.Styled.Events
 
 onClick : msg -> Attribute msg
 onClick =
-  alwaysStopPropagationOn "onclick"
+  alwaysStopPropagationOn "click"
 
 
 onClickStyled : msg -> Html.Styled.Attribute msg
 onClickStyled =
-  alwaysStopPropagationOnStyled "onclick"
+  alwaysStopPropagationOnStyled "click"
 
 
 onMouseDown : msg -> Attribute msg
