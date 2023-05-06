@@ -38,7 +38,7 @@ type ProofInteraction
 
 
 type alias Surgery =
-  { growing : List Zipper
+  { growing : List Path
   , cropped : Maybe Flower
   , pulled : Maybe Garden }
 

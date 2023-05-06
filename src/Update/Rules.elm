@@ -89,7 +89,7 @@ operable polarity surgery context =
   Utils.List.hasSuffix
     (\ancestor ->
       List.member ancestor surgery.growing)
-    context.zipper
+    (context.zipper |> zipperToPath)
 
 
 growable : Surgery -> Context -> Bool
@@ -116,7 +116,7 @@ operate : Rule -> Zipper -> Bouquet -> Surgery -> Surgery
 operate rule zipper bouquet surgery =
   case (rule, bouquet, zipper) of
     (Grow, [_], Bouquet _ [] :: _) ->
-      { surgery | growing = zipper :: surgery.growing }
+      { surgery | growing = (zipper |> zipperToPath) :: surgery.growing }
     
     (Crop, [flower], Bouquet _ _ :: _) ->
       { surgery | cropped = Just flower }

@@ -182,6 +182,25 @@ walk bouquet path =
   walkBouquet [] bouquet path
 
 
+-- Also there is a forgetful functor from zippers to paths
+
+
+zipToInt : Zip -> Int
+zipToInt zip =
+  case zip of
+    Bouquet left _ ->
+      List.length left
+    Pistil _ ->
+      0
+    Petal _ left _ ->
+      1 + List.length left
+
+
+zipperToPath : Zipper -> Path
+zipperToPath =
+  List.map zipToInt
+
+
 -- String representation
 
 
