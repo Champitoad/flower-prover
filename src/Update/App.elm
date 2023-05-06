@@ -10,7 +10,6 @@ import Json.Decode exposing (Value)
 import Html5.DragDrop as DnD
 
 import Keyboard.Event exposing (KeyboardEvent)
-import Utils.List
 
 
 port dragstart : Value -> Cmd msg
@@ -131,7 +130,15 @@ update msg model =
       , Cmd.none )
     
     ChangeUIMode mode ->
-      ({ model | mode = mode }, Cmd.none)
+      let
+        newGoal =
+          case mode of
+            ProofMode _ ->
+              List.map naturalizeFlower model.goal
+            _ ->
+              model.goal
+      in
+      ({ model | mode = mode, goal = newGoal }, Cmd.none)
     
     Undo ->
       (undo model, Cmd.none)

@@ -42,10 +42,10 @@ importColor =
   Utils.Color.fromRgb { red = 1, green = 0.8, blue = 0 }
 
 
-cropAction : Surgery -> Context -> Flower -> List (Attribute Msg)
-cropAction surgery context flower =
+cropAction : Context -> Flower -> List (Attribute Msg)
+cropAction context flower =
   let actionableStyle = redActionable in
-  if croppable surgery context then
+  if croppable context || isGrownFlower flower then
     Utils.Events.onClick (Action Crop context.zipper [flower])
     :: (htmlAttribute <| title "Remove Flower")
     :: actionableStyle.active
@@ -53,11 +53,11 @@ cropAction surgery context flower =
     actionableStyle.inactive
 
 
-pullAction : Surgery -> Context -> Bouquet -> List (Attribute Msg)
-pullAction surgery context bouquet =
+pullAction : Context -> Garden -> List (Attribute Msg)
+pullAction context garden =
   let actionableStyle = redActionable in
-  if pullable surgery context then
-    Utils.Events.onClick (Action Pull context.zipper bouquet)
+  if pullable context then
+    Utils.Events.onClick (Action Pull context.zipper garden.flowers)
     :: (htmlAttribute <| title "Remove Petal")
     :: actionableStyle.active
   else
@@ -93,8 +93,8 @@ viewFormula model context formula =
               :: (htmlAttribute <| title "Decompose")
               :: actionableStyle.active
         
-        EditMode Operating surgery ->
-          cropAction surgery context (Formula formula)
+        EditMode Operating _ ->
+          cropAction context (Formula formula)
 
         _ ->
           actionableStyle.inactive
@@ -118,11 +118,11 @@ viewFormula model context formula =
     ( text (Formula.toString formula) )
 
 
-viewPistil : Model -> Context -> Garden -> List Garden -> Element Msg
-viewPistil model context (Garden bouquet as pistil) petals =
+viewPistil : Model -> Context -> Metadata -> Garden -> List Garden -> Element Msg
+viewPistil model context metadata pistil petals =
   let
     newZipper =
-      Pistil petals :: context.zipper
+      mkPistil metadata pistil.metadata petals :: context.zipper
 
     clickAction =
       case model.mode of
@@ -131,11 +131,11 @@ viewPistil model context (Garden bouquet as pistil) petals =
             actionableStyle = orangeActionable
 
             action rule name =
-              (Events.onClick (Action rule newZipper bouquet))
+              (Events.onClick (Action rule newZipper (harvest pistil)))
               :: (htmlAttribute <| title name)
               :: actionableStyle.active
           in
-          if List.isEmpty bouquet then
+          if List.isEmpty (harvest pistil) then
             case context.zipper of
               _ :: Pistil _ :: _ ->
                 let
@@ -154,8 +154,8 @@ viewPistil model context (Garden bouquet as pistil) petals =
           else
             actionableStyle.inactive
         
-        EditMode Operating surgery ->
-          cropAction surgery context (Flower pistil petals)
+        EditMode Operating _ ->
+          cropAction context (mkFlower metadata pistil petals)
 
         _ ->
           (actionable Utils.Color.transparent).inactive
@@ -177,25 +177,25 @@ viewPistil model context (Garden bouquet as pistil) petals =
             pistil ) )
 
 
-viewPetal : Model -> Context -> Garden -> (List Garden, List Garden) -> Garden -> Element Msg
-viewPetal model context pistil (leftPetals, rightPetals) (Garden bouquet as petal) =
+viewPetal : Model -> Context -> Metadata -> Garden -> (List Garden, List Garden) -> Garden -> Element Msg
+viewPetal model context metadata pistil (left, right) petal =
   let
     newZipper =
-      Petal pistil leftPetals rightPetals :: context.zipper
+      mkPetal metadata petal.metadata pistil left right :: context.zipper
 
     clickAction =
       let actionableStyle = greenActionable in
       case model.mode of
         ProofMode Justifying ->
-          if List.isEmpty bouquet then
-            (Events.onClick (Action Close newZipper bouquet))
+          if List.isEmpty petal.flowers then
+            (Events.onClick (Action Close newZipper petal.flowers))
             :: (htmlAttribute <| title "QED")
             :: actionableStyle.active
           else
             actionableStyle.inactive
         
-        EditMode Operating surgery ->
-          pullAction surgery { context | zipper = newZipper } bouquet
+        EditMode Operating _ ->
+          pullAction { context | zipper = newZipper } petal
 
         _ ->
           actionableStyle.inactive
@@ -234,7 +234,7 @@ viewAddPetalZone : Context -> Garden -> List Garden -> Element Msg
 viewAddPetalZone context pistil petals =
   let
     newFlower =
-      Flower pistil (petals ++ [Garden []])
+      mkRealFlower pistil (petals ++ [mkFakeGarden []])
 
     addPetalButton =
         ( addButton
@@ -255,10 +255,12 @@ viewAddFlowerZone : Context -> Bouquet -> Element Msg
 viewAddFlowerZone context bouquet =
   let
     newFlower =
-      yinyang
+      mkFakeFlower
+        (mkFakeGarden [])
+        [mkFakeGarden []]
 
     newZipper =
-      Bouquet bouquet [] :: context.zipper
+      mkBouquet bouquet [] :: context.zipper
 
     addFlowerButton =
       el
@@ -285,15 +287,15 @@ viewFlower model context flower =
     Formula formula ->
       viewFormula model context formula
     
-    Flower pistil petals ->
+    Flower { metadata, pistil, petals } ->
       let
         pistilEl =
-          viewPistil model context pistil petals
+          viewPistil model context metadata pistil petals
         
         addPetalZone =
           case model.mode of 
-            EditMode _ surgery ->
-              if glueable surgery context then
+            EditMode _ _ ->
+              if glueable context then
                 [viewAddPetalZone context pistil petals]
               else
                 []
@@ -305,7 +307,7 @@ viewFlower model context flower =
             [ width fill
             , height fill
             , spacing flowerBorderWidth ]
-            ( Utils.List.zipperMap (viewPetal model context pistil) petals
+            ( Utils.List.zipperMap (viewPetal model context metadata pistil) petals
               ++ addPetalZone )
 
         
@@ -326,19 +328,19 @@ viewFlower model context flower =
               , size = 0.25
               , blur = 15
               , color = flowerForegroundColor context.polarity } ]
-        ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-        ++ dragAction color model.dragDrop context.zipper flower )
+         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
+         ++ dragAction color model.dragDrop context.zipper flower )
         [ pistilEl, petalsEl ]
 
 
 viewGarden : Model -> Context -> Garden -> Element Msg
-viewGarden model context (Garden bouquet) =
+viewGarden model context garden =
   let
     flowerEl (left, right) =
       viewFlower
         model
         { context
-        | zipper = Bouquet left right :: context.zipper }
+        | zipper = mkBouquet left right :: context.zipper }
     
     dropAction (left, right) =
       case model.mode of
@@ -354,7 +356,7 @@ viewGarden model context (Garden bouquet) =
                   dropTargetStyle =
                     case DnD.getDropId model.dragDrop of
                       Just (Just { target }) ->
-                        if Bouquet left right :: context.zipper == target
+                        if mkBouquet left right :: context.zipper == target
                         then dropStyle.active
                         else dropStyle.inactive
                     
@@ -364,7 +366,7 @@ viewGarden model context (Garden bouquet) =
                 dropTargetStyle ++
                 ( List.map htmlAttribute <|
                   DnD.droppable DragDropMsg
-                    (Just { target = Bouquet left right :: context.zipper
+                    (Just { target = mkBouquet left right :: context.zipper
                           , content = [] }) )
               else
                 []
@@ -375,11 +377,11 @@ viewGarden model context (Garden bouquet) =
           case DnD.getDragId model.dragDrop of
             Just { source, content } ->
               case source of
-                Bouquet sourceLeft sourceRight :: sourceParent ->
+                Bouquet sourceBouquet :: sourceParent ->
                   if sourceParent == context.zipper then
                     let
                       (sourceIndex, index) =
-                        (List.length sourceLeft, List.length left)
+                        (List.length sourceBouquet.left, List.length left)
                     in
                     if sourceIndex == index || index == sourceIndex + 1 then []
                     else
@@ -393,13 +395,13 @@ viewGarden model context (Garden bouquet) =
                               middle =
                                 Utils.List.slice (sourceIndex + 1) (index - 1) whole
                             in
-                            sourceLeft ++ middle ++ content :: right
+                            sourceBouquet.left ++ middle ++ content :: right
                           else
                             let
                               middle =
                                 Utils.List.slice index (sourceIndex - 1) whole
                             in
-                            left ++ content :: (middle ++ sourceRight)
+                            left ++ content :: (middle ++ sourceBouquet.right)
 
                         dropStyle =
                           droppable reorderColor
@@ -407,7 +409,7 @@ viewGarden model context (Garden bouquet) =
                         dropTargetStyle =
                           case DnD.getDropId model.dragDrop of
                             Just (Just { target }) ->
-                              if Bouquet left right :: context.zipper == target
+                              if mkBouquet left right :: context.zipper == target
                               then dropStyle.active
                               else dropStyle.inactive
 
@@ -417,7 +419,7 @@ viewGarden model context (Garden bouquet) =
                       dropTargetStyle ++
                       ( List.map htmlAttribute <|
                         DnD.droppable DragDropMsg
-                          (Just { target = Bouquet left right :: context.zipper
+                          (Just { target = mkBouquet left right :: context.zipper
                                 , content = newBouquet }) )
                   else
                     []
@@ -443,7 +445,7 @@ viewGarden model context (Garden bouquet) =
     length flower =
       case flower of
         Formula _ -> shrink
-        Flower _ _ -> fill
+        Flower _ -> fill
 
     intersticial () =
       let
@@ -475,13 +477,13 @@ viewGarden model context (Garden bouquet) =
             ( flowerEl lr flower )
 
         els =
-          Utils.List.zipperMap sperse bouquet
+          Utils.List.zipperMap sperse garden.flowers
         
         addFlowerZone =
           case model.mode of 
-            EditMode _ surgery ->
-              if growable surgery context then
-                [viewAddFlowerZone context bouquet]
+            EditMode _ _ ->
+              if growable context then
+                [viewAddFlowerZone context garden.flowers]
               else
                 []
             _ ->
@@ -494,7 +496,7 @@ viewGarden model context (Garden bouquet) =
         attrs =
           layoutAttrs ++
           borderAttrs ++
-          dropAction (bouquet, [])
+          dropAction (garden.flowers, [])
         
         sperse lr flower =
           el
@@ -504,7 +506,7 @@ viewGarden model context (Garden bouquet) =
             ( flowerEl lr flower )
 
         els =
-          Utils.List.zipperMap sperse bouquet
+          Utils.List.zipperMap sperse garden.flowers
       in
       wrappedRow attrs els
   in
@@ -523,7 +525,7 @@ viewGoal model =
       ( Utils.List.zipperMap
           ( \(l, r) flower ->
               el [ width fill, height fill, centerX, centerY ]
-              ( viewFlower model (Context [Bouquet l r] Pos) flower ) )
+              ( viewFlower model (Context [mkBouquet l r] Pos) flower ) )
           model.goal )
     
     bouquetEl () =

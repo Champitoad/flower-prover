@@ -38,15 +38,13 @@ type ProofInteraction
 
 
 type alias Surgery =
-  { growing : List Path
-  , cropped : Maybe Flower
+  { cropped : Maybe Flower
   , pulled : Maybe Garden }
 
 
 initialSurgery : Surgery
 initialSurgery =
-  { growing = []
-  , cropped = Nothing
+  { cropped = Nothing
   , pulled = Nothing }
 
 

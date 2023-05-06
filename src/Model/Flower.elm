@@ -5,15 +5,88 @@ import Model.Formula as Formula exposing (..)
 import Utils.List
 
 
+type alias Metadata
+  = { grown : Bool }
+
+
 type Flower
   = Formula Formula
-  | Flower Garden (List Garden)
+  | Flower { metadata : Metadata
+           , pistil : Garden
+           , petals : List Garden }
+
 
 type alias Bouquet
   = List Flower
 
-type Garden
-  = Garden Bouquet
+
+type alias Garden
+  = { metadata : Metadata
+    , flowers : Bouquet }
+
+
+isGrownFlower : Flower -> Bool
+isGrownFlower flower =
+  case flower of
+    Flower { metadata } ->
+      metadata.grown
+    _ ->
+      False
+
+
+isGrownGarden : Garden -> Bool
+isGrownGarden garden =
+  garden.metadata.grown
+
+
+naturalizeFlower : Flower -> Flower
+naturalizeFlower flower =
+  case flower of
+    Formula _ -> flower
+    Flower data ->
+      Flower { data
+             | metadata = { grown = False }
+             , pistil = naturalizeGarden data.pistil
+             , petals = List.map naturalizeGarden data.petals }
+
+
+naturalizeGarden : Garden -> Garden
+naturalizeGarden garden =
+  { garden
+  | metadata = { grown = False }
+  , flowers = List.map naturalizeFlower garden.flowers }
+
+
+harvest : Garden -> Bouquet
+harvest { flowers } =
+  flowers
+
+
+mkFlower : Metadata -> Garden -> List Garden -> Flower
+mkFlower metadata pistil petals =
+  Flower { metadata = metadata
+         , pistil = pistil
+         , petals = petals }
+
+
+mkRealFlower : Garden -> List Garden -> Flower
+mkRealFlower =
+  mkFlower { grown = False }
+
+
+mkFakeFlower : Garden -> List Garden -> Flower
+mkFakeFlower =
+  mkFlower { grown = True }
+
+
+mkRealGarden : Bouquet -> Garden
+mkRealGarden flowers =
+  Garden { grown = False } flowers
+
+
+mkFakeGarden : Bouquet -> Garden
+mkFakeGarden flowers =
+  Garden { grown = True } flowers
 
 
 decompose : Formula -> Bouquet
@@ -26,33 +99,39 @@ decompose formula =
       []
     
     Falsity ->
-      [Flower (Garden []) []]
+      [mkRealFlower (mkRealGarden []) []]
     
     And f1 f2 ->
       [Formula f1, Formula f2]
     
     Or f1 f2 ->
-      [ Flower
-          ( Garden [] )
-          [ Garden [Formula f1]
-          , Garden [Formula f2] ] ]
+      [ mkRealFlower
+          ( mkRealGarden [] )
+          [ mkRealGarden [Formula f1]
+          , mkRealGarden [Formula f2] ] ]
     
     Implies f1 f2 ->
-      [ Flower
-          ( Garden [Formula f1] )
-          [ Garden [Formula f2] ] ]
+      [ mkRealFlower
+          ( mkRealGarden [Formula f1] )
+          [ mkRealGarden [Formula f2] ] ]
     
     Not f1 ->
-      [ Flower (Garden [Formula f1]) [] ]
+      [ mkRealFlower (mkRealGarden [Formula f1]) [] ]
 
 
 -- Flower zippers
 
 
 type Zip
-  = Bouquet Bouquet Bouquet
-  | Pistil (List Garden)
-  | Petal Garden (List Garden) (List Garden)
+  = Bouquet { left : Bouquet, right : Bouquet }
+  | Pistil { metadata : Metadata
+           , pistilMetadata : Metadata
+           , petals : List Garden }
+  | Petal { metadata : Metadata
+          , petalMetadata : Metadata
+          , pistil : Garden
+          , left : List Garden
+          , right : List Garden }
 
 type alias Zipper
   = List Zip
@@ -60,17 +139,54 @@ type alias Zipper
 -- We encode zippers as lists, where the head is the innermost context
 
 
+isGrownZip : Zip -> Bool
+isGrownZip zip =
+  case zip of
+    Pistil { metadata, pistilMetadata } ->
+      metadata.grown || pistilMetadata.grown
+    Petal { metadata, petalMetadata } ->
+      metadata.grown || petalMetadata.grown
+    _ ->
+      False
+
+
+isGrownZipper : Zipper -> Bool
+isGrownZipper zipper =
+  Utils.List.exists isGrownZip zipper
+
+
+mkBouquet : Bouquet -> Bouquet -> Zip
+mkBouquet left right =
+  Bouquet { left = left, right = right }
+
+
+mkPistil : Metadata -> Metadata -> List Garden -> Zip
+mkPistil metadata pistilMetadata petals =
+  Pistil { metadata = metadata
+         , pistilMetadata = pistilMetadata
+         , petals = petals }
+
+
+mkPetal : Metadata -> Metadata -> Garden -> List Garden -> List Garden -> Zip
+mkPetal metadata petalMetadata pistil left right =
+  Petal { metadata = metadata
+        , petalMetadata = petalMetadata
+        , pistil = pistil
+        , left = left
+        , right = right }
+
+
 fillZip : Zip -> Bouquet -> Bouquet
 fillZip zip bouquet =
   case zip of
-    Bouquet left right ->
+    Bouquet { left, right } ->
       left ++ bouquet ++ right
 
-    Pistil petals ->
-      [Flower (Garden bouquet) petals]
+    Pistil { metadata, pistilMetadata, petals } ->
+      [mkFlower metadata (Garden pistilMetadata bouquet) petals]
 
-    Petal pistil leftPetals rightPetals ->
-      [Flower pistil (leftPetals ++ Garden bouquet :: rightPetals)]
+    Petal { metadata, petalMetadata, pistil, left, right } ->
+      [mkFlower metadata pistil (left ++ Garden petalMetadata bouquet :: right)]
 
 
 fillZipper : Bouquet -> Zipper -> Bouquet
@@ -81,14 +197,14 @@ fillZipper =
 hypsZip : Zip -> Bouquet
 hypsZip zip =
   case zip of
-    Bouquet left right ->
+    Bouquet { left, right } ->
       left ++ right
 
     Pistil _ ->
       []
     
-    Petal (Garden bouquet) _ _ ->
-      bouquet
+    Petal { pistil } ->
+      harvest pistil
 
 
 hypsZipper : Zipper -> Bouquet
@@ -106,12 +222,12 @@ justifies source destination =
   let lca = Utils.List.longestCommonSuffix source destination in
   case source of
     -- Self pollination
-    Bouquet _ _ :: (Pistil _ :: grandParent as parent) ->
+    Bouquet _ :: (Pistil _ :: grandParent as parent) ->
       lca == grandParent ||
       lca == parent
 
     -- Wind pollination
-    Bouquet _ _ :: parent ->
+    Bouquet _ :: parent ->
       lca == parent
     
     _ ->
@@ -159,13 +275,13 @@ walk bouquet path =
         n :: tail ->
           case flower of
             Formula _ -> Nothing
-            Flower (Garden bouquet_ as pistil) petals ->
+            Flower { metadata, pistil, petals } ->
               if n == 0 then
-                walkBouquet (Pistil petals :: acc) bouquet_ tail
+                walkBouquet (mkPistil metadata pistil.metadata petals :: acc) (harvest pistil) tail
               else
                 case Utils.List.pivot (n - 1) petals of
-                  (l, Garden petal :: r) ->
-                    walkBouquet (Petal pistil l r :: acc) petal tail
+                  (l, petal :: r) ->
+                    walkBouquet (mkPetal metadata petal.metadata pistil l r :: acc) petal.flowers tail
                   _ ->
                     Nothing
     
@@ -175,7 +291,7 @@ walk bouquet path =
         n :: tail ->
           case Utils.List.pivot (n - 1) bouquet_ of
             (l, flower :: r) ->
-              walkFlower (Bouquet l r :: acc) flower tail
+              walkFlower (mkBouquet l r :: acc) flower tail
             _ ->
               Nothing
   in
@@ -188,11 +304,11 @@ walk bouquet path =
 zipToInt : Zip -> Int
 zipToInt zip =
   case zip of
-    Bouquet left _ ->
+    Bouquet { left } ->
       List.length left
     Pistil _ ->
       0
-    Petal _ left _ ->
+    Petal { left } ->
       1 + List.length left
 
 
@@ -210,7 +326,7 @@ viewFlowerText flower =
     Formula formula ->
       Formula.toString formula
     
-    Flower pistil petals ->
+    Flower { pistil, petals } ->
       let
         pistilText =
           viewGardenText pistil
@@ -224,8 +340,8 @@ viewFlowerText flower =
 
 
 viewGardenText : Garden -> String
-viewGardenText (Garden bouquet) =
-  bouquet
+viewGardenText { flowers } =
+  flowers
   |> List.map viewFlowerText
   |> String.join ", "
 
@@ -260,9 +376,9 @@ atom name =
 
 entails : Bouquet -> Bouquet -> Flower
 entails phi psi =
-  Flower
-    ( Garden phi )
-    [ Garden psi ]
+  mkRealFlower
+    ( mkRealGarden phi )
+    [ mkRealGarden psi ]
 
 
 yinyang : Flower
@@ -284,30 +400,30 @@ testFlower =
 
 bigFlower : Flower
 bigFlower =
-  Flower
-    ( Garden
+  mkRealFlower
+    ( mkRealGarden
         [ Formula (Atom "a")
-        , Flower
-            ( Garden
+        , mkRealFlower
+            ( mkRealGarden
                 [ Formula (Atom "a") ] )
-            [ Garden
+            [ mkRealGarden
                 [ Formula (Atom "b") ],
-              Garden
-                [ Flower
-                    ( Garden
+              mkRealGarden
+                [ mkRealFlower
+                    ( mkRealGarden
                         [ Formula (Atom "b") ] )
-                    [ Garden
+                    [ mkRealGarden
                         [ Formula (Atom "c") ] ],
                   Formula (Atom "b") ] ]
-        , Flower
-            ( Garden
+        , mkRealFlower
+            ( mkRealGarden
                 [ Formula (Atom "d")] )
-            [ Garden
+            [ mkRealGarden
                 [ Formula (Atom "e") ] ] ] )
-    [ Garden
+    [ mkRealGarden
         [ Formula (Atom "b")
         , Formula (Atom "a") ]
-    , Garden
+    , mkRealGarden
       [ Formula (Atom "c") ] ]
  
 
@@ -320,20 +436,20 @@ modusPonensCurryfied =
 
 notFalse : Flower
 notFalse =
-  Flower (Garden [Flower (Garden []) []]) []
+  mkRealFlower (mkRealGarden [mkRealFlower (mkRealGarden []) []]) []
 
 
 criticalPair : Flower
 criticalPair =
-  Flower
-    ( Garden
-        [ Flower
-            ( Garden [] )
-            [ Garden [ atom "a" ]
-            , Garden [ atom "b"  ] ]
+  mkRealFlower
+    ( mkRealGarden
+        [ mkRealFlower
+            ( mkRealGarden [] )
+            [ mkRealGarden [ atom "a" ]
+            , mkRealGarden [ atom "b"  ] ]
         , entails [atom "a"] [atom "c"]
         , entails [atom "b"] [atom "c"] ] )
-    [ Garden [ Formula (Atom "c") ] ]
+    [ mkRealGarden [ Formula (Atom "c") ] ]
 
 
 orElim : Flower

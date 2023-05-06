@@ -36,10 +36,6 @@
   - Selection restricted to flowers in the same garden
 
 - Implement Edit mode
-  - Fix logic of `Surgery.growing`
-    - Instead of identifying by zipper, which gets invalidated when adding more
-      elements, we should have unique identifiers attached to flowers (and maybe
-      gardens?)
   - `add flower/petal` zones have:
     - text edit to grow atom
       - one can imagine instead a button that launches/inlines a domain-specific

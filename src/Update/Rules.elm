@@ -46,14 +46,16 @@ justifiable zipper bouquet =
 unlockable : Zipper -> Bouquet -> Bool
 unlockable zipper bouquet =
   case (bouquet, zipper) of
-    ([], Pistil [Garden _] :: _) -> True
-    _ -> False
+    ([], Pistil { petals } :: _) ->
+      List.length petals == 1
+    _ ->
+      False
 
 
 caseable : Zipper -> Bouquet -> Bool
 caseable zipper bouquet =
   case (bouquet, zipper) of
-    ([], Pistil petals :: Bouquet _ _ :: Pistil _ :: _) ->
+    ([], Pistil { petals } :: Bouquet _ :: Pistil _ :: _) ->
       List.length petals > 1
     _ ->
       False
@@ -62,8 +64,11 @@ caseable zipper bouquet =
 closeable : Zipper -> Bouquet -> Bool
 closeable zipper bouquet =
   case (bouquet, zipper) of
-    ([], Pistil [] :: Bouquet _ _ :: Pistil _ :: _ ) -> True
-    ([], Petal _ _ _ :: _) -> True
+    ([], Pistil { petals } :: Bouquet _ :: Pistil _ :: _ ) ->
+      case petals of
+        [] -> True
+        _ -> False
+    ([], Petal _ :: _) -> True
     _ -> False
 
 
@@ -83,31 +88,28 @@ autoRules zipper bouquet =
     [] rulePreds
 
 
-operable : Polarity -> Surgery -> Context -> Bool
-operable polarity surgery context =
+operable : Polarity -> Context -> Bool
+operable polarity context =
   context.polarity == polarity ||
-  Utils.List.hasSuffix
-    (\ancestor ->
-      List.member ancestor surgery.growing)
-    (context.zipper |> zipperToPath)
+  isGrownZipper context.zipper
 
 
-growable : Surgery -> Context -> Bool
+growable : Context -> Bool
 growable =
   operable Pos
 
 
-glueable : Surgery -> Context -> Bool
+glueable : Context -> Bool
 glueable =
   operable Neg
 
 
-pullable : Surgery -> Context -> Bool
+pullable : Context -> Bool
 pullable =
   operable Pos
 
 
-croppable : Surgery -> Context -> Bool
+croppable : Context -> Bool
 croppable =
   operable Neg
 
@@ -115,14 +117,11 @@ croppable =
 operate : Rule -> Zipper -> Bouquet -> Surgery -> Surgery
 operate rule zipper bouquet surgery =
   case (rule, bouquet, zipper) of
-    (Grow, [_], Bouquet _ [] :: _) ->
-      { surgery | growing = (zipper |> zipperToPath) :: surgery.growing }
-    
-    (Crop, [flower], Bouquet _ _ :: _) ->
+    (Crop, [flower], Bouquet _ :: _) ->
       { surgery | cropped = Just flower }
 
-    (Pull, _, Petal _ _ _ :: _) ->
-      { surgery | pulled = Just (Garden bouquet) }
+    (Pull, _, Petal _ :: _) ->
+      { surgery | pulled = Just (mkRealGarden bouquet) }
     
     _ ->
       surgery
@@ -140,27 +139,36 @@ apply rule zipper bouquet =
     (Import, _, _) ->
       fillZipper bouquet zipper
 
-    (Unlock, [], Pistil [Garden petal] :: parent)  ->
-      fillZipper petal parent
+    (Unlock, [], Pistil { petals } :: parent)  ->
+      case petals of
+        [petal] ->
+          fillZipper (harvest petal) parent
+        _ ->
+          Debug.todo "Unsupported action"
     
-    (Case, [], Pistil branches :: Bouquet left right :: Pistil petals :: parent) ->
+    (Case, [], Pistil branches
+            :: Bouquet { left, right }
+            :: Pistil goal :: parent) ->
       let
         case_ : Garden -> Flower
         case_ branch =
-          Flower branch petals
+          mkFlower branches.metadata branch goal.petals
         
         pistil =
-          Garden (left ++ right)
+          Garden goal.pistilMetadata (left ++ right)
         
         cases =
-          List.map case_ branches  
+          List.map case_ branches.petals
       in
-      fillZipper [Flower pistil [Garden cases]] parent
+      fillZipper [mkFlower goal.metadata pistil [mkRealGarden cases]] parent
     
-    (Close, [], Pistil [] :: Bouquet _ _ :: Pistil _ :: parent ) ->
-      fillZipper [] parent
+    (Close, [], Pistil p :: Bouquet _ :: Pistil _ :: parent ) ->
+      if List.isEmpty p.petals then
+        fillZipper [] parent
+      else
+        Debug.todo "Unsupported action"
     
-    (Close, [], Petal _ _ _ :: parent) ->
+    (Close, [], Petal _ :: parent) ->
       fillZipper [] parent
     
     (Reorder, _, _ :: parent) ->
@@ -172,8 +180,8 @@ apply rule zipper bouquet =
     (Crop, _, _) ->
       fillZipper [] zipper
 
-    (Pull, _, Petal pistil left right :: parent) ->
-      fillZipper [Flower pistil (left ++ right)] parent
+    (Pull, _, Petal { metadata, pistil, left, right } :: parent) ->
+      fillZipper [mkFlower metadata pistil (left ++ right)] parent
 
     _ ->
       Debug.todo "Unsupported action"
@@ -198,9 +206,9 @@ autoFlower allowed zipper flower =
       let candidates = autoRules zipper [flower] in
       tryRules candidates allowed zipper [flower]
     
-    Flower pistil petals ->
+    Flower { metadata, pistil, petals } ->
       -- First try on pistil
-      let resultPistil = autoGarden allowed (Pistil petals :: zipper) pistil in
+      let resultPistil = autoGarden allowed (mkPistil metadata pistil.metadata petals :: zipper) pistil in
       case resultPistil of
         Just _ -> resultPistil
         Nothing ->
@@ -210,14 +218,14 @@ autoFlower allowed zipper flower =
               case acc of
                 Just _ -> acc
                 Nothing ->
-                  autoGarden allowed (Petal pistil left right :: zipper) petal
+                  autoGarden allowed (mkPetal metadata petal.metadata pistil left right :: zipper) petal
           in
           zipperFoldl autoPetal Nothing petals
 
 
 autoGarden : List Rule -> Zipper -> Garden -> Maybe Bouquet
-autoGarden allowed zipper (Garden bouquet) =
-  autoBouquet allowed zipper bouquet
+autoGarden allowed zipper garden =
+  autoBouquet allowed zipper (harvest garden)
 
 
 autoBouquet : List Rule -> Zipper -> Bouquet -> Maybe Bouquet
@@ -237,7 +245,7 @@ autoBouquet allowed zipper bouquet =
           case acc of
             Just _ -> acc
             Nothing ->
-              autoFlower allowed (Bouquet left right :: zipper) tulip
+              autoFlower allowed (mkBouquet left right :: zipper) tulip
       in
       zipperFoldl autoTulip Nothing bouquet
 

@@ -108,6 +108,11 @@ forall p l =
   List.foldl (\x acc -> acc && p x) True l
 
 
+exists : (a -> Bool) -> List a -> Bool
+exists p l =
+  List.foldl (\x acc -> acc || p x) False l
+
+
 hasPrefix : (List a -> Bool) -> List a -> Bool
 hasPrefix p l =
   let
