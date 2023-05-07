@@ -36,6 +36,7 @@
   - Selection restricted to flowers in the same garden
 
 - Implement Edit mode
+  - Grown petals should be highlighted in blue
   - `add flower/petal` zones have:
     - text edit to grow atom
       - one can imagine instead a button that launches/inlines a domain-specific
@@ -48,7 +49,6 @@
       type (locally, or even in an online data base)
   - Add Reordering interaction for petals
     - Then to reorder a flower, one must drag from the pistil
-  - Grown flowers/petals should be highlighted in blue
   - Alternative version for Edit mode based on submodes:
     - Submode picker on left of toolbar
     - Submodes are: `Add Formula` ('T' text icon), `Add Space` (plus square

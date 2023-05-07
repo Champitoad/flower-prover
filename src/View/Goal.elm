@@ -230,11 +230,11 @@ addButton params =
   button style params
 
 
-viewAddPetalZone : Context -> Garden -> List Garden -> Element Msg
-viewAddPetalZone context pistil petals =
+viewAddPetalZone : Context -> Metadata -> Garden -> List Garden -> Element Msg
+viewAddPetalZone context metadata pistil petals =
   let
     newFlower =
-      mkRealFlower pistil (petals ++ [mkFakeGarden []])
+      mkFlower metadata pistil (petals ++ [mkFakeGarden []])
 
     addPetalButton =
         ( addButton
@@ -247,6 +247,7 @@ viewAddPetalZone context pistil petals =
     [ width shrink
     , height fill
     , padding 10
+    , Border.rounded flowerBorderRound
     , Background.color (flowerBackgroundColor (invert context.polarity)) ]
     [ addPetalButton ]
 
@@ -296,7 +297,7 @@ viewFlower model context flower =
           case model.mode of 
             EditMode _ _ ->
               if glueable context then
-                [viewAddPetalZone context pistil petals]
+                [viewAddPetalZone context metadata pistil petals]
               else
                 []
             _ ->
@@ -316,20 +317,28 @@ viewFlower model context flower =
             ProofMode _ -> importColor
             EditMode _ _ -> reorderColor
             _ -> Utils.Color.transparent
+        
+
+        borderColor =
+          if metadata.grown then
+            Color.rgb255 58 134 255
+            |> Utils.Color.toElement
+          else
+            flowerForegroundColor context.polarity
       in
       column
         ( [ width fill
           , height fill
-          , Background.color (flowerForegroundColor context.polarity)
-          , Border.color (flowerForegroundColor context.polarity)
-          , Border.rounded flowerBorderRound
+          , Background.color (flowerForegroundColor context.polarity) ]
+         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
+         ++ dragAction color model.dragDrop context.zipper flower
+         ++
+          [ Border.color borderColor
           , Border.shadow
               { offset = (0, 5)
               , size = 0.25
               , blur = 15
-              , color = flowerForegroundColor context.polarity } ]
-         ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-         ++ dragAction color model.dragDrop context.zipper flower )
+              , color = borderColor } ] )
         [ pistilEl, petalsEl ]
 
 
