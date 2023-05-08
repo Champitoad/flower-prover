@@ -36,7 +36,6 @@
   - Selection restricted to flowers in the same garden
 
 - Implement Edit mode
-  - Grown petals should be highlighted in blue
   - `add flower/petal` zones have:
     - text edit to grow atom
       - one can imagine instead a button that launches/inlines a domain-specific

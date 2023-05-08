@@ -446,7 +446,7 @@ viewGarden model context garden =
       , (height (fill |> minimum spaceSize))
       , padding spaceSize
       , spacing spaceSize ]
-    
+     
     borderAttrs =
       [ Border.width (droppable Utils.Color.transparent).borderWidth
       , Border.color Style.transparent ]
@@ -458,9 +458,19 @@ viewGarden model context garden =
 
     intersticial () =
       let
+        borderColor =
+          if garden.metadata.grown then
+            Style.grownColor
+          else
+            Style.transparent
+
         attrs =
           layoutAttrs ++
-          borderAttrs
+          borderAttrs ++
+          [ Border.color borderColor
+          , Border.solid
+          , Border.width flowerBorderWidth
+          , Border.rounded flowerBorderRound ]
 
         dropZone lr =
           el

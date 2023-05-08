@@ -46,6 +46,11 @@ flowerBackgroundColor polarity =
       rgb 0 0 0
 
 
+grownColor : Color
+grownColor =
+  rgb 0.227 0.525 1
+
+
 flowerBorderWidth : Int
 flowerBorderWidth =
   3
