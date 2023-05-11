@@ -24,8 +24,10 @@ type Rule
 decomposable : Zipper -> Bouquet -> Bool
 decomposable _ bouquet =
   case bouquet of
-    [Formula (Atom _)] -> False
-    [Formula _] -> True
+    [Formula { statement }] ->
+      case statement of
+        Atom _ -> False
+        _ -> True
     _ -> False
 
 
@@ -34,8 +36,10 @@ justifiable zipper bouquet =
   let
     justifiableFlower flower =
       case flower of
-        Formula (Atom _) ->
-          isHypothesis flower zipper
+        Formula { statement } ->
+          case statement of
+            Atom _ -> isHypothesis flower zipper
+            _ -> False
         _ ->
           False
   in
@@ -130,8 +134,8 @@ operate rule zipper bouquet surgery =
 apply : Rule -> Zipper -> Bouquet -> Bouquet
 apply rule zipper bouquet =
   case (rule, bouquet, zipper) of
-    (Decompose, [Formula formula], _) ->
-      fillZipper (decompose formula) zipper
+    (Decompose, [Formula { statement }], _) ->
+      fillZipper (decompose statement) zipper
 
     (Justify, _, _) ->
       fillZipper [] zipper

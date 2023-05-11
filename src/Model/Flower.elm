@@ -10,6 +10,11 @@ type alias Metadata
     , newAtomName : String }
 
 
+type alias FormulaData
+  = { metadata : Metadata
+    , statement : Formula }
+
+
 type alias FlowerData
   = { metadata : Metadata
     , pistil : Garden
@@ -17,7 +22,7 @@ type alias FlowerData
 
 
 type Flower
-  = Formula Formula
+  = Formula FormulaData
   | Flower FlowerData
 
 
@@ -37,10 +42,10 @@ type Garden
 isGrownFlower : Flower -> Bool
 isGrownFlower flower =
   case flower of
+    Formula { metadata } ->
+      metadata.grown
     Flower { metadata } ->
       metadata.grown
-    _ ->
-      False
 
 
 isGrownGarden : Garden -> Bool
@@ -51,10 +56,11 @@ isGrownGarden (Garden data) =
 naturalizeFlower : Flower -> Flower
 naturalizeFlower flower =
   case flower of
-    Formula _ -> flower
-    Flower data ->
+    Formula ({ metadata } as data) ->
+      Formula { data | metadata = { metadata | grown = False } }
+    Flower ({ metadata } as data) ->
       Flower { data
-             | metadata = { grown = False, newAtomName = "" }
+             | metadata = { metadata | grown = False }
              , pistil = naturalizeGarden data.pistil
              , petals = List.map naturalizeGarden data.petals }
 
@@ -70,6 +76,20 @@ naturalizeGarden (Garden data) =
 harvest : Garden -> Bouquet
 harvest (Garden { flowers }) =
   flowers
+
+
+mkFormula : Metadata -> Formula -> Flower
+mkFormula metadata statement =
+  Formula (FormulaData metadata statement)
+
+mkRealFormula : Formula -> Flower
+mkRealFormula =
+  mkFormula { grown = False, newAtomName = "" }
+
+
+mkFakeFormula : Formula -> Flower
+mkFakeFormula =
+  mkFormula { grown = True, newAtomName = "" }
 
 
 mkFlower : Metadata -> Garden -> List Garden -> Flower
@@ -106,7 +126,7 @@ decompose : Formula -> Bouquet
 decompose formula =
   case formula of
     Atom _ ->
-      [Formula formula]
+      [mkRealFormula formula]
 
     Truth ->
       []
@@ -115,21 +135,21 @@ decompose formula =
       [mkRealFlower (mkRealGarden []) []]
     
     And f1 f2 ->
-      [Formula f1, Formula f2]
+      [mkRealFormula f1, mkRealFormula f2]
     
     Or f1 f2 ->
       [ mkRealFlower
           ( mkRealGarden [] )
-          [ mkRealGarden [Formula f1]
-          , mkRealGarden [Formula f2] ] ]
+          [ mkRealGarden [mkRealFormula f1]
+          , mkRealGarden [mkRealFormula f2] ] ]
     
     Implies f1 f2 ->
       [ mkRealFlower
-          ( mkRealGarden [Formula f1] )
-          [ mkRealGarden [Formula f2] ] ]
+          ( mkRealGarden [mkRealFormula f1] )
+          [ mkRealGarden [mkRealFormula f2] ] ]
     
     Not f1 ->
-      [ mkRealFlower (mkRealGarden [Formula f1]) [] ]
+      [ mkRealFlower (mkRealGarden [mkRealFormula f1]) [] ]
 
 
 -- Flower zippers
@@ -348,8 +368,8 @@ zipperToPath =
 viewFlowerText : Flower -> String
 viewFlowerText flower =
   case flower of
-    Formula formula ->
-      Formula.toString formula
+    Formula { statement } ->
+      Formula.toString statement
     
     Flower { pistil, petals } ->
       let
@@ -373,7 +393,7 @@ viewGardenText (Garden { flowers }) =
 
 viewZipperText : Zipper -> String
 viewZipperText zipper =
-  fillZipper [Formula (Atom "□")] zipper
+  fillZipper [mkRealFormula (Atom "□")] zipper
   |> List.map (viewFlowerText)
   |> String.join ", "
 
@@ -396,7 +416,7 @@ logBouquet msg bouquet =
 
 atom : String -> Flower
 atom name =
-  Formula (Atom name)
+  mkRealFormula (Atom name)
 
 
 entails : Bouquet -> Bouquet -> Flower
@@ -427,29 +447,29 @@ bigFlower : Flower
 bigFlower =
   mkRealFlower
     ( mkRealGarden
-        [ Formula (Atom "a")
+        [ mkRealFormula (Atom "a")
         , mkRealFlower
             ( mkRealGarden
-                [ Formula (Atom "a") ] )
+                [ mkRealFormula (Atom "a") ] )
             [ mkRealGarden
-                [ Formula (Atom "b") ],
+                [ mkRealFormula (Atom "b") ],
               mkRealGarden
                 [ mkRealFlower
                     ( mkRealGarden
-                        [ Formula (Atom "b") ] )
+                        [ mkRealFormula (Atom "b") ] )
                     [ mkRealGarden
-                        [ Formula (Atom "c") ] ],
-                  Formula (Atom "b") ] ]
+                        [ mkRealFormula (Atom "c") ] ],
+                  mkRealFormula (Atom "b") ] ]
         , mkRealFlower
             ( mkRealGarden
-                [ Formula (Atom "d")] )
+                [ mkRealFormula (Atom "d")] )
             [ mkRealGarden
-                [ Formula (Atom "e") ] ] ] )
+                [ mkRealFormula (Atom "e") ] ] ] )
     [ mkRealGarden
-        [ Formula (Atom "b")
-        , Formula (Atom "a") ]
+        [ mkRealFormula (Atom "b")
+        , mkRealFormula (Atom "a") ]
     , mkRealGarden
-      [ Formula (Atom "c") ] ]
+      [ mkRealFormula (Atom "c") ] ]
  
 
 modusPonensCurryfied : Flower
@@ -474,12 +494,12 @@ criticalPair =
             , mkRealGarden [ atom "b"  ] ]
         , entails [atom "a"] [atom "c"]
         , entails [atom "b"] [atom "c"] ] )
-    [ mkRealGarden [ Formula (Atom "c") ] ]
+    [ mkRealGarden [ mkRealFormula (Atom "c") ] ]
 
 
 orElim : Flower
 orElim =
-  Formula
+  mkRealFormula
     ( Implies
         ( And
           ( Implies (Atom "a") (Atom "c") )
@@ -491,7 +511,7 @@ orElim =
 
 orElimInvertible : Flower
 orElimInvertible =
-  Formula
+  mkRealFormula
     ( Implies
         ( Implies
           ( Or (Atom "a") (Atom "b") )
@@ -503,7 +523,7 @@ orElimInvertible =
 
 kreiselPutnam : Flower
 kreiselPutnam =
-  Formula
+  mkRealFormula
     ( Implies
         ( Implies
             ( Not (Atom "a") )

@@ -67,22 +67,27 @@ pullAction context (Garden gardenData) =
     actionableStyle.inactive
 
 
-viewFormula : Model -> Context -> Formula -> Element Msg
-viewFormula model context formula =
+drawGrownBorder : Bool -> List (Attribute msg)
+drawGrownBorder doit =
+  if doit then grownBorder.active else grownBorder.inactive
+
+
+viewFormula : Model -> Context -> FormulaData -> Element Msg
+viewFormula model context ({ metadata, statement } as data) =
   let
     form =
-      Formula formula
+      Formula data
 
     clickAction =
       let
         actionableStyle =
-          case formula of
+          case statement of
             Atom _ -> greenActionable
             _ -> pinkActionable
       in
       case model.mode of
         ProofMode Justifying ->
-          case formula of
+          case statement of
             Atom _ ->
               if isHypothesis form context.zipper then
                 (Events.onClick (Action Justify context.zipper [form]))
@@ -97,7 +102,7 @@ viewFormula model context formula =
               :: actionableStyle.active
         
         EditMode Operating _ ->
-          cropAction context (Formula formula)
+          cropAction context (Formula data)
 
         _ ->
           actionableStyle.inactive
@@ -117,8 +122,9 @@ viewFormula model context formula =
       , Font.size 50
       , nonSelectable ]
       ++ reorderDragAction
-      ++ clickAction )
-    ( text (Formula.toString formula) )
+      ++ clickAction
+      ++ drawGrownBorder metadata.grown )
+    ( text (Formula.toString statement) )
 
 
 viewPistil : Model -> Context -> PistilData -> Garden -> Element Msg
@@ -262,7 +268,7 @@ viewAddFlowerZone context { metadata, flowers } =
       if String.isEmpty name then
         mkFakeFlower (mkFakeGarden []) [mkFakeGarden []]
       else
-        Formula (Atom name)
+        mkFakeFormula (Atom name)
 
     newZipper name =
       case context.zipper of
@@ -354,14 +360,6 @@ viewFlower model context flower =
             ProofMode _ -> importColor
             EditMode _ _ -> reorderColor
             _ -> Utils.Color.transparent
-        
-
-        borderColor =
-          if metadata.grown then
-            Color.rgb255 58 134 255
-            |> Utils.Color.toElement
-          else
-            flowerForegroundColor context.polarity
       in
       column
         ( [ width fill
@@ -369,10 +367,10 @@ viewFlower model context flower =
           , Background.color (flowerForegroundColor context.polarity) ]
          ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
          ++ dragAction color model.dragDrop context.zipper flower
+         ++ onClick DoNothing
+         :: drawGrownBorder metadata.grown
          ++
-          [ onClick DoNothing
-          , Border.color borderColor
-          , Border.shadow
+          [ Border.shadow
               { offset = (0, 5)
               , size = 0.25
               , blur = 15
@@ -496,19 +494,9 @@ viewGarden model context (Garden data) =
 
     intersticial () =
       let
-        borderColor =
-          if data.metadata.grown then
-            Style.grownColor
-          else
-            Style.transparent
-
         attrs =
           layoutAttrs ++
-          borderAttrs ++
-          [ Border.color borderColor
-          , Border.solid
-          , Border.width flowerBorderWidth
-          , Border.rounded flowerBorderRound ]
+          borderAttrs
 
         dropZone lr =
           el
@@ -546,7 +534,9 @@ viewGarden model context (Garden data) =
             _ ->
               []
       in
-      wrappedRow attrs (els ++ addFlowerZone)
+      wrappedRow
+        (attrs ++ drawGrownBorder data.metadata.grown)
+        (els ++ addFlowerZone)
         
     normal () =
       let

@@ -70,10 +70,10 @@ actionable : Color.Color -> ZoneStyle msg
 actionable color =
   let
     width =
-      3
+      5
 
     border =
-      [ Border.width 5
+      [ Border.width width
       , Border.dotted
       , Border.rounded flowerBorderRound ]
     
@@ -145,6 +145,25 @@ droppable color =
   { borderWidth = width
   , active = Background.color bgColor :: border
   , inactive = border }
+
+
+grownBorder : ZoneStyle msg
+grownBorder =
+  let
+    width =
+      3
+
+    border =
+      [ Border.rounded flowerBorderRound ]
+  in
+  { borderWidth = width
+  , active =
+      Border.color grownColor ::
+      Border.solid ::
+      Border.width width ::
+      border
+  , inactive =
+      border }
 
 
 nonSelectable : Attribute Msg
