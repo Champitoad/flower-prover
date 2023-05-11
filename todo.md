@@ -35,10 +35,6 @@
 
 - Implement Edit mode
   - `add flower/petal` zones have:
-    - text edit to grow atom
-      - one can imagine instead a button that launches/inlines a domain-specific
-        GUI to build statements/objects in a custom domain, i.e. euclidian
-        geometry
     - free space to paste clipboard by clicking
   - First-order:
     - `add variable` zones in all gardens, regardless of polarity

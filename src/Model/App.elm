@@ -73,7 +73,7 @@ type alias Model
 
 init : Model
 init =
-  { goal = Goal.Prove bigFlower
+  { goal = Goal.Prove yinyang
   , mode = EditMode Operating initialSurgery
   , dragDrop = DnD.init
   , history = History { prev = Nothing, next = Nothing } }

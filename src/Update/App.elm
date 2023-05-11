@@ -3,7 +3,7 @@ port module Update.App exposing (..)
 import Update.Rules exposing (..)
 
 import Model.Flower exposing (..)
-import Model.Goal as Goal
+import Model.Goal as Goal exposing (Goal)
 import Model.App exposing (..)
 
 import Json.Decode exposing (Value)      
@@ -19,6 +19,7 @@ port dragstart : Value -> Cmd msg
 type Msg
   = Action Rule Zipper Bouquet
   | Auto
+  | SetGoal Goal
   | ChangeUIMode UIMode
   | Undo
   | Redo
@@ -130,6 +131,9 @@ update msg model =
         | goal = Goal.map (auto [Unlock, Decompose, Close, Justify]) model.goal
         , history = History { prev = Just model, next = Nothing } }
       , Cmd.none )
+    
+    SetGoal goal ->
+      ( { model | goal = goal }, Cmd.none )
     
     ChangeUIMode mode ->
       let

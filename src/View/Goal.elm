@@ -258,28 +258,48 @@ viewAddPetalZone context { metadata, pistil, petals } =
 viewAddFlowerZone : Context -> GardenData -> Element Msg
 viewAddFlowerZone context { metadata, flowers } =
   let
-    newFlower =
-      mkFakeFlower (mkFakeGarden []) [mkFakeGarden []]
+    newFlower name =
+      if String.isEmpty name then
+        mkFakeFlower (mkFakeGarden []) [mkFakeGarden []]
+      else
+        Formula (Atom name)
 
-    newZipper =
-      mkBouquet flowers [] :: context.zipper
+    newZipper name =
+      case context.zipper of
+        [] -> [mkBouquet flowers []]
+        zip :: zipper ->
+          case zip of
+            Bouquet { left, right } ->
+              mkBouquet (left ++ flowers) right :: zipper
+            Pistil ({ pistilMetadata } as data) ->
+              mkBouquet flowers [] ::
+              Pistil { data | pistilMetadata = { pistilMetadata | newAtomName = name } } ::
+              zipper
+            Petal ({ petalMetadata } as data) ->
+              mkBouquet flowers [] ::
+              Petal { data | petalMetadata = { petalMetadata | newAtomName = name } } ::
+              zipper
     
-    addAtomTextEdit =
+    onChange name =
+      let newGoal = Goal.fromBouquet (fillZipper [] (newZipper name)) in
+      SetGoal newGoal
+    
+    addAtomTextEdit name =
       Input.text
         [ width (105 |> px)
         , Border.rounded flowerBorderRound
         , onClick DoNothing ]
-        { onChange = \name -> ConsoleLog "input" name
-        , text = metadata.newAtomName
+        { onChange = onChange
+        , text = name
         , placeholder = Just (Input.placeholder [] (text "flower"))
         , label = Input.labelHidden "Atom name" }
 
-    addFlowerButton =
+    addFlowerButton name =
       el
         [ width fill
         , height fill ]
         ( addButton
-            { msg = Action Grow newZipper [newFlower]
+            { msg = Action Grow (newZipper name) [newFlower name]
             , title = "Add Flower"
             , icon = Icons.plus
             , enabled = True } )
@@ -289,9 +309,9 @@ viewAddFlowerZone context { metadata, flowers } =
     , height fill
     , centerX
     , Border.rounded flowerBorderRound
-    , Background.color (flowerBackgroundColor context.polarity) ]
-    [ addAtomTextEdit
-    , addFlowerButton ]
+    , Background.color Style.transparent ]
+    [ addAtomTextEdit metadata.newAtomName
+    , addFlowerButton metadata.newAtomName ]
 
 
 viewFlower : Model -> Context -> Flower -> Element Msg
