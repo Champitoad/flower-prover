@@ -24,6 +24,7 @@ type Msg
   | Redo
   | DragDropMsg FlowerDnDMsg
   | HandleKeyboardEvent KeyboardEvent
+  | ConsoleLog String String
   | DoNothing
 
 
@@ -159,6 +160,10 @@ update msg model =
             _ -> model
       in
       (newModel, Cmd.none)
+    
+    ConsoleLog tag message ->
+      let _ = Debug.log tag message in
+      (model, Cmd.none)
     
     DoNothing ->
       (model, Cmd.none)

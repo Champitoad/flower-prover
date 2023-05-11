@@ -6,23 +6,32 @@ import Utils.List
 
 
 type alias Metadata
-  = { grown : Bool }
+  = { grown : Bool
+    , newAtomName : String }
+
+
+type alias FlowerData
+  = { metadata : Metadata
+    , pistil : Garden
+    , petals : List Garden }
 
 
 type Flower
   = Formula Formula
-  | Flower { metadata : Metadata
-           , pistil : Garden
-           , petals : List Garden }
+  | Flower FlowerData
 
 
 type alias Bouquet
   = List Flower
 
 
-type alias Garden
+type alias GardenData
   = { metadata : Metadata
     , flowers : Bouquet }
+
+
+type Garden
+  = Garden GardenData
 
 
 isGrownFlower : Flower -> Bool
@@ -35,8 +44,8 @@ isGrownFlower flower =
 
 
 isGrownGarden : Garden -> Bool
-isGrownGarden garden =
-  garden.metadata.grown
+isGrownGarden (Garden data) =
+  data.metadata.grown
 
 
 naturalizeFlower : Flower -> Flower
@@ -45,48 +54,52 @@ naturalizeFlower flower =
     Formula _ -> flower
     Flower data ->
       Flower { data
-             | metadata = { grown = False }
+             | metadata = { grown = False, newAtomName = "" }
              , pistil = naturalizeGarden data.pistil
              , petals = List.map naturalizeGarden data.petals }
 
 
 naturalizeGarden : Garden -> Garden
-naturalizeGarden garden =
-  { garden
-  | metadata = { grown = False }
-  , flowers = List.map naturalizeFlower garden.flowers }
+naturalizeGarden (Garden data) =
+  Garden
+    { data
+    | metadata = { grown = False, newAtomName = "" }
+    , flowers = List.map naturalizeFlower data.flowers }
 
 
 harvest : Garden -> Bouquet
-harvest { flowers } =
+harvest (Garden { flowers }) =
   flowers
 
 
 mkFlower : Metadata -> Garden -> List Garden -> Flower
 mkFlower metadata pistil petals =
-  Flower { metadata = metadata
-         , pistil = pistil
-         , petals = petals }
+  Flower (FlowerData metadata pistil petals)
 
 
 mkRealFlower : Garden -> List Garden -> Flower
 mkRealFlower =
-  mkFlower { grown = False }
+  mkFlower { grown = False, newAtomName = "" }
 
 
 mkFakeFlower : Garden -> List Garden -> Flower
 mkFakeFlower =
-  mkFlower { grown = True }
+  mkFlower { grown = True, newAtomName = "" }
+
+
+mkGarden : Metadata -> Bouquet -> Garden
+mkGarden metadata flowers =
+  Garden (GardenData metadata flowers)
 
 
 mkRealGarden : Bouquet -> Garden
-mkRealGarden flowers =
-  Garden { grown = False } flowers
+mkRealGarden =
+  mkGarden { grown = False, newAtomName = "" }
 
 
 mkFakeGarden : Bouquet -> Garden
-mkFakeGarden flowers =
-  Garden { grown = True } flowers
+mkFakeGarden =
+  mkGarden { grown = True, newAtomName = "" }
 
 
 decompose : Formula -> Bouquet
@@ -122,19 +135,34 @@ decompose formula =
 -- Flower zippers
 
 
+type alias BouquetData
+  = { left : Bouquet
+    , right : Bouquet }
+
+
+type alias PistilData
+  = { metadata : Metadata
+    , pistilMetadata : Metadata
+    , petals : List Garden }
+
+
+type alias PetalData
+  = { metadata : Metadata
+    , petalMetadata : Metadata
+    , pistil : Garden
+    , left : List Garden
+    , right : List Garden }
+
+
 type Zip
-  = Bouquet { left : Bouquet, right : Bouquet }
-  | Pistil { metadata : Metadata
-           , pistilMetadata : Metadata
-           , petals : List Garden }
-  | Petal { metadata : Metadata
-          , petalMetadata : Metadata
-          , pistil : Garden
-          , left : List Garden
-          , right : List Garden }
+  = Bouquet BouquetData
+  | Pistil PistilData
+  | Petal PetalData
+
 
 type alias Zipper
   = List Zip
+
 
 -- We encode zippers as lists, where the head is the innermost context
 
@@ -183,10 +211,10 @@ fillZip zip bouquet =
       left ++ bouquet ++ right
 
     Pistil { metadata, pistilMetadata, petals } ->
-      [mkFlower metadata (Garden pistilMetadata bouquet) petals]
+      [mkFlower metadata (mkGarden pistilMetadata bouquet) petals]
 
     Petal { metadata, petalMetadata, pistil, left, right } ->
-      [mkFlower metadata pistil (left ++ Garden petalMetadata bouquet :: right)]
+      [mkFlower metadata pistil (left ++ mkGarden petalMetadata bouquet :: right)]
 
 
 fillZipper : Bouquet -> Zipper -> Bouquet
@@ -258,10 +286,6 @@ type alias Path
   = List Int
 
 
--- This is useful to maintain the identity of flowers by keeping track of their
--- position, without having to remember the content of their context, nor adding
--- a stateful identifier in the model.
-
 -- A zipper can be reconstructed by "walking down" a path in a bouquet. The path
 -- does not always denote a valid branch of the bouquet, thus this operation is
 -- partial.
@@ -276,12 +300,13 @@ walk bouquet path =
           case flower of
             Formula _ -> Nothing
             Flower { metadata, pistil, petals } ->
+              let (Garden pistilData) = pistil in
               if n == 0 then
-                walkBouquet (mkPistil metadata pistil.metadata petals :: acc) (harvest pistil) tail
+                walkBouquet (mkPistil metadata pistilData.metadata petals :: acc) (harvest pistil) tail
               else
                 case Utils.List.pivot (n - 1) petals of
-                  (l, petal :: r) ->
-                    walkBouquet (mkPetal metadata petal.metadata pistil l r :: acc) petal.flowers tail
+                  (l, Garden petalData :: r) ->
+                    walkBouquet (mkPetal metadata petalData.metadata pistil l r :: acc) petalData.flowers tail
                   _ ->
                     Nothing
     
@@ -340,7 +365,7 @@ viewFlowerText flower =
 
 
 viewGardenText : Garden -> String
-viewGardenText { flowers } =
+viewGardenText (Garden { flowers }) =
   flowers
   |> List.map viewFlowerText
   |> String.join ", "

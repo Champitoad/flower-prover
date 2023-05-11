@@ -155,7 +155,7 @@ apply rule zipper bouquet =
           mkFlower branches.metadata branch goal.petals
         
         pistil =
-          Garden goal.pistilMetadata (left ++ right)
+          mkGarden goal.pistilMetadata (left ++ right)
         
         cases =
           List.map case_ branches.petals
@@ -208,17 +208,18 @@ autoFlower allowed zipper flower =
     
     Flower { metadata, pistil, petals } ->
       -- First try on pistil
-      let resultPistil = autoGarden allowed (mkPistil metadata pistil.metadata petals :: zipper) pistil in
+      let (Garden pistilData) = pistil in
+      let resultPistil = autoGarden allowed (mkPistil metadata pistilData.metadata petals :: zipper) pistil in
       case resultPistil of
         Just _ -> resultPistil
         Nothing ->
           -- Then try on petals
           let
-            autoPetal (left, right) petal acc =
+            autoPetal (left, right) (Garden petalData as petal) acc =
               case acc of
                 Just _ -> acc
                 Nothing ->
-                  autoGarden allowed (mkPetal metadata petal.metadata pistil left right :: zipper) petal
+                  autoGarden allowed (mkPetal metadata petalData.metadata pistil left right :: zipper) petal
           in
           zipperFoldl autoPetal Nothing petals
 

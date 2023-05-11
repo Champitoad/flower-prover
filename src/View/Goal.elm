@@ -21,6 +21,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
 import Element.Font as Font
+import Element.Input as Input
 
 import Html.Attributes exposing (title)
 
@@ -31,6 +32,7 @@ import Css
 import FeatherIcons as Icons
 
 import Color
+import Utils.Events exposing (onClick)
 
 
 reorderColor : Color.Color
@@ -55,10 +57,10 @@ cropAction context flower =
 
 
 pullAction : Context -> Garden -> List (Attribute Msg)
-pullAction context garden =
+pullAction context (Garden gardenData) =
   let actionableStyle = redActionable in
   if pullable context then
-    Utils.Events.onClick (Action Pull context.zipper garden.flowers)
+    Utils.Events.onClick (Action Pull context.zipper gardenData.flowers)
     :: (htmlAttribute <| title "Remove Petal")
     :: actionableStyle.active
   else
@@ -119,11 +121,11 @@ viewFormula model context formula =
     ( text (Formula.toString formula) )
 
 
-viewPistil : Model -> Context -> Metadata -> Garden -> List Garden -> Element Msg
-viewPistil model context metadata pistil petals =
+viewPistil : Model -> Context -> PistilData -> Garden -> Element Msg
+viewPistil model context { metadata, pistilMetadata, petals } pistil =
   let
     newZipper =
-      mkPistil metadata pistil.metadata petals :: context.zipper
+      mkPistil metadata pistilMetadata petals :: context.zipper
 
     clickAction =
       case model.mode of
@@ -178,18 +180,18 @@ viewPistil model context metadata pistil petals =
             pistil ) )
 
 
-viewPetal : Model -> Context -> Metadata -> Garden -> (List Garden, List Garden) -> Garden -> Element Msg
-viewPetal model context metadata pistil (left, right) petal =
+viewPetal : Model -> Context -> PetalData -> Garden -> Element Msg
+viewPetal model context { metadata, petalMetadata, pistil, left, right } (Garden petalData as petal) =
   let
     newZipper =
-      mkPetal metadata petal.metadata pistil left right :: context.zipper
+      mkPetal metadata petalMetadata pistil left right :: context.zipper
 
     clickAction =
       let actionableStyle = greenActionable in
       case model.mode of
         ProofMode Justifying ->
-          if List.isEmpty petal.flowers then
-            (Events.onClick (Action Close newZipper petal.flowers))
+          if List.isEmpty petalData.flowers then
+            (Events.onClick (Action Close newZipper petalData.flowers))
             :: (htmlAttribute <| title "QED")
             :: actionableStyle.active
           else
@@ -222,7 +224,7 @@ addButton : ButtonParams msg -> Element msg
 addButton params =
   let
     style =
-      { width = Css.px defaultButtonSize
+      { width = Css.pct 100
       , height = Css.pct 100
       , color = Color.rgb255 58 134 255
       , iconColorEnabled = Color.white
@@ -231,8 +233,8 @@ addButton params =
   button style params
 
 
-viewAddPetalZone : Context -> Metadata -> Garden -> List Garden -> Element Msg
-viewAddPetalZone context metadata pistil petals =
+viewAddPetalZone : Context -> FlowerData -> Element Msg
+viewAddPetalZone context { metadata, pistil, petals } =
   let
     newFlower =
       mkFlower metadata pistil (petals ++ [mkFakeGarden []])
@@ -253,20 +255,28 @@ viewAddPetalZone context metadata pistil petals =
     [ addPetalButton ]
 
 
-viewAddFlowerZone : Context -> Bouquet -> Element Msg
-viewAddFlowerZone context bouquet =
+viewAddFlowerZone : Context -> GardenData -> Element Msg
+viewAddFlowerZone context { metadata, flowers } =
   let
     newFlower =
-      mkFakeFlower
-        (mkFakeGarden [])
-        [mkFakeGarden []]
+      mkFakeFlower (mkFakeGarden []) [mkFakeGarden []]
 
     newZipper =
-      mkBouquet bouquet [] :: context.zipper
+      mkBouquet flowers [] :: context.zipper
+    
+    addAtomTextEdit =
+      Input.text
+        [ width (105 |> px)
+        , Border.rounded flowerBorderRound
+        , onClick DoNothing ]
+        { onChange = \name -> ConsoleLog "input" name
+        , text = metadata.newAtomName
+        , placeholder = Just (Input.placeholder [] (text "flower"))
+        , label = Input.labelHidden "Atom name" }
 
     addFlowerButton =
       el
-        [ width shrink
+        [ width fill
         , height fill ]
         ( addButton
             { msg = Action Grow newZipper [newFlower]
@@ -280,7 +290,8 @@ viewAddFlowerZone context bouquet =
     , centerX
     , Border.rounded flowerBorderRound
     , Background.color (flowerBackgroundColor context.polarity) ]
-    [ addFlowerButton ]
+    [ addAtomTextEdit
+    , addFlowerButton ]
 
 
 viewFlower : Model -> Context -> Flower -> Element Msg
@@ -289,16 +300,18 @@ viewFlower model context flower =
     Formula formula ->
       viewFormula model context formula
     
-    Flower { metadata, pistil, petals } ->
+    Flower ({ metadata, pistil, petals } as data) ->
       let
+        (Garden pistilData) = pistil
+
         pistilEl =
-          viewPistil model context metadata pistil petals
+          viewPistil model context (PistilData metadata pistilData.metadata petals) pistil
         
         addPetalZone =
           case model.mode of 
             EditMode _ _ ->
               if glueable context then
-                [viewAddPetalZone context metadata pistil petals]
+                [viewAddPetalZone context data]
               else
                 []
             _ ->
@@ -309,7 +322,10 @@ viewFlower model context flower =
             [ width fill
             , height fill
             , spacing flowerBorderWidth ]
-            ( Utils.List.zipperMap (viewPetal model context metadata pistil) petals
+            ( Utils.List.zipperMap
+                (\(left, right) (Garden petalData as petal) ->
+                  viewPetal model context (PetalData metadata petalData.metadata pistil left right) petal)
+                petals
               ++ addPetalZone )
 
         
@@ -334,17 +350,18 @@ viewFlower model context flower =
          ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
          ++ dragAction color model.dragDrop context.zipper flower
          ++
-          [ Border.color borderColor
+          [ onClick DoNothing
+          , Border.color borderColor
           , Border.shadow
               { offset = (0, 5)
               , size = 0.25
               , blur = 15
-              , color = borderColor } ] )
+              , color = flowerForegroundColor context.polarity } ] )
         [ pistilEl, petalsEl ]
 
 
 viewGarden : Model -> Context -> Garden -> Element Msg
-viewGarden model context garden =
+viewGarden model context (Garden data) =
   let
     flowerEl (left, right) =
       viewFlower
@@ -460,7 +477,7 @@ viewGarden model context garden =
     intersticial () =
       let
         borderColor =
-          if garden.metadata.grown then
+          if data.metadata.grown then
             Style.grownColor
           else
             Style.transparent
@@ -497,13 +514,13 @@ viewGarden model context garden =
             ( flowerEl lr flower )
 
         els =
-          Utils.List.zipperMap sperse garden.flowers
+          Utils.List.zipperMap sperse data.flowers
         
         addFlowerZone =
           case model.mode of 
             EditMode _ _ ->
               if growable context then
-                [viewAddFlowerZone context garden.flowers]
+                [viewAddFlowerZone context data]
               else
                 []
             _ ->
@@ -516,7 +533,7 @@ viewGarden model context garden =
         attrs =
           layoutAttrs ++
           borderAttrs ++
-          dropAction (garden.flowers, [])
+          dropAction (data.flowers, [])
         
         sperse lr flower =
           el
@@ -526,7 +543,7 @@ viewGarden model context garden =
             ( flowerEl lr flower )
 
         els =
-          Utils.List.zipperMap sperse garden.flowers
+          Utils.List.zipperMap sperse data.flowers
       in
       wrappedRow attrs els
   in
