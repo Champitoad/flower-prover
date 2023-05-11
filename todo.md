@@ -1,5 +1,13 @@
 # Features
 
+- Implement Navigation mode
+  - Underlying data structure: *focus stack* = list of zippers
+  - Global context at top of the screen = hypotheses in top of focus stack
+  - Focus on flower by clicking
+  - Jump to flower in global context by clicking
+  - Unfocus by clicking on focused flower
+  - Scale/Unscale animation?
+
 - Automation of some proof actions
   - Click on it opens either:
     - A dialog with a list of checkboxes to enable/disable automation for each
@@ -51,14 +59,6 @@
       between elements, use the entire parent space:
       - the garden when adding flowers
       - the flower when adding petals (but where on the flower??)
-
-- Implement Navigation mode
-  - Underlying data structure: *focus stack* = list of zippers
-  - Global context at top of the screen = hypotheses in top of focus stack
-  - Focus on flower by clicking
-  - Jump to flower in global context by clicking
-  - Unfocus by clicking on focused flower
-  - Scale/Unscale animation?
 
 # Brainstorming
 
