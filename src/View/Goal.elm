@@ -6,6 +6,7 @@ import View.Events exposing (..)
 
 import Model.Formula as Formula exposing (..)
 import Model.Flower exposing (..)
+import Model.Goal as Goal
 import Model.App exposing (..)
 
 import Update.Rules exposing (..)
@@ -540,23 +541,7 @@ viewGarden model context garden =
 viewGoal : Model -> Element Msg
 viewGoal model =
   let
-    bouquetEls () =
-      ( Utils.List.zipperMap
-          ( \(l, r) flower ->
-              el [ width fill, height fill, centerX, centerY ]
-              ( viewFlower model (Context [mkBouquet l r] Pos) flower ) )
-          model.goal )
-    
-    bouquetEl () =
-      column
-        [ width fill
-        , height fill
-        , scrollbarY
-        , spacing 100
-        , Background.color (rgb 0.65 0.65 0.65) ]
-        ( bouquetEls () )
-
-    workingOnIt =
+    msg txt =
       el
         [ width fill
         , height fill
@@ -564,14 +549,24 @@ viewGoal model =
         ( el
             [ centerX, centerY
             , Font.size 50 ]
-            ( text "Working on it!" ) )
+            ( text txt ) )
+
+    goalEl () =
+      case model.goal of
+        Goal.QED ->
+          msg "Proof complete!"
+        Goal.Prove flower ->
+          viewFlower model (Context [] Pos) flower
+
+    workingOnIt =
+      msg "Working on it!"
   in
   case model.mode of
     ProofMode _ ->
-      bouquetEl ()
+      goalEl ()
     
     EditMode _ _ ->
-      bouquetEl ()
+      goalEl ()
 
     _ ->
       workingOnIt

@@ -1,7 +1,5 @@
 # Features
 
-- Top-level is a garden instead of a bouquet
-
 - Automation of some proof actions
   - Click on it opens either:
     - A dialog with a list of checkboxes to enable/disable automation for each

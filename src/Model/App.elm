@@ -1,6 +1,7 @@
 module Model.App exposing (..)
 
 import Model.Flower exposing (..)
+import Model.Goal as Goal exposing (Goal)
 
 import Html5.DragDrop as DnD
 
@@ -60,11 +61,11 @@ type UIMode
   | NavigationMode
 
 
--- Full application state
+-- Full state of the application
 
 
 type alias Model
-  = { goal : Bouquet
+  = { goal : Goal
     , mode : UIMode
     , dragDrop : FlowerDnD
     , history : History }
@@ -72,7 +73,7 @@ type alias Model
 
 init : Model
 init =
-  { goal = [ bigFlower ]
+  { goal = Goal.Prove bigFlower
   , mode = EditMode Operating initialSurgery
   , dragDrop = DnD.init
   , history = History { prev = Nothing, next = Nothing } }

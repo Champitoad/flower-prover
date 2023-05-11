@@ -3,6 +3,7 @@ port module Update.App exposing (..)
 import Update.Rules exposing (..)
 
 import Model.Flower exposing (..)
+import Model.Goal as Goal
 import Model.App exposing (..)
 
 import Json.Decode exposing (Value)      
@@ -118,14 +119,14 @@ update msg model =
               model.mode
       in
       ( { model
-        | goal = apply rule zipper bouquet
+        | goal = Goal.fromBouquet <| apply rule zipper bouquet
         , mode = mode
         , history = History { prev = Just model, next = Nothing } }
       , Cmd.none )
     
     Auto ->
       ( { model
-        | goal = auto [Unlock, Decompose, Close, Justify] model.goal
+        | goal = Goal.map (auto [Unlock, Decompose, Close, Justify]) model.goal
         , history = History { prev = Just model, next = Nothing } }
       , Cmd.none )
     
@@ -134,7 +135,7 @@ update msg model =
         newGoal =
           case mode of
             ProofMode _ ->
-              List.map naturalizeFlower model.goal
+              Goal.map (List.map naturalizeFlower) model.goal
             _ ->
               model.goal
       in
