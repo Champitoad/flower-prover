@@ -336,7 +336,7 @@ viewFlower model context flower =
         addPetalZone =
           case model.mode of 
             EditMode _ _ ->
-              if glueable context then
+              if glueable context || data.metadata.grown then
                 [viewAddPetalZone context data]
               else
                 []
@@ -527,7 +527,7 @@ viewGarden model context (Garden data) =
         addFlowerZone =
           case model.mode of 
             EditMode _ _ ->
-              if growable context then
+              if growable context || data.metadata.grown  then
                 [viewAddFlowerZone context data]
               else
                 []
