@@ -583,9 +583,6 @@ viewGoal model =
 
     goalEl () =
       viewBouquet model (Context [] Pos) "" model.goal
-
-    workingOnIt =
-      msg "Working on it!"
   in
   case model.mode of
     ProofMode _ ->
@@ -595,4 +592,4 @@ viewGoal model =
       goalEl ()
 
     _ ->
-      workingOnIt
+      msg "Working on it!"
