@@ -6,7 +6,6 @@ import View.Events exposing (..)
 
 import Model.Formula as Formula exposing (..)
 import Model.Flower exposing (..)
-import Model.Goal as Goal
 import Model.App exposing (..)
 
 import Update.Rules exposing (..)
@@ -261,16 +260,16 @@ viewAddPetalZone context { metadata, pistil, petals } =
     [ addPetalButton ]
 
 
-viewAddFlowerZone : Context -> GardenData -> Element Msg
-viewAddFlowerZone context { metadata, flowers } =
+viewAddFlowerZone : Context -> String -> Bouquet -> Element Msg
+viewAddFlowerZone context newAtomName flowers =
   let
-    newFlower name =
-      if String.isEmpty name then
+    newFlower =
+      if String.isEmpty newAtomName then
         mkFakeFlower (mkFakeGarden []) [mkFakeGarden []]
       else
-        mkFakeFormula (Atom name)
+        mkFakeFormula (Atom newAtomName)
 
-    newZipper name =
+    newZipper newName =
       case context.zipper of
         [] -> [mkBouquet flowers []]
         zip :: zipper ->
@@ -279,33 +278,32 @@ viewAddFlowerZone context { metadata, flowers } =
               mkBouquet (left ++ flowers) right :: zipper
             Pistil ({ pistilMetadata } as data) ->
               mkBouquet flowers [] ::
-              Pistil { data | pistilMetadata = { pistilMetadata | newAtomName = name } } ::
+              Pistil { data | pistilMetadata = { pistilMetadata | newAtomName = newName } } ::
               zipper
             Petal ({ petalMetadata } as data) ->
               mkBouquet flowers [] ::
-              Petal { data | petalMetadata = { petalMetadata | newAtomName = name } } ::
+              Petal { data | petalMetadata = { petalMetadata | newAtomName = newName } } ::
               zipper
     
-    onChange name =
-      let newGoal = Goal.fromBouquet (fillZipper [] (newZipper name)) in
-      SetGoal newGoal
+    onChange newName =
+      SetGoal (fillZipper [] (newZipper newName))
     
-    addAtomTextEdit name =
+    addAtomTextEdit =
       Input.text
         [ width (105 |> px)
         , Border.rounded flowerBorderRound
         , onClick DoNothing ]
         { onChange = onChange
-        , text = name
+        , text = newAtomName
         , placeholder = Just (Input.placeholder [] (text "flower"))
         , label = Input.labelHidden "Atom name" }
 
-    addFlowerButton name =
+    addFlowerButton =
       el
         [ width fill
         , height fill ]
         ( addButton
-            { msg = Action Grow (newZipper name) [newFlower name]
+            { msg = Action Grow (newZipper newAtomName) [newFlower]
             , title = "Add Flower"
             , icon = Icons.plus
             , enabled = True } )
@@ -316,8 +314,8 @@ viewAddFlowerZone context { metadata, flowers } =
     , centerX
     , Border.rounded flowerBorderRound
     , Background.color Style.transparent ]
-    [ addAtomTextEdit metadata.newAtomName
-    , addFlowerButton metadata.newAtomName ]
+    [ addAtomTextEdit
+    , addFlowerButton ]
 
 
 viewFlower : Model -> Context -> Flower -> Element Msg
@@ -378,8 +376,8 @@ viewFlower model context flower =
         [ pistilEl, petalsEl ]
 
 
-viewGarden : Model -> Context -> Garden -> Element Msg
-viewGarden model context (Garden data) =
+viewBouquet : Model -> Context -> String -> Bouquet -> Element Msg
+viewBouquet model context newAtomName bouquet =
   let
     flowerEl (left, right) =
       viewFlower
@@ -495,8 +493,7 @@ viewGarden model context (Garden data) =
     intersticial () =
       let
         attrs =
-          layoutAttrs ++
-          borderAttrs
+          layoutAttrs
 
         dropZone lr =
           el
@@ -522,28 +519,26 @@ viewGarden model context (Garden data) =
             ( flowerEl lr flower )
 
         els =
-          Utils.List.zipperMap sperse data.flowers
+          Utils.List.zipperMap sperse bouquet
         
         addFlowerZone =
           case model.mode of 
             EditMode _ _ ->
-              if growable context || data.metadata.grown  then
-                [viewAddFlowerZone context data]
+              if growable context then
+                [viewAddFlowerZone context newAtomName bouquet]
               else
                 []
             _ ->
               []
       in
-      wrappedRow
-        (attrs ++ drawGrownBorder data.metadata.grown)
-        (els ++ addFlowerZone)
+      wrappedRow attrs (els ++ addFlowerZone)
         
     normal () =
       let
         attrs =
           layoutAttrs ++
           borderAttrs ++
-          dropAction (data.flowers, [])
+          dropAction (bouquet, [])
         
         sperse lr flower =
           el
@@ -553,7 +548,7 @@ viewGarden model context (Garden data) =
             ( flowerEl lr flower )
 
         els =
-          Utils.List.zipperMap sperse data.flowers
+          Utils.List.zipperMap sperse bouquet
       in
       wrappedRow attrs els
   in
@@ -563,6 +558,14 @@ viewGarden model context (Garden data) =
 
     _ ->
       normal ()
+
+
+viewGarden : Model -> Context -> Garden -> Element Msg
+viewGarden model context (Garden { metadata, flowers }) =
+  el
+    ( fillXY ++
+      drawGrownBorder metadata.grown )
+    ( viewBouquet model context metadata.newAtomName flowers )
 
 
 viewGoal : Model -> Element Msg
@@ -579,11 +582,7 @@ viewGoal model =
             ( text txt ) )
 
     goalEl () =
-      case model.goal of
-        Goal.QED ->
-          msg "Proof complete!"
-        Goal.Prove flower ->
-          viewFlower model (Context [] Pos) flower
+      viewBouquet model (Context [] Pos) "" model.goal
 
     workingOnIt =
       msg "Working on it!"

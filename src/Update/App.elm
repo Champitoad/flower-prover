@@ -19,7 +19,7 @@ port dragstart : Value -> Cmd msg
 type Msg
   = Action Rule Zipper Bouquet
   | Auto
-  | SetGoal Goal
+  | SetGoal Bouquet
   | ChangeUIMode UIMode
   | Undo
   | Redo
@@ -121,14 +121,14 @@ update msg model =
               model.mode
       in
       ( { model
-        | goal = Goal.fromBouquet <| apply rule zipper bouquet
+        | goal = apply rule zipper bouquet
         , mode = mode
         , history = History { prev = Just model, next = Nothing } }
       , Cmd.none )
     
     Auto ->
       ( { model
-        | goal = Goal.map (auto [Unlock, Decompose, Close, Justify]) model.goal
+        | goal = auto [Unlock, Decompose, Close, Justify] model.goal
         , history = History { prev = Just model, next = Nothing } }
       , Cmd.none )
     
@@ -140,7 +140,7 @@ update msg model =
         newGoal =
           case mode of
             ProofMode _ ->
-              Goal.map (List.map naturalizeFlower) model.goal
+              List.map naturalizeFlower model.goal
             _ ->
               model.goal
       in

@@ -65,7 +65,7 @@ type UIMode
 
 
 type alias Model
-  = { goal : Goal
+  = { goal : Bouquet
     , mode : UIMode
     , dragDrop : FlowerDnD
     , history : History }
@@ -73,8 +73,8 @@ type alias Model
 
 init : Model
 init =
-  { goal = Goal.Prove yinyang
-  , mode = EditMode Operating initialSurgery
+  { goal = [bigFlower]
+  , mode = ProofMode Justifying
   , dragDrop = DnD.init
   , history = History { prev = Nothing, next = Nothing } }
 
