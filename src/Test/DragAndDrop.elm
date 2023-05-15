@@ -2,16 +2,14 @@ module Test.DragAndDrop exposing (..)
 
 import Browser
 
-import Html.Events as HtmlEvents
-
 import Element exposing (..)
 import Element.Background as Background
-import Element.Events as Events
 
 
 -- MAIN
 
 
+main : Program () Model Msg
 main =
   Browser.sandbox
     { init = init

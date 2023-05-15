@@ -2,10 +2,6 @@ module Test.PreventPropagation exposing (..)
 
 import Browser
 
-import Html
-import Html.Events
-import Json.Decode as Json
-
 import Element exposing (..)
 import Element.Background as Background
 import Element.Events as Events
@@ -16,6 +12,7 @@ import Utils.Events exposing (..)
 -- MAIN
 
 
+main : Program () Model Msg
 main =
   Browser.sandbox
     { init = init

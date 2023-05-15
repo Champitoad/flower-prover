@@ -1,7 +1,6 @@
 module Model.App exposing (..)
 
 import Model.Flower exposing (..)
-import Model.Goal as Goal exposing (Goal)
 
 import Html5.DragDrop as DnD
 

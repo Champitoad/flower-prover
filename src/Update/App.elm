@@ -3,7 +3,6 @@ port module Update.App exposing (..)
 import Update.Rules exposing (..)
 
 import Model.Flower exposing (..)
-import Model.Goal as Goal exposing (Goal)
 import Model.App exposing (..)
 
 import Json.Decode exposing (Value)      
