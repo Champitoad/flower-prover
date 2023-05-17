@@ -366,6 +366,8 @@ viewFlower model context flower =
          ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
          ++ dragAction color model.dragDrop context.zipper flower
          ++ onClick DoNothing
+         :: Border.solid
+         :: Border.width grownBorder.borderWidth
          :: drawGrownBorder metadata.grown
          ++
           [ Border.shadow
