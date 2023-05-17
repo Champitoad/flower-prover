@@ -1,6 +1,6 @@
 # Features
 
-- Fix bug with goal being cropped at the bottom
+- Fix newAtomName not being updated when typing at top-level
 
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers

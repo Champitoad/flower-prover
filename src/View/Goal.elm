@@ -584,7 +584,10 @@ viewGoal model =
             ( text txt ) )
 
     goalEl () =
-      viewBouquet model (Context [] Pos) "" model.goal
+      el
+        ( scrollbars ::
+          fillXY )
+        ( viewBouquet model (Context [] Pos) "" model.goal )
   in
   case model.mode of
     ProofMode _ ->
