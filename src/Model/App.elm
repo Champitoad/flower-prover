@@ -72,7 +72,7 @@ type alias Model
 
 init : Model
 init =
-  { goal = [bigFlower]
+  { goal = [orElim]
   , mode = ProofMode Justifying
   , dragDrop = DnD.init
   , history = History { prev = Nothing, next = Nothing } }

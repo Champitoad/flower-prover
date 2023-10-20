@@ -77,6 +77,7 @@
   - Should work well because of *variarity*
   - Only lacks recursive types
   - Bottom type?
+  - Maybe make a fork based on our *refinement calculus*
 
 - Full tree structure for undo/redo history, navigable from/identified with the
   partial proof term view
