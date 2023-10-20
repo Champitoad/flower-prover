@@ -78,6 +78,9 @@
   - Only lacks recursive types
   - Bottom type?
   - Maybe make a fork based on our *refinement calculus*
+    - Might want to have separate namespaces for *parameters* (variables in
+      binders, i.e. `x` in `λx.t`), *local variables* (names for justifications
+      in workspaces, i.e. `n` in `let n = t`), and *labels* (names for exported results, i.e. `ℓ` in `{ℓ = t}`)
 
 - Full tree structure for undo/redo history, navigable from/identified with the
   partial proof term view
