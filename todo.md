@@ -90,3 +90,8 @@
 - Analogy between Proof/Edit modes and Survival/Creative modes in Minecraft
 
 - Vocal recognition to input text (typically for atoms)
+
+- Petals of a flower can be folded into a view focused on a single petal
+  $\delta$ by *pinching* them towards $\delta$; then, one can cycle through
+  petals by *swiping* left/right on the view, and *unpinch* to go back to the
+  full view
