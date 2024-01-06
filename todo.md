@@ -94,4 +94,4 @@
 - Petals of a flower can be folded into a view focused on a single petal
   $\delta$ by *pinching* them towards $\delta$; then, one can cycle through
   petals by *swiping* left/right on the view, and *unpinch* to go back to the
-  full view
+  full view. A similar mechanism for bouquets would also make sense.
