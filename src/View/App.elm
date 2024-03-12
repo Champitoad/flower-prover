@@ -10,7 +10,7 @@ import Update.App exposing (..)
 
 import Element exposing (..)
 
-import Html exposing (Html, div)
+import Html exposing (div)
 import Html.Events exposing (on)
 import Html.Attributes exposing (style)
 
@@ -18,6 +18,11 @@ import Json.Decode
 
 import Keyboard.Event exposing (decodeKeyboardEvent)
 import Html.Attributes exposing (tabindex)
+import Browser exposing (Document)
+
+import View.Route as Route
+import View.Widgets as Widgets
+import View.Manual as Manual
 
 
 keyboardListener : Html.Attribute Msg
@@ -26,22 +31,39 @@ keyboardListener =
   <| Json.Decode.map HandleKeyboardEvent decodeKeyboardEvent
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-  let
-    goal =
-      viewGoal model
+  case Route.fromUrl model.url of
+    Route.App ->
+      let
+        goal =
+          viewGoal model
+        
+        toolbar =
+          viewToolbar model
+        
+        app =
+          column fillXY [ goal, toolbar ]
+          |> layout []
+      in
+      { title = "Flower Prover"
+      , body =
+        [
+          div
+          [ style "width" "100%"
+          , style "height" "100%"
+          , keyboardListener
+          , tabindex 0 ]
+          [ app ]
+        ]
+      }
     
-    toolbar =
-      viewToolbar model
+    Route.Manual ->
+      { title = "Manual · Flower Prover"
+      , body = [ layout [] Manual.page ]
+      }
     
-    app =
-      column fillXY [ goal, toolbar ]
-      |> layout []
-  in
-  div
-    [ style "width" "100%"
-    , style "height" "100%"
-    , keyboardListener
-    , tabindex 0 ]
-    [ app ]
+    Route.NotFound _ ->
+      { title = "Error 404"
+      , body = [ layout [] (Widgets.fullPageTextMessage "Page not found!") ]
+      }

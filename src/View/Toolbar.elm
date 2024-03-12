@@ -33,10 +33,19 @@ viewAutoButton mode =
         _ -> False
   in
   defaultButton
-    { msg = Auto
+    { action = Msg Auto
     , title = "Auto"
     , icon = Icons.settings
     , enabled = enabled }
+
+
+viewHelpButton : Element Msg
+viewHelpButton =
+  defaultButton
+    { action = Link "/manual"
+    , title = "Help"
+    , icon = Icons.helpCircle
+    , enabled = True }
 
 
 viewModeSelector : UIMode -> Element Msg
@@ -122,12 +131,12 @@ viewUndoRedo (History history) =
   in
   row []
     [ defaultButton
-        { msg = Undo
+        { action = Msg Undo
         , title = "Undo"
         , icon = Icons.arrowLeft
         , enabled = undoEnabled }
     , defaultButton
-        { msg = Redo
+        { action = Msg Redo
         , title = "Redo"
         , icon = Icons.arrowRight
         , enabled = redoEnabled } ]
@@ -147,11 +156,15 @@ viewToolbar model =
     , Background.gradient
         { angle = 0
         , steps = [ rgb 0.8 0.8 0.8, rgb 0.9 0.9 0.9 ] } ]
-    [ el
-        [ width fill ]
-        ( el
+    [ row
+        [ width fill
+        , spacing 5 ]
+        [ el
             [ alignLeft ]
-            ( autoButton ) )
+            ( viewHelpButton ) 
+        , el
+            [ alignLeft ]
+            ( autoButton ) ]
     , modeSelector
     , el
         [ width fill ]

@@ -32,6 +32,7 @@ import FeatherIcons as Icons
 
 import Color
 import Utils.Events exposing (onClick)
+import View.Widgets as Widgets
 
 
 reorderColor : Color.Color
@@ -246,7 +247,7 @@ viewAddPetalZone context { metadata, pistil, petals } =
 
     addPetalButton =
         ( addButton
-            { msg =  Action Grow context.zipper [newFlower]
+            { action =  Msg (Action Grow context.zipper [newFlower])
             , title = "Add Petal"
             , icon = Icons.plus
             , enabled = True } )
@@ -303,7 +304,7 @@ viewAddFlowerZone context newAtomName flowers =
         [ width fill
         , height fill ]
         ( addButton
-            { msg = Action Grow (newZipper newAtomName) [newFlower]
+            { action = Msg (Action Grow (newZipper newAtomName) [newFlower])
             , title = "Add Flower"
             , icon = Icons.plus
             , enabled = True } )
@@ -573,16 +574,6 @@ viewGarden model context (Garden { metadata, flowers }) =
 viewGoal : Model -> Element Msg
 viewGoal model =
   let
-    msg txt =
-      el
-        [ width fill
-        , height fill
-        , Background.color (rgb 1 1 1) ]
-        ( el
-            [ centerX, centerY
-            , Font.size 50 ]
-            ( text txt ) )
-
     goalEl () =
       el
         ( scrollbars ::
@@ -597,4 +588,4 @@ viewGoal model =
       goalEl ()
 
     _ ->
-      msg "Working on it!"
+      Widgets.fullPageTextMessage "Working on it!"

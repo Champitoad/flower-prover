@@ -11,6 +11,10 @@ import Html5.DragDrop as DnD
 
 import Keyboard.Event exposing (KeyboardEvent)
 
+import Url
+import Browser
+import Browser.Navigation
+
 
 port dragstart : Value -> Cmd msg
 
@@ -26,6 +30,8 @@ type Msg
   | HandleKeyboardEvent KeyboardEvent
   | ConsoleLog String String
   | DoNothing
+  | UrlChanged Url.Url
+  | LinkClicked Browser.UrlRequest
 
 
 handleDragDropMsg : FlowerDnDMsg -> Model -> (Model, Cmd Msg)
@@ -170,3 +176,14 @@ update msg model =
     
     DoNothing ->
       (model, Cmd.none)
+    
+    UrlChanged url ->
+      ({ model | url = url }, Cmd.none)
+    
+    LinkClicked urlRequest ->
+      case urlRequest of
+        Browser.Internal url ->
+          ( model, Browser.Navigation.pushUrl model.key (Url.toString url) )
+
+        Browser.External href ->
+          ( model, Browser.Navigation.load href )

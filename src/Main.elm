@@ -12,11 +12,13 @@ import Browser
 
 main : Program () Model Msg
 main =
-  Browser.element
-    { init = \() -> (init, Cmd.none)
+  Browser.application
+    { init = \() url key -> (init url key, Cmd.none)
     , update = update
     , subscriptions = subscriptions
-    , view = view }
+    , view = view
+    , onUrlChange = UrlChanged
+    , onUrlRequest = LinkClicked }
 
 
 -- SUBSCRIPTIONS

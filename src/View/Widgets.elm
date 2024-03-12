@@ -4,6 +4,8 @@ import Utils.Color
 import Utils.Events
 
 import Element exposing (..)
+import Element.Background
+import Element.Font
 
 import Css
 import Html.Styled exposing (fromUnstyled, toUnstyled)
@@ -13,6 +15,8 @@ import FeatherIcons as Icons
 import FeatherIcons exposing (Icon)
 
 import Color
+import Html.Styled.Attributes exposing (action)
+import Css exposing (enabled)
 
 
 buttonBorderRadius : number
@@ -32,16 +36,19 @@ type alias ButtonStyle widthUnit heightUnit
     , iconColorEnabled : Color.Color
     , iconColorDisabled : Color.Color }
 
+type ButtonAction msg
+  = Msg msg
+  | Link String
 
 type alias ButtonParams msg
-  = { msg : msg
+  = { action : ButtonAction msg
     , title : String
     , icon : Icon
     , enabled : Bool }
 
 
 button : ButtonStyle widthUnit heightUnit -> ButtonParams msg -> Element msg
-button style { msg, title, icon, enabled } =
+button style { action, title, icon, enabled } =
   let
     iconStyledHtml =
       let
@@ -86,11 +93,25 @@ button style { msg, title, icon, enabled } =
         [ Css.borderColor Css.transparent
         , Css.backgroundColor Css.transparent ]
     
-    action =
-      if enabled then [Utils.Events.onClickStyled msg] else []
+    tag =
+      case action of
+        Msg _ ->
+          Html.Styled.div
+        Link _ ->
+          Html.Styled.a
+
+    actionAttr =
+      if enabled then
+        case action of
+          Msg msg ->
+            [ Utils.Events.onClickStyled msg ]
+          Link url ->
+            [ Attrs.href url ]
+      else
+        []
   in
-  Html.Styled.div
-    ( css styleAttrs :: Attrs.title title :: action )
+  tag
+    ( css styleAttrs :: Attrs.title title :: actionAttr )
     [ iconStyledHtml ]
   |> toUnstyled
   |> html
@@ -108,3 +129,15 @@ defaultButtonStyle =
 defaultButton : ButtonParams msg -> Element msg
 defaultButton =
   button defaultButtonStyle
+
+
+fullPageTextMessage : String -> Element msg
+fullPageTextMessage txt =
+  el
+    [ width fill
+    , height fill
+    , Element.Background.color (rgb 1 1 1) ]
+    ( el
+        [ centerX, centerY
+        , Element.Font.size 50 ]
+        ( text txt ) )

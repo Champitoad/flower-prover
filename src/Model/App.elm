@@ -3,6 +3,8 @@ module Model.App exposing (..)
 import Model.Flower exposing (..)
 
 import Html5.DragDrop as DnD
+import Url
+import Browser.Navigation
 
 
 -- Selection
@@ -67,15 +69,19 @@ type alias Model
   = { goal : Bouquet
     , mode : UIMode
     , dragDrop : FlowerDnD
-    , history : History }
+    , history : History
+    , url : Url.Url
+    , key : Browser.Navigation.Key }
 
 
-init : Model
-init =
+init : Url.Url -> Browser.Navigation.Key -> Model
+init url key =
   { goal = [orElim]
   , mode = ProofMode Justifying
   , dragDrop = DnD.init
-  , history = History { prev = Nothing, next = Nothing } }
+  , history = History { prev = Nothing, next = Nothing }
+  , url = url
+  , key = key }
 
 
 -- History of the full state mutually defined
