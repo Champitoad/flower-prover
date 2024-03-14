@@ -6,6 +6,7 @@ import View.Events exposing (..)
 
 import Model.Formula as Formula exposing (..)
 import Model.Flower exposing (..)
+import Model.Goal exposing (..)
 import Model.App exposing (..)
 
 import Update.Rules exposing (..)
@@ -72,8 +73,8 @@ drawGrownBorder doit =
   if doit then grownBorder.active else grownBorder.inactive
 
 
-viewFormula : Model -> Context -> FormulaData -> Element Msg
-viewFormula model context ({ metadata, statement } as data) =
+viewFormula : Goal -> FormulaData -> Element Msg
+viewFormula { mode, context, dragDrop } ({ metadata, statement } as data) =
   let
     form =
       Formula data
@@ -85,7 +86,7 @@ viewFormula model context ({ metadata, statement } as data) =
             Atom _ -> greenActionable
             _ -> pinkActionable
       in
-      case model.mode of
+      case mode of
         ProofMode Justifying ->
           case statement of
             Atom _ ->
@@ -108,9 +109,9 @@ viewFormula model context ({ metadata, statement } as data) =
           actionableStyle.inactive
     
     reorderDragAction =
-      case model.mode of
+      case mode of
         EditMode _ _ ->
-          dragAction reorderColor model.dragDrop context.zipper form
+          dragAction reorderColor dragDrop context.zipper form
         
         _ ->
           []
@@ -127,14 +128,14 @@ viewFormula model context ({ metadata, statement } as data) =
     ( text (Formula.toString statement) )
 
 
-viewPistil : Model -> Context -> PistilData -> Garden -> Element Msg
-viewPistil model context { metadata, pistilMetadata, petals } pistil =
+viewPistil : Goal -> PistilData -> Garden -> Element Msg
+viewPistil ({ mode, context } as goal) { metadata, pistilMetadata, petals } pistil =
   let
     newZipper =
       mkPistil metadata pistilMetadata petals :: context.zipper
 
     clickAction =
-      case model.mode of
+      case mode of
         ProofMode Justifying ->
           let
             actionableStyle = orangeActionable
@@ -179,22 +180,27 @@ viewPistil model context { metadata, pistilMetadata, petals } pistil =
           , padding 10 ]
          ++ clickAction )
         ( viewGarden
-            model
-            { context
-            | zipper = newZipper
-            , polarity = invert context.polarity }
+            { goal | context =
+              { context
+              | zipper = newZipper
+              , polarity = invert context.polarity
+              }
+            }
             pistil ) )
 
 
-viewPetal : Model -> Context -> PetalData -> Garden -> Element Msg
-viewPetal model context { metadata, petalMetadata, pistil, left, right } (Garden petalData as petal) =
+viewPetal : Goal -> PetalData -> Garden -> Element Msg
+viewPetal
+  ({ mode, context } as goal)
+  { metadata, petalMetadata, pistil, left, right }
+  (Garden petalData as petal) =
   let
     newZipper =
       mkPetal metadata petalMetadata pistil left right :: context.zipper
 
     clickAction =
       let actionableStyle = greenActionable in
-      case model.mode of
+      case mode of
         ProofMode Justifying ->
           if List.isEmpty petalData.flowers then
             (Events.onClick (Action Close newZipper petalData.flowers))
@@ -220,9 +226,7 @@ viewPetal model context { metadata, petalMetadata, pistil, left, right } (Garden
           , padding 10 ]
          ++ clickAction )
         ( viewGarden
-            model
-            { context
-            | zipper = newZipper }
+            { goal | context = { context | zipper = newZipper } }
             petal ) )
 
 
@@ -319,21 +323,21 @@ viewAddFlowerZone context newAtomName flowers =
     , addFlowerButton ]
 
 
-viewFlower : Model -> Context -> Flower -> Element Msg
-viewFlower model context flower =
+viewFlower : Goal -> Flower -> Element Msg
+viewFlower ({ mode, context, dragDrop } as goal) flower =
   case flower of
     Formula formula ->
-      viewFormula model context formula
+      viewFormula goal formula
     
     Flower ({ metadata, pistil, petals } as data) ->
       let
         (Garden pistilData) = pistil
 
         pistilEl =
-          viewPistil model context (PistilData metadata pistilData.metadata petals) pistil
+          viewPistil goal (PistilData metadata pistilData.metadata petals) pistil
         
         addPetalZone =
-          case model.mode of 
+          case mode of 
             EditMode _ _ ->
               if glueable context || data.metadata.grown then
                 [viewAddPetalZone context data]
@@ -349,13 +353,13 @@ viewFlower model context flower =
             , spacing flowerBorderWidth ]
             ( Utils.List.zipperMap
                 (\(left, right) (Garden petalData as petal) ->
-                  viewPetal model context (PetalData metadata petalData.metadata pistil left right) petal)
+                  viewPetal goal (PetalData metadata petalData.metadata pistil left right) petal)
                 petals
               ++ addPetalZone )
 
         
         color =
-          case model.mode of
+          case mode of
             ProofMode _ -> importColor
             EditMode _ _ -> reorderColor
             _ -> Utils.Color.transparent
@@ -365,7 +369,7 @@ viewFlower model context flower =
           , height fill
           , Background.color (flowerForegroundColor context.polarity) ]
          ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-         ++ dragAction color model.dragDrop context.zipper flower
+         ++ dragAction color dragDrop context.zipper flower
          ++ onClick DoNothing
          :: Border.solid
          :: Border.width grownBorder.borderWidth
@@ -379,19 +383,21 @@ viewFlower model context flower =
         [ pistilEl, petalsEl ]
 
 
-viewBouquet : Model -> Context -> String -> Bouquet -> Element Msg
-viewBouquet model context newAtomName bouquet =
+viewBouquet : Goal -> String -> Bouquet -> Element Msg
+viewBouquet ({ mode, context, dragDrop } as goal) newAtomName bouquet =
   let
     flowerEl (left, right) =
       viewFlower
-        model
-        { context
-        | zipper = mkBouquet left right :: context.zipper }
+        { goal | context =
+          { context | zipper =
+            mkBouquet left right :: context.zipper
+          }
+        }
     
     dropAction (left, right) =
-      case model.mode of
+      case mode of
         ProofMode Importing ->
-          case DnD.getDragId model.dragDrop of
+          case DnD.getDragId dragDrop of
             Just { source } ->
               -- if isHypothesis content context.zipper then
               if justifies source context.zipper then
@@ -400,7 +406,7 @@ viewBouquet model context newAtomName bouquet =
                     droppable importColor
 
                   dropTargetStyle =
-                    case DnD.getDropId model.dragDrop of
+                    case DnD.getDropId dragDrop of
                       Just (Just { target }) ->
                         if mkBouquet left right :: context.zipper == target
                         then dropStyle.active
@@ -420,7 +426,7 @@ viewBouquet model context newAtomName bouquet =
               []
 
         EditMode Reordering _ ->
-          case DnD.getDragId model.dragDrop of
+          case DnD.getDragId dragDrop of
             Just { source, content } ->
               case source of
                 Bouquet sourceBouquet :: sourceParent ->
@@ -453,7 +459,7 @@ viewBouquet model context newAtomName bouquet =
                           droppable reorderColor
 
                         dropTargetStyle =
-                          case DnD.getDropId model.dragDrop of
+                          case DnD.getDropId dragDrop of
                             Just (Just { target }) ->
                               if mkBouquet left right :: context.zipper == target
                               then dropStyle.active
@@ -525,7 +531,7 @@ viewBouquet model context newAtomName bouquet =
           Utils.List.zipperMap sperse bouquet
         
         addFlowerZone =
-          case model.mode of 
+          case mode of 
             EditMode _ _ ->
               if growable context then
                 [viewAddFlowerZone context newAtomName bouquet]
@@ -555,7 +561,7 @@ viewBouquet model context newAtomName bouquet =
       in
       wrappedRow attrs els
   in
-  case model.mode of
+  case mode of
     EditMode _ _ ->
       intersticial ()
 
@@ -563,24 +569,24 @@ viewBouquet model context newAtomName bouquet =
       normal ()
 
 
-viewGarden : Model -> Context -> Garden -> Element Msg
-viewGarden model context (Garden { metadata, flowers }) =
+viewGarden : Goal -> Garden -> Element Msg
+viewGarden goal (Garden { metadata, flowers }) =
   el
     ( fillXY ++
       drawGrownBorder metadata.grown )
-    ( viewBouquet model context metadata.newAtomName flowers )
+    ( viewBouquet goal metadata.newAtomName flowers )
 
 
-viewGoal : Model -> Element Msg
-viewGoal model =
+viewGoal : Goal -> Element Msg
+viewGoal goal =
   let
     goalEl () =
       el
         ( scrollbars ::
           fillXY )
-        ( viewBouquet model (Context [] Pos) "" model.goal )
+        ( viewBouquet goal "" goal.focus )
   in
-  case model.mode of
+  case goal.mode of
     ProofMode _ ->
       goalEl ()
     

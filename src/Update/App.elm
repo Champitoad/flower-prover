@@ -3,6 +3,7 @@ port module Update.App exposing (..)
 import Update.Rules exposing (..)
 
 import Model.Flower exposing (..)
+import Model.Goal exposing (..)
 import Model.App exposing (..)
 
 import Json.Decode exposing (Value)      
@@ -35,7 +36,7 @@ type Msg
 
 
 handleDragDropMsg : FlowerDnDMsg -> Model -> (Model, Cmd Msg)
-handleDragDropMsg dndMsg model =
+handleDragDropMsg dndMsg ({ goal } as model) =
   let
     dragStart = 
       DnD.getDragstartEvent dndMsg
@@ -46,21 +47,27 @@ handleDragDropMsg dndMsg model =
       |> Maybe.withDefault Cmd.none
 
     ( newDragDrop, result ) =
-      DnD.update dndMsg model.dragDrop
+      DnD.update dndMsg goal.dragDrop
 
     model_ =
       case dragStart of
         Just _ ->
-          case model.mode of
+          case goal.mode of
             ProofMode Justifying ->
-              { model
-              | dragDrop = newDragDrop
-              , mode = ProofMode Importing }
+              { model | goal =
+                { goal
+                | dragDrop = newDragDrop
+                , mode = ProofMode Importing
+                }
+              }
 
             EditMode _ surgery ->
-              { model
-              | dragDrop = newDragDrop
-              , mode = EditMode Reordering surgery }
+              { model | goal =
+                { goal
+                | dragDrop = newDragDrop
+                , mode = EditMode Reordering surgery
+                }
+              }
             
             _ ->
               model
@@ -68,7 +75,7 @@ handleDragDropMsg dndMsg model =
         Nothing ->
           let
             defaultMode =
-              case model.mode of
+              case goal.mode of
                 ProofMode _ ->
                   ProofMode Justifying
 
@@ -76,7 +83,7 @@ handleDragDropMsg dndMsg model =
                   EditMode Operating surgery
 
                 _ ->
-                  model.mode
+                  goal.mode
           in
           case result of
             Just (drag, drop, _) ->
@@ -85,7 +92,7 @@ handleDragDropMsg dndMsg model =
                 Just destination ->
                   let
                     action =
-                      case model.mode of
+                      case goal.mode of
                         ProofMode Importing ->
                           Action Import
                             destination.target [drag.content]
@@ -99,57 +106,70 @@ handleDragDropMsg dndMsg model =
                     
                     newModel =
                       update action model |> Tuple.first
+                    
+                    newGoal =
+                      newModel.goal
                   in
-                  { newModel | dragDrop = newDragDrop, mode = defaultMode }
+                  { newModel | goal = { newGoal | dragDrop = newDragDrop, mode = defaultMode } }
 
                 -- Dropping on non-target
                 Nothing ->
-                  { model | dragDrop = newDragDrop, mode = defaultMode }
+                  { model | goal = { goal | dragDrop = newDragDrop, mode = defaultMode } }
         
             -- Dragging
             Nothing ->
-              { model | dragDrop = newDragDrop }
+              { model | goal = { goal | dragDrop = newDragDrop } }
   in
   (model_, cmd)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
+update msg ({ goal } as model) =
   case msg of
     Action rule zipper bouquet ->
       let
         mode =
-          case model.mode of
+          case goal.mode of
             EditMode interaction surgery ->
               EditMode interaction (operate rule zipper bouquet surgery)
             _ ->
-              model.mode
+              goal.mode
       in
-      ( { model
-        | goal = apply rule zipper bouquet
-        , mode = mode
-        , history = History { prev = Just model, next = Nothing } }
+      ( { model | goal =
+          { goal
+          | focus = apply rule zipper bouquet
+          , mode = mode
+          }
+        , history = History { prev = Just model, next = Nothing }
+        }
       , Cmd.none )
     
     Auto ->
-      ( { model
-        | goal = auto [Unlock, Decompose, Close, Justify] model.goal
+      ( { model | goal =
+          { goal
+          | focus = auto [Unlock, Decompose, Close, Justify] goal.focus
+          }
         , history = History { prev = Just model, next = Nothing } }
       , Cmd.none )
     
-    SetGoal goal ->
-      ( { model | goal = goal }, Cmd.none )
+    SetGoal bouquet ->
+      ( { model | goal = { goal | focus = bouquet } }, Cmd.none )
     
     ChangeUIMode mode ->
       let
-        newGoal =
+        newFocus =
           case mode of
             ProofMode _ ->
-              List.map naturalizeFlower model.goal
+              List.map naturalizeFlower goal.focus
             _ ->
-              model.goal
+              goal.focus
       in
-      ({ model | mode = mode, goal = newGoal }, Cmd.none)
+      ({ model | goal =
+         { goal
+         | mode = mode
+         , focus = newFocus
+         }
+       }, Cmd.none)
     
     Undo ->
       (undo model, Cmd.none)

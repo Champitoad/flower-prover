@@ -3,6 +3,7 @@ module View.Toolbar exposing (..)
 import View.Style exposing (..)
 import View.Widgets exposing (..)
 
+import Model.Goal exposing (..)
 import Model.App exposing (..)
 
 import Update.App exposing (..)
@@ -145,8 +146,8 @@ viewUndoRedo (History history) =
 viewToolbar : Model -> Element Msg
 viewToolbar model =
   let
-    autoButton = viewAutoButton model.mode
-    modeSelector = viewModeSelector model.mode
+    autoButton = viewAutoButton model.goal.mode
+    modeSelector = viewModeSelector model.goal.mode
     undoRedo = viewUndoRedo model.history
   in
   row

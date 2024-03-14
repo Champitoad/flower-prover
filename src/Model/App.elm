@@ -1,74 +1,18 @@
 module Model.App exposing (..)
 
 import Model.Flower exposing (..)
+import Model.Goal as Goal
 
-import Html5.DragDrop as DnD
 import Url
 import Browser.Navigation
 
-
--- Selection
-
-
-type alias Selection
-  = List Zipper
-
-
--- Drag-and-Drop
-
-
-type alias FlowerDragId
-  = { source : Zipper, content : Flower }
-
-type alias FlowerDropId
-  = Maybe { target : Zipper, content : Bouquet }
-
-type alias FlowerDnD
-  = DnD.Model FlowerDragId FlowerDropId
-
-type alias FlowerDnDMsg
-  = DnD.Msg FlowerDragId FlowerDropId
-
-
--- Modal UI
-
-
-type ProofInteraction
-  = Justifying
-  | Importing
-  | Fencing Selection
-
-
-type alias Surgery =
-  { cropped : Maybe Flower
-  , pulled : Maybe Garden }
-
-
-initialSurgery : Surgery
-initialSurgery =
-  { cropped = Nothing
-  , pulled = Nothing }
-
-
-type EditInteraction
-  = Operating
-  | Adding Zipper
-  | Reordering
-
-
-type UIMode
-  = ProofMode ProofInteraction
-  | EditMode EditInteraction Surgery
-  | NavigationMode
 
 
 -- Full state of the application
 
 
 type alias Model
-  = { goal : Bouquet
-    , mode : UIMode
-    , dragDrop : FlowerDnD
+  = { goal : Goal.Goal
     , history : History
     , url : Url.Url
     , key : Browser.Navigation.Key }
@@ -76,12 +20,11 @@ type alias Model
 
 init : Url.Url -> Browser.Navigation.Key -> Model
 init url key =
-  { goal = [orElim]
-  , mode = ProofMode Justifying
-  , dragDrop = DnD.init
+  { goal = Goal.fromBouquet [orElim]
   , history = History { prev = Nothing, next = Nothing }
   , url = url
-  , key = key }
+  , key = key
+  }
 
 
 -- History of the full state mutually defined

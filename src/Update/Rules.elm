@@ -4,7 +4,7 @@ import Utils.List exposing (forall, zipperFoldl)
 
 import Model.Formula exposing (..)
 import Model.Flower exposing (..)
-import Model.App exposing (..)
+import Model.Goal exposing (..)
 
 
 type Rule

@@ -3,6 +3,7 @@ module View.Events exposing (..)
 import View.Style
 
 import Model.Flower exposing (..)
+import Model.Goal exposing (..)
 import Model.App exposing (..)
 
 import Update.App exposing (..)
