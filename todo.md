@@ -1,5 +1,7 @@
 # Features
 
+- Print "Proof complete!" for empty top-level bouquets
+
 - Fix newAtomName not being updated when typing at top-level
 
 - Implement Navigation mode
