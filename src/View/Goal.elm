@@ -32,6 +32,7 @@ import Css
 import FeatherIcons as Icons
 
 import Color
+import Utils.Color
 import Utils.Events exposing (onClick)
 import View.Widgets as Widgets
 
@@ -115,12 +116,17 @@ viewFormula { mode, context, location, dragDrop } ({ metadata, statement } as da
         
         _ ->
           []
+    
+    (fontSize, paddingSize) =
+      case location of
+        App -> (45, 10)
+        Manual _ -> (30, 5)
   in
   el
     ( [ centerX, centerY
-      , padding 10
+      , padding paddingSize
       , Font.color (flowerForegroundColor context.polarity)
-      , Font.size 50
+      , Font.size fontSize
       , nonSelectable ]
       ++ reorderDragAction
       ++ clickAction
@@ -169,6 +175,11 @@ viewPistil ({ mode, context, location } as goal) { metadata, pistilMetadata, pet
 
         _ ->
           (actionable Utils.Color.transparent).inactive
+    
+    paddingSize =
+      case location of
+        App -> 10
+        Manual _ -> 5
   in
   el
     ( [ width fill
@@ -177,7 +188,7 @@ viewPistil ({ mode, context, location } as goal) { metadata, pistilMetadata, pet
     ( el
         ( [ width fill
           , height fill
-          , padding 10 ]
+          , padding paddingSize ]
          ++ clickAction )
         ( viewGarden
             { goal | context =
@@ -214,6 +225,11 @@ viewPetal
 
         _ ->
           actionableStyle.inactive
+
+    paddingSize =
+      case location of
+        App -> 10
+        Manual _ -> 10
   in
   el
     [ width fill
@@ -223,7 +239,7 @@ viewPetal
     ( el
         ( [ width fill
           , height fill
-          , padding 10 ]
+          , padding paddingSize ]
          ++ clickAction )
         ( viewGarden
             { goal | context = { context | zipper = newZipper } }
@@ -357,12 +373,26 @@ viewFlower ({ mode, context, location, dragDrop } as goal) flower =
                 petals
               ++ addPetalZone )
 
-        
         color =
           case mode of
             ProofMode _ -> importColor
             EditMode _ _ -> reorderColor
             _ -> Utils.Color.transparent
+        
+        { shadowOffset, shadowSize, shadowBlur, shadowAlpha } =
+          case location of
+            App ->
+              { shadowOffset = (0, 5)
+              , shadowSize = 0.25
+              , shadowBlur = 15
+              , shadowAlpha = 1
+              }
+            Manual _ ->
+              { shadowOffset = (0, 3)
+              , shadowSize = 0.25
+              , shadowBlur = 10
+              , shadowAlpha = 0.7
+              }
       in
       column
         ( [ width fill
@@ -376,10 +406,14 @@ viewFlower ({ mode, context, location, dragDrop } as goal) flower =
          :: drawGrownBorder metadata.grown
          ++
           [ Border.shadow
-              { offset = (0, 5)
-              , size = 0.25
-              , blur = 15
-              , color = flowerForegroundColor context.polarity } ] )
+              { offset = shadowOffset
+              , size = shadowSize
+              , blur = shadowBlur
+              , color =
+                  flowerForegroundColor context.polarity |>
+                  Utils.Color.fromElement |>
+                  Utils.Color.withAlpha shadowAlpha |>
+                  Utils.Color.toElement } ] )
         [ pistilEl, petalsEl ]
 
 
@@ -482,7 +516,10 @@ viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet 
         _ ->
           []
 
-    spaceSize = 30
+    spaceSize =
+      case location of
+        App -> 30
+        Manual _ -> 10
     
     layoutAttrs =
       [ (width (fill |> minimum spaceSize))

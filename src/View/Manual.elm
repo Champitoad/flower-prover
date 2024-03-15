@@ -33,7 +33,8 @@ viewSandbox : Sandbox -> String -> Element Msg
 viewSandbox { currentGoal } id =
   row
     [ width fill
-    , spacing 10 ]
+    , spacing 10
+    ]
     [ viewGoal currentGoal
     , resetButton id
     ]
@@ -67,12 +68,14 @@ body { manualExamples } =
       el [width shrink, height fill] none
   in
   row
-    ( scrollbarY :: fillXY )
+    ( scrollbarY ::
+      fillXY )
     [ padder
     , column
       [ width (fill |> maximum 600)
       , height fill
       , padding 20
+      , spacing 20
       , centerX ]
       [ text "Look at this box:"
       , sandbox "Flower"
