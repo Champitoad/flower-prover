@@ -37,7 +37,7 @@ view model =
     Route.App ->
       let
         goal =
-          viewGoal model.goal
+          viewGoal model.dragDrop model.goal
         
         toolbar =
           viewToolbar model

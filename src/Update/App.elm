@@ -37,7 +37,7 @@ type Msg
 
 
 handleDragDropMsg : FlowerDnDMsg -> Model -> (Model, Cmd Msg)
-handleDragDropMsg dndMsg ({ goal } as model) =
+handleDragDropMsg dndMsg model =
   let
     dragStart = 
       DnD.getDragstartEvent dndMsg
@@ -48,46 +48,48 @@ handleDragDropMsg dndMsg ({ goal } as model) =
       |> Maybe.withDefault Cmd.none
 
     ( newDragDrop, result ) =
-      DnD.update dndMsg goal.dragDrop
+      DnD.update dndMsg model.dragDrop
 
     model_ =
       case dragStart of
-        Just _ ->
-          case goal.mode of
-            ProofMode Justifying ->
-              { model | goal =
-                { goal
-                | dragDrop = newDragDrop
-                , mode = ProofMode Importing
-                }
-              }
-
-            EditMode _ surgery ->
-              { model | goal =
-                { goal
-                | dragDrop = newDragDrop
-                , mode = EditMode Reordering surgery
-                }
-              }
-            
-            _ ->
-              model
-
-        Nothing ->
+        Just { dragId } ->
           let
-            defaultMode =
+            goal = getGoal dragId.location model
+            
+            newMode =
               case goal.mode of
-                ProofMode _ ->
-                  ProofMode Justifying
-
+                ProofMode Justifying ->
+                  ProofMode Importing
                 EditMode _ surgery ->
-                  EditMode Operating surgery
-
+                  EditMode Reordering surgery
                 _ ->
                   goal.mode
+            
+            newGoal =
+              { goal | mode = newMode }
+            
+            newModel =
+              { model | dragDrop = newDragDrop }
           in
+          setGoal dragId.location newGoal newModel
+
+        Nothing ->
           case result of
             Just (drag, drop, _) ->
+              let
+                goal = getGoal drag.location model
+                
+                defaultMode =
+                  case goal.mode of
+                    ProofMode _ ->
+                      ProofMode Justifying
+
+                    EditMode _ surgery ->
+                      EditMode Operating surgery
+
+                    _ ->
+                      goal.mode
+              in
               case drop of
                 -- Dropping on target
                 Just destination ->
@@ -105,21 +107,28 @@ handleDragDropMsg dndMsg ({ goal } as model) =
                         _ ->
                           DoNothing
                     
-                    newModel =
+                    updatedModel =
                       update action model |> Tuple.first
                     
+                    updatedGoal =
+                      getGoal goal.location updatedModel
+                    
                     newGoal =
-                      newModel.goal
+                      { updatedGoal | mode = defaultMode }
+                    
+                    newModel =
+                      setGoal goal.location newGoal updatedModel
                   in
-                  { newModel | goal = { newGoal | dragDrop = newDragDrop, mode = defaultMode } }
+                  { newModel | dragDrop = newDragDrop }
 
                 -- Dropping on non-target
                 Nothing ->
-                  { model | goal = { goal | dragDrop = newDragDrop, mode = defaultMode } }
+                  let newModel = setGoal goal.location { goal | mode = defaultMode } model in
+                  { newModel | dragDrop = newDragDrop }
         
             -- Dragging
             Nothing ->
-              { model | goal = { goal | dragDrop = newDragDrop } }
+              { model | dragDrop = newDragDrop }
   in
   (model_, cmd)
 

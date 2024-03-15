@@ -29,13 +29,13 @@ resetButton id =
     , label = resetIcon
     }
 
-viewSandbox : Sandbox -> String -> Element Msg
-viewSandbox { currentGoal } id =
+viewSandbox : FlowerDnD -> Sandbox -> String -> Element Msg
+viewSandbox dnd { currentGoal } id =
   row
     [ width fill
     , spacing 10
     ]
-    [ viewGoal currentGoal
+    [ viewGoal dnd currentGoal
     , resetButton id
     ]
     
@@ -59,10 +59,10 @@ navbar =
 
 
 body : Model -> Element Msg
-body { manualExamples } =
+body { manualExamples, dragDrop } =
   let
     sandbox id =
-      viewSandbox (getSandbox id manualExamples) id
+      viewSandbox dragDrop (getSandbox id manualExamples) id
     
     padder =
       el [width shrink, height fill] none

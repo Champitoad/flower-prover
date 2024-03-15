@@ -74,8 +74,8 @@ drawGrownBorder doit =
   if doit then grownBorder.active else grownBorder.inactive
 
 
-viewFormula : Goal -> FormulaData -> Element Msg
-viewFormula { mode, context, location, dragDrop } ({ metadata, statement } as data) =
+viewFormula : FlowerDnD -> Goal -> FormulaData -> Element Msg
+viewFormula dnd { mode, context, location } ({ metadata, statement } as data) =
   let
     form =
       Formula data
@@ -112,7 +112,7 @@ viewFormula { mode, context, location, dragDrop } ({ metadata, statement } as da
     reorderDragAction =
       case mode of
         EditMode _ _ ->
-          dragAction reorderColor dragDrop context.zipper form
+          dragAction reorderColor dnd location context.zipper form
         
         _ ->
           []
@@ -134,8 +134,8 @@ viewFormula { mode, context, location, dragDrop } ({ metadata, statement } as da
     ( text (Formula.toString statement) )
 
 
-viewPistil : Goal -> PistilData -> Garden -> Element Msg
-viewPistil ({ mode, context, location } as goal) { metadata, pistilMetadata, petals } pistil =
+viewPistil : FlowerDnD -> Goal -> PistilData -> Garden -> Element Msg
+viewPistil dnd ({ mode, context, location } as goal) { metadata, pistilMetadata, petals } pistil =
   let
     newZipper =
       mkPistil metadata pistilMetadata petals :: context.zipper
@@ -190,7 +190,7 @@ viewPistil ({ mode, context, location } as goal) { metadata, pistilMetadata, pet
           , height fill
           , padding paddingSize ]
          ++ clickAction )
-        ( viewGarden
+        ( viewGarden dnd
             { goal | context =
               { context
               | zipper = newZipper
@@ -200,8 +200,8 @@ viewPistil ({ mode, context, location } as goal) { metadata, pistilMetadata, pet
             pistil ) )
 
 
-viewPetal : Goal -> PetalData -> Garden -> Element Msg
-viewPetal
+viewPetal : FlowerDnD -> Goal -> PetalData -> Garden -> Element Msg
+viewPetal dnd
   ({ mode, context, location } as goal)
   { metadata, petalMetadata, pistil, left, right }
   (Garden petalData as petal) =
@@ -241,7 +241,7 @@ viewPetal
           , height fill
           , padding paddingSize ]
          ++ clickAction )
-        ( viewGarden
+        ( viewGarden dnd
             { goal | context = { context | zipper = newZipper } }
             petal ) )
 
@@ -339,18 +339,18 @@ viewAddFlowerZone location context newAtomName flowers =
     , addFlowerButton ]
 
 
-viewFlower : Goal -> Flower -> Element Msg
-viewFlower ({ mode, context, location, dragDrop } as goal) flower =
+viewFlower : FlowerDnD -> Goal -> Flower -> Element Msg
+viewFlower dnd ({ mode, context, location } as goal) flower =
   case flower of
     Formula formula ->
-      viewFormula goal formula
+      viewFormula dnd goal formula
     
     Flower ({ metadata, pistil, petals } as data) ->
       let
         (Garden pistilData) = pistil
 
         pistilEl =
-          viewPistil goal (PistilData metadata pistilData.metadata petals) pistil
+          viewPistil dnd goal (PistilData metadata pistilData.metadata petals) pistil
         
         addPetalZone =
           case mode of 
@@ -369,7 +369,7 @@ viewFlower ({ mode, context, location, dragDrop } as goal) flower =
             , spacing flowerBorderWidth ]
             ( Utils.List.zipperMap
                 (\(left, right) (Garden petalData as petal) ->
-                  viewPetal goal (PetalData metadata petalData.metadata pistil left right) petal)
+                  viewPetal dnd goal (PetalData metadata petalData.metadata pistil left right) petal)
                 petals
               ++ addPetalZone )
 
@@ -399,7 +399,7 @@ viewFlower ({ mode, context, location, dragDrop } as goal) flower =
           , height fill
           , Background.color (flowerForegroundColor context.polarity) ]
          ++ (List.map htmlAttribute <| DnD.droppable DragDropMsg Nothing)
-         ++ dragAction color dragDrop context.zipper flower
+         ++ dragAction color dnd location context.zipper flower
          ++ onClick DoNothing
          :: Border.solid
          :: Border.width grownBorder.borderWidth
@@ -417,11 +417,11 @@ viewFlower ({ mode, context, location, dragDrop } as goal) flower =
         [ pistilEl, petalsEl ]
 
 
-viewBouquet : Goal -> String -> Bouquet -> Element Msg
-viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet =
+viewBouquet : FlowerDnD -> Goal -> String -> Bouquet -> Element Msg
+viewBouquet dnd ({ mode, context, location } as goal) newAtomName bouquet =
   let
     flowerEl (left, right) =
-      viewFlower
+      viewFlower dnd
         { goal | context =
           { context | zipper =
             mkBouquet left right :: context.zipper
@@ -431,7 +431,7 @@ viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet 
     dropAction (left, right) =
       case mode of
         ProofMode Importing ->
-          case DnD.getDragId dragDrop of
+          case DnD.getDragId dnd of
             Just { source } ->
               -- if isHypothesis content context.zipper then
               if justifies source context.zipper then
@@ -440,7 +440,7 @@ viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet 
                     droppable importColor
 
                   dropTargetStyle =
-                    case DnD.getDropId dragDrop of
+                    case DnD.getDropId dnd of
                       Just (Just { target }) ->
                         if mkBouquet left right :: context.zipper == target
                         then dropStyle.active
@@ -453,14 +453,14 @@ viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet 
                 ( List.map htmlAttribute <|
                   DnD.droppable DragDropMsg
                     (Just { target = mkBouquet left right :: context.zipper
-                          , content = [] }) )
+                          , content = [], location = location }) )
               else
                 []
             _ ->
               []
 
         EditMode Reordering _ ->
-          case DnD.getDragId dragDrop of
+          case DnD.getDragId dnd of
             Just { source, content } ->
               case source of
                 Bouquet sourceBouquet :: sourceParent ->
@@ -493,7 +493,7 @@ viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet 
                           droppable reorderColor
 
                         dropTargetStyle =
-                          case DnD.getDropId dragDrop of
+                          case DnD.getDropId dnd of
                             Just (Just { target }) ->
                               if mkBouquet left right :: context.zipper == target
                               then dropStyle.active
@@ -506,7 +506,7 @@ viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet 
                       ( List.map htmlAttribute <|
                         DnD.droppable DragDropMsg
                           (Just { target = mkBouquet left right :: context.zipper
-                                , content = newBouquet }) )
+                                , content = newBouquet, location = location }) )
                   else
                     []
                 _ ->
@@ -606,22 +606,22 @@ viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet 
       normal ()
 
 
-viewGarden : Goal -> Garden -> Element Msg
-viewGarden goal (Garden { metadata, flowers }) =
+viewGarden : FlowerDnD -> Goal -> Garden -> Element Msg
+viewGarden dnd goal (Garden { metadata, flowers }) =
   el
     ( fillXY ++
       drawGrownBorder metadata.grown )
-    ( viewBouquet goal metadata.newAtomName flowers )
+    ( viewBouquet dnd goal metadata.newAtomName flowers )
 
 
-viewGoal : Goal -> Element Msg
-viewGoal goal =
+viewGoal : FlowerDnD -> Goal -> Element Msg
+viewGoal dnd goal =
   let
     goalEl () =
       el
         ( scrollbars ::
           fillXY )
-        ( viewBouquet goal "" goal.focus )
+        ( viewBouquet dnd goal "" goal.focus )
   in
   case goal.mode of
     ProofMode _ ->

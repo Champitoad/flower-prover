@@ -25,8 +25,8 @@ stopPropagation =
   , onMouseMove DoNothing ]
 
 
-dragAction : Color.Color -> FlowerDnD -> Zipper -> Flower -> List (Attribute Msg)
-dragAction color dnd zipper flower =
+dragAction : Color.Color -> FlowerDnD -> Location -> Zipper -> Flower -> List (Attribute Msg)
+dragAction color dnd location zipper flower =
   if List.length zipper <= 1 then []
   else
     let
@@ -44,4 +44,4 @@ dragAction color dnd zipper flower =
     style ++
     (List.map htmlAttribute <|
       DnD.draggable DragDropMsg
-        { source = zipper, content = flower })
+        { location = location, source = zipper, content = flower })

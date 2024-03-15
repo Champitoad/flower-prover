@@ -2,7 +2,6 @@ module Model.Goal exposing (..)
 
 import Model.Flower as Flower exposing (..)
 
-import Html5.DragDrop as DnD
 import Dict exposing (Dict)
 
 
@@ -11,22 +10,6 @@ import Dict exposing (Dict)
 
 type alias Selection
   = List Zipper
-
-
--- Drag-and-Drop
-
-
-type alias FlowerDragId
-  = { source : Zipper, content : Flower }
-
-type alias FlowerDropId
-  = Maybe { target : Zipper, content : Bouquet }
-
-type alias FlowerDnD
-  = DnD.Model FlowerDragId FlowerDropId
-
-type alias FlowerDnDMsg
-  = DnD.Msg FlowerDragId FlowerDropId
 
 
 -- Modal UI
@@ -67,7 +50,6 @@ type UIMode
    context: the context in which the bouquet occurs
    location: a unique, semantic identifier for the goal location
    mode: the current mode of interaction
-   dragDrop: the state of an eventual ongoing drag-and-drop operation
 -}
 
 
@@ -81,7 +63,6 @@ type alias Goal
     , context : Context
     , location : Location
     , mode : UIMode
-    , dragDrop : FlowerDnD
     }
 
 
@@ -91,7 +72,6 @@ fromBouquet bouquet =
   , context = Context [] Pos
   , location = App
   , mode = ProofMode Justifying
-  , dragDrop = DnD.init
   }
 
 
@@ -168,7 +148,6 @@ manualExamples =
         , context = Context [] Pos
         , location = Manual id
         , mode = mode
-        , dragDrop = DnD.init
         }
     
     examples : List (SandboxID, UIMode, Bouquet)
