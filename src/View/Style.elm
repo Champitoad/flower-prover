@@ -3,8 +3,6 @@ module View.Style exposing (..)
 import Model.Flower exposing (..)
 import Model.App exposing (..)
 
-import Update.App exposing (..)
-
 import Utils.Color as Color
 
 import Element exposing (..)
@@ -166,6 +164,6 @@ grownBorder =
       border }
 
 
-nonSelectable : Attribute Msg
+nonSelectable : Attribute msg
 nonSelectable =
   htmlAttribute <| style "user-select" "none"

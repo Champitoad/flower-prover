@@ -21,13 +21,14 @@ port dragstart : Value -> Cmd msg
 
 
 type Msg
-  = Action Rule Zipper Bouquet
+  = Action Rule Location Zipper Bouquet
   | Auto
   | SetGoal Bouquet
   | ChangeUIMode UIMode
   | Undo
   | Redo
   | DragDropMsg FlowerDnDMsg
+  | ResetSandbox SandboxID
   | HandleKeyboardEvent KeyboardEvent
   | ConsoleLog String String
   | DoNothing
@@ -94,11 +95,11 @@ handleDragDropMsg dndMsg ({ goal } as model) =
                     action =
                       case goal.mode of
                         ProofMode Importing ->
-                          Action Import
+                          Action Import goal.location
                             destination.target [drag.content]
                         
                         EditMode Reordering _ ->
-                          Action Reorder
+                          Action Reorder goal.location
                             destination.target destination.content
                         
                         _ ->
@@ -124,25 +125,42 @@ handleDragDropMsg dndMsg ({ goal } as model) =
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg ({ goal } as model) =
+update msg ({ goal, manualExamples } as model) =
   case msg of
-    Action rule zipper bouquet ->
+    Action rule location zipper bouquet ->
       let
-        mode =
+        newFocus =
+          apply rule zipper bouquet
+
+        newMode =
           case goal.mode of
             EditMode interaction surgery ->
               EditMode interaction (operate rule zipper bouquet surgery)
             _ ->
               goal.mode
+        
+        oldGoal =
+          case location of
+            App -> goal
+            Manual sandboxID -> (getSandbox sandboxID manualExamples).currentGoal
+              
+        newGoal =
+            { oldGoal | focus = newFocus, mode = newMode }
+        
+        newModel =
+          case location of
+            App ->
+              { model
+              | goal = newGoal
+              , history = History { prev = Just model, next = Nothing }
+              }
+            
+            Manual sandboxID ->
+              { model
+              | manualExamples = updateSandbox sandboxID newGoal manualExamples
+              }
       in
-      ( { model | goal =
-          { goal
-          | focus = apply rule zipper bouquet
-          , mode = mode
-          }
-        , history = History { prev = Just model, next = Nothing }
-        }
-      , Cmd.none )
+      (newModel, Cmd.none)
     
     Auto ->
       ( { model | goal =
@@ -179,6 +197,10 @@ update msg ({ goal } as model) =
 
     DragDropMsg dndMsg ->
       handleDragDropMsg dndMsg model
+    
+    ResetSandbox id ->
+      ( { model | manualExamples = resetSandbox id model.manualExamples }
+      , Cmd.none )
     
     HandleKeyboardEvent { ctrlKey, key } ->
       let

@@ -1,19 +1,19 @@
 module Model.App exposing (..)
 
 import Model.Flower exposing (..)
-import Model.Goal as Goal
+import Model.Goal as Goal exposing (Goal, Sandboxes, manualExamples)
 
 import Url
 import Browser.Navigation
-
 
 
 -- Full state of the application
 
 
 type alias Model
-  = { goal : Goal.Goal
+  = { goal : Goal
     , history : History
+    , manualExamples : Sandboxes
     , url : Url.Url
     , key : Browser.Navigation.Key }
 
@@ -22,6 +22,7 @@ init : Url.Url -> Browser.Navigation.Key -> Model
 init url key =
   { goal = Goal.fromBouquet [orElim]
   , history = History { prev = Nothing, next = Nothing }
+  , manualExamples = manualExamples
   , url = url
   , key = key
   }

@@ -1,8 +1,43 @@
 module View.Manual exposing (..)
 
+import View.Style exposing (..)
+import View.Goal exposing (..)
+import Model.Goal exposing (..)
+import Model.App exposing (..)
+import Update.App exposing (..)
+
 import Element exposing (..)
 import Element.Border as Border
-import View.Style exposing (..)
+import Element.Input as Input
+
+import FeatherIcons as Icons
+
+
+resetIcon : Element msg
+resetIcon =
+  Icons.refreshCw |>
+  Icons.withSize 20 |>
+  Icons.toHtml [] |>
+  html
+
+
+resetButton : SandboxID -> Element Msg
+resetButton id =
+  Input.button
+    [ ]
+    { onPress = Just (ResetSandbox id)
+    , label = resetIcon
+    }
+
+viewSandbox : Sandbox -> String -> Element Msg
+viewSandbox { currentGoal } id =
+  row
+    [ width fill
+    , spacing 10 ]
+    [ viewGoal currentGoal
+    , resetButton id
+    ]
+    
 
 backButtonStyle : List (Attribute msg)
 backButtonStyle =
@@ -11,28 +46,47 @@ backButtonStyle =
   , Border.solid
   , padding 10 ]
 
+
 navbar : Element msg
 navbar =
   row
-    [ width fill ]
+    [ width fill
+    , padding 20 ]
     [ link
         ( alignLeft :: backButtonStyle )
         { url = "/", label = text "back to app" } ]
 
-body : Element msg
-body =
-  column
-    [ width (fill |> maximum 600)
-    , height fill
-    , centerX ]
-    [ text "Look at this box:"
+
+body : Model -> Element Msg
+body { manualExamples } =
+  let
+    sandbox id =
+      viewSandbox (getSandbox id manualExamples) id
+    
+    padder =
+      el [width shrink, height fill] none
+  in
+  row
+    ( scrollbarY :: fillXY )
+    [ padder
+    , column
+      [ width (fill |> maximum 600)
+      , height fill
+      , padding 20
+      , centerX ]
+      [ text "Look at this box:"
+      , sandbox "Flower"
+      , sandbox "Justify"
+      , sandbox "Modus Ponens"
+      ]
+    , padder
     ]
 
-page : Element msg
-page =
+
+page : Model -> Element Msg
+page model =
   column
     [ width fill
-    , height fill
-    , padding 20 ]
-    [ body
+    , height fill ]
+    [ body model
     , navbar ]

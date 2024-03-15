@@ -107,6 +107,11 @@ mkFakeFlower =
   mkFlower { grown = True, newAtomName = "" }
 
 
+makeFlower : Bouquet -> List Bouquet -> Flower
+makeFlower pistil petals =
+  mkRealFlower (mkRealGarden pistil) (List.map mkRealGarden petals)
+
+
 mkGarden : Metadata -> Bouquet -> Garden
 mkGarden metadata flowers =
   Garden (GardenData metadata flowers)
@@ -417,6 +422,14 @@ logBouquet msg bouquet =
 atom : String -> Flower
 atom name =
   mkRealFormula (Atom name)
+
+
+{-| Make an atomic flower from a string.
+    
+    a "foo" == atom "foo"
+-}
+a : String -> Flower
+a = atom
 
 
 entails : Bouquet -> Bouquet -> Flower

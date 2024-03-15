@@ -23,7 +23,6 @@ import Browser exposing (Document)
 import View.Route as Route
 import View.Widgets as Widgets
 import View.Manual as Manual
-import Model.Flower exposing (logBouquet)
 
 
 keyboardListener : Html.Attribute Msg
@@ -61,7 +60,7 @@ view model =
     
     Route.Manual ->
       { title = "Manual · Flower Prover"
-      , body = [ layout [] Manual.page ]
+      , body = [ layout [] (Manual.page model) ]
       }
     
     Route.NotFound _ ->

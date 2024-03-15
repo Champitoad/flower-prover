@@ -46,22 +46,22 @@ importColor =
   Utils.Color.fromRgb { red = 1, green = 0.8, blue = 0 }
 
 
-cropAction : Context -> Flower -> List (Attribute Msg)
-cropAction context flower =
+cropAction : Location -> Context -> Flower -> List (Attribute Msg)
+cropAction location context flower =
   let actionableStyle = redActionable in
   if croppable context || isGrownFlower flower then
-    Utils.Events.onClick (Action Crop context.zipper [flower])
+    Utils.Events.onClick (Action Crop location context.zipper [flower])
     :: (htmlAttribute <| title "Remove Flower")
     :: actionableStyle.active
   else
     actionableStyle.inactive
 
 
-pullAction : Context -> Garden -> List (Attribute Msg)
-pullAction context (Garden gardenData) =
+pullAction : Location -> Context -> Garden -> List (Attribute Msg)
+pullAction location context (Garden gardenData) =
   let actionableStyle = redActionable in
   if pullable context then
-    Utils.Events.onClick (Action Pull context.zipper gardenData.flowers)
+    Utils.Events.onClick (Action Pull location context.zipper gardenData.flowers)
     :: (htmlAttribute <| title "Remove Petal")
     :: actionableStyle.active
   else
@@ -74,7 +74,7 @@ drawGrownBorder doit =
 
 
 viewFormula : Goal -> FormulaData -> Element Msg
-viewFormula { mode, context, dragDrop } ({ metadata, statement } as data) =
+viewFormula { mode, context, location, dragDrop } ({ metadata, statement } as data) =
   let
     form =
       Formula data
@@ -91,19 +91,19 @@ viewFormula { mode, context, dragDrop } ({ metadata, statement } as data) =
           case statement of
             Atom _ ->
               if isHypothesis form context.zipper then
-                (Events.onClick (Action Justify context.zipper [form]))
+                (Events.onClick (Action Justify location context.zipper [form]))
                 :: (htmlAttribute <| title "Justify")
                 :: actionableStyle.active
               else
                 actionableStyle.inactive
             
             _ ->
-              (Events.onClick (Action Decompose context.zipper [form]))
+              (Events.onClick (Action Decompose location context.zipper [form]))
               :: (htmlAttribute <| title "Decompose")
               :: actionableStyle.active
         
         EditMode Operating _ ->
-          cropAction context (Formula data)
+          cropAction location context (Formula data)
 
         _ ->
           actionableStyle.inactive
@@ -129,7 +129,7 @@ viewFormula { mode, context, dragDrop } ({ metadata, statement } as data) =
 
 
 viewPistil : Goal -> PistilData -> Garden -> Element Msg
-viewPistil ({ mode, context } as goal) { metadata, pistilMetadata, petals } pistil =
+viewPistil ({ mode, context, location } as goal) { metadata, pistilMetadata, petals } pistil =
   let
     newZipper =
       mkPistil metadata pistilMetadata petals :: context.zipper
@@ -141,7 +141,7 @@ viewPistil ({ mode, context } as goal) { metadata, pistilMetadata, petals } pist
             actionableStyle = orangeActionable
 
             action rule name =
-              (Events.onClick (Action rule newZipper (harvest pistil)))
+              (Events.onClick (Action rule location newZipper (harvest pistil)))
               :: (htmlAttribute <| title name)
               :: actionableStyle.active
           in
@@ -165,7 +165,7 @@ viewPistil ({ mode, context } as goal) { metadata, pistilMetadata, petals } pist
             actionableStyle.inactive
         
         EditMode Operating _ ->
-          cropAction context (mkFlower metadata pistil petals)
+          cropAction location context (mkFlower metadata pistil petals)
 
         _ ->
           (actionable Utils.Color.transparent).inactive
@@ -191,7 +191,7 @@ viewPistil ({ mode, context } as goal) { metadata, pistilMetadata, petals } pist
 
 viewPetal : Goal -> PetalData -> Garden -> Element Msg
 viewPetal
-  ({ mode, context } as goal)
+  ({ mode, context, location } as goal)
   { metadata, petalMetadata, pistil, left, right }
   (Garden petalData as petal) =
   let
@@ -203,14 +203,14 @@ viewPetal
       case mode of
         ProofMode Justifying ->
           if List.isEmpty petalData.flowers then
-            (Events.onClick (Action Close newZipper petalData.flowers))
+            (Events.onClick (Action Close location newZipper petalData.flowers))
             :: (htmlAttribute <| title "QED")
             :: actionableStyle.active
           else
             actionableStyle.inactive
         
         EditMode Operating _ ->
-          pullAction { context | zipper = newZipper } petal
+          pullAction location { context | zipper = newZipper } petal
 
         _ ->
           actionableStyle.inactive
@@ -243,15 +243,15 @@ addButton params =
   button style params
 
 
-viewAddPetalZone : Context -> FlowerData -> Element Msg
-viewAddPetalZone context { metadata, pistil, petals } =
+viewAddPetalZone : Location -> Context -> FlowerData -> Element Msg
+viewAddPetalZone location context { metadata, pistil, petals } =
   let
     newFlower =
       mkFlower metadata pistil (petals ++ [mkFakeGarden []])
 
     addPetalButton =
         ( addButton
-            { action =  Msg (Action Grow context.zipper [newFlower])
+            { action =  Msg (Action Grow location context.zipper [newFlower])
             , title = "Add Petal"
             , icon = Icons.plus
             , enabled = True } )
@@ -265,8 +265,8 @@ viewAddPetalZone context { metadata, pistil, petals } =
     [ addPetalButton ]
 
 
-viewAddFlowerZone : Context -> String -> Bouquet -> Element Msg
-viewAddFlowerZone context newAtomName flowers =
+viewAddFlowerZone : Location -> Context -> String -> Bouquet -> Element Msg
+viewAddFlowerZone location context newAtomName flowers =
   let
     newFlower =
       if String.isEmpty newAtomName then
@@ -308,7 +308,7 @@ viewAddFlowerZone context newAtomName flowers =
         [ width fill
         , height fill ]
         ( addButton
-            { action = Msg (Action Grow (newZipper newAtomName) [newFlower])
+            { action = Msg (Action Grow location (newZipper newAtomName) [newFlower])
             , title = "Add Flower"
             , icon = Icons.plus
             , enabled = True } )
@@ -324,7 +324,7 @@ viewAddFlowerZone context newAtomName flowers =
 
 
 viewFlower : Goal -> Flower -> Element Msg
-viewFlower ({ mode, context, dragDrop } as goal) flower =
+viewFlower ({ mode, context, location, dragDrop } as goal) flower =
   case flower of
     Formula formula ->
       viewFormula goal formula
@@ -340,7 +340,7 @@ viewFlower ({ mode, context, dragDrop } as goal) flower =
           case mode of 
             EditMode _ _ ->
               if glueable context || data.metadata.grown then
-                [viewAddPetalZone context data]
+                [viewAddPetalZone location context data]
               else
                 []
             _ ->
@@ -384,7 +384,7 @@ viewFlower ({ mode, context, dragDrop } as goal) flower =
 
 
 viewBouquet : Goal -> String -> Bouquet -> Element Msg
-viewBouquet ({ mode, context, dragDrop } as goal) newAtomName bouquet =
+viewBouquet ({ mode, context, location, dragDrop } as goal) newAtomName bouquet =
   let
     flowerEl (left, right) =
       viewFlower
@@ -534,7 +534,7 @@ viewBouquet ({ mode, context, dragDrop } as goal) newAtomName bouquet =
           case mode of 
             EditMode _ _ ->
               if growable context then
-                [viewAddFlowerZone context newAtomName bouquet]
+                [viewAddFlowerZone location context newAtomName bouquet]
               else
                 []
             _ ->
