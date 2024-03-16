@@ -36,12 +36,6 @@ italic txt =
     (text txt)
 
 
-h1 : String -> Element msg
-h1 txt =
-  el [Font.size 40, paddingXY 0 20]
-    (text txt)
-
-
 -- Layout
 
 

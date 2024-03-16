@@ -105,8 +105,18 @@ body { manualExamples, dragDrop } =
     (t, b, i) =
       (text, bold, italic)
     
-    heading icon txt =
-      row [spacing 20] [ icon, h1 txt ]
+
+    h1 icon txt =
+      row [spacing 20, paddingXY 0 20]
+        [ icon
+        , el [Font.size 40] (text txt)
+        ]
+
+    h2 txt =
+      row [spacing 15]
+        [ el [Font.size 35] (text "•")
+        , el [Font.size 25] (bold txt)
+        ]
   in
   row
     ( scrollbarY ::
@@ -117,8 +127,9 @@ body { manualExamples, dragDrop } =
       , height fill
       , padding 20
       , spacing 20
-      , centerX ]
-      [ heading flowerIcon "Flowers"
+      , centerX
+      ]
+      [ h1 flowerIcon "Flowers"
       , par [ t"Look at this box:" ]
       , sandbox "Flower"
       , tcol
@@ -136,9 +147,21 @@ body { manualExamples, dragDrop } =
           , par [ t"Flowers can be ", b"nested", t" inside each other." ]
           , par [ t"Flowers can be ", b"proved", t", ", b"edited",  t" and ", b"navigated", t"." ]
           ]
-      , heading proofIcon "Proof Mode"
-      , heading editIcon "Edit Mode"
-      , heading navigateIcon "Navigation Mode"
+
+      , h1 proofIcon "Proof Mode"
+
+      , h2 "QED"
+      , par [ t"Click on an ", el greenActionable.active (text "empty petal"), t" to erase its flower." ]
+      , sandbox "QED"
+      
+      , h2 "Justify"
+      , par [ t"Click on an ", el greenActionable.active (text "atom"), t" to erase it." ]
+      , sandbox "Justify"
+
+      , h1 editIcon "Edit Mode"
+
+      , h1 navigateIcon "Navigation Mode"
+      , par [ t"Coming soon!" ]
       ]
     , padder
     ]

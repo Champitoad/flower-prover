@@ -153,6 +153,7 @@ manualExamples =
     examples : List (SandboxID, UIMode, Bouquet)
     examples =
       [ ( "Flower", ProofMode Justifying, [makeFlower [a"a", a"b"] [[a"c"], [a"d"]]] )
+      , ( "QED", ProofMode Justifying, [makeFlower [a"a"] [[]]] )
       , ( "Justify", ProofMode Justifying, [Flower.identity] )
       , ( "Modus Ponens", ProofMode Justifying, [Flower.modusPonensCurryfied] )
       ]
