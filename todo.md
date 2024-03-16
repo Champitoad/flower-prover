@@ -1,8 +1,9 @@
-# Features
-
-- Print "Proof complete!" for empty top-level bouquets
-
+- Fix different text sizes between `par` and `tcol` in manual on mobile
+- Remove all Debug uses to build with --optimize flag
+- Responsive layout with bigger text on high resolution mobile devices
 - Fix newAtomName not being updated when typing at top-level
+
+# Features
 
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers
