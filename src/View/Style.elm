@@ -8,8 +8,41 @@ import Utils.Color as Color
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 
 import Html.Attributes exposing (style)
+
+
+-- Interaction
+
+
+nonSelectable : Attribute msg
+nonSelectable =
+  htmlAttribute <| style "user-select" "none"
+
+
+-- Text
+
+
+bold : String -> Element msg
+bold txt =
+  el [Font.bold]
+    (text txt)
+
+
+italic : String -> Element msg
+italic txt =
+  el [Font.italic]
+    (text txt)
+
+
+h1 : String -> Element msg
+h1 txt =
+  el [Font.size 40, paddingXY 0 20]
+    (text txt)
+
+
+-- Layout
 
 
 fillXY : List (Attribute msg)
@@ -22,9 +55,15 @@ centered elem =
   el [centerX, centerY] elem
 
 
+-- Color
+
+
 transparent : Color
 transparent =
   rgba 0 0 0 0
+
+
+-- Flower styling
 
 
 flowerForegroundColor : Polarity -> Color
@@ -162,8 +201,3 @@ grownBorder =
       border
   , inactive =
       border }
-
-
-nonSelectable : Attribute msg
-nonSelectable =
-  htmlAttribute <| style "user-select" "none"

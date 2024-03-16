@@ -9,6 +9,7 @@ import Update.App exposing (..)
 import Element exposing (..)
 import Element.Border as Border
 import Element.Input as Input
+import Element.Font as Font
 
 import FeatherIcons as Icons
 
@@ -66,6 +67,12 @@ body { manualExamples, dragDrop } =
     
     padder =
       el [width shrink, height fill] none
+    
+    (tcol, par) =
+      (textColumn [spacing 15], paragraph [])
+    
+    (t, b, i) =
+      (text, bold, italic)
   in
   row
     ( scrollbarY ::
@@ -77,10 +84,26 @@ body { manualExamples, dragDrop } =
       , padding 20
       , spacing 20
       , centerX ]
-      [ text "Look at this box:"
+      [ h1 "Flowers"
+      , par [ t"Look at this box:" ]
       , sandbox "Flower"
-      , sandbox "Justify"
-      , sandbox "Modus Ponens"
+      , tcol
+          [ par [ t"It is called a ", b"flower", t"." ]
+          , par [ t"a, b, c and d are ", b"atoms", t"." ]
+          , par [ t"a and b are in the ", b"pistil", t" (upper part of the box)." ]
+          , par [ t"c and d are each in a ", b"petal", t"." ]
+          , par [ t"Petals form the ", b"corolla", t" (lower part of the box)." ]
+          , par [ t"Flowers represent ", b"logical statements", t":" ]
+          , textColumn [paddingXY 30 5, spacing 5]
+              [ par [ i"If a ", b"and", i" b are true," ]
+              , par [ b"then", i" either c ", b"or", i" d is true." ] ]
+          , par [ t"Juxtaposition is interpreted as ", b"conjunction", t"." ]
+          , par [ t"A pistil ", b"implies", t" the ", b"disjunction", t" of its petals." ]
+          , par [ t"Flowers can be ", b"nested", t" inside each other." ]
+          , par [ t"Flowers can be ", b"proved", t", ", b"edited",  t" and ", b"navigated", t"." ]
+          ]
+      , h1 "Proof Mode"
+      , h1 "Edit Mode"
       ]
     , padder
     ]
