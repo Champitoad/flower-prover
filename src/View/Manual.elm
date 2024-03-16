@@ -2,6 +2,7 @@ module View.Manual exposing (..)
 
 import View.Style exposing (..)
 import View.Goal exposing (..)
+import Model.Flower exposing (..)
 import Model.Goal exposing (..)
 import Model.App exposing (..)
 import Update.App exposing (..)
@@ -10,6 +11,8 @@ import Element exposing (..)
 import Element.Border as Border
 import Element.Input as Input
 import Element.Font as Font
+
+import Html5.DragDrop as DnD
 
 import FeatherIcons as Icons
 
@@ -65,7 +68,7 @@ viewSandbox dnd { currentGoal } id =
   row
     [ width fill
     , spacing 20
-    , padding 10
+    , padding 5
     ]
     [ viewGoal dnd currentGoal
     , resetButton id
@@ -100,20 +103,19 @@ body { manualExamples, dragDrop } =
       el [width shrink, height fill] none
     
     (tcol, par) =
-      (textColumn [spacing 15], paragraph [])
+      (textColumn [spacing 10], paragraph [])
     
     (t, b, i) =
       (text, bold, italic)
     
-
     h1 icon txt =
-      row [spacing 20, paddingXY 0 20]
+      row [spacing 20, paddingEach { top = 20, bottom = 10, left = 0, right = 0 }]
         [ icon
         , el [Font.size 40] (text txt)
         ]
 
     h2 txt =
-      row [spacing 15]
+      row [spacing 15, paddingEach { top = 10, bottom = 0, left = 0, right = 0 } ]
         [ el [Font.size 35] (text "•")
         , el [Font.size 25] (bold txt)
         ]
@@ -126,7 +128,7 @@ body { manualExamples, dragDrop } =
       [ width (fill |> maximum 600)
       , height fill
       , padding 20
-      , spacing 20
+      , spacing 30
       , centerX
       ]
       [ h1 flowerIcon "Flowers"
@@ -138,25 +140,46 @@ body { manualExamples, dragDrop } =
           , par [ t"a and b are in the ", b"pistil", t" (upper part of the box)." ]
           , par [ t"c and d are each in a ", b"petal", t"." ]
           , par [ t"Petals form the ", b"corolla", t" (lower part of the box)." ]
-          , par [ t"Flowers represent ", b"logical statements", t":" ]
+          ]
+      , tcol
+          [ par [ t"Flowers represent ", b"logical statements", t":" ]
           , textColumn [paddingXY 30 5, spacing 5]
               [ par [ i"If a ", b"and", i" b are true," ]
               , par [ b"then", i" either c ", b"or", i" d is true." ] ]
           , par [ t"Juxtaposition is interpreted as ", b"conjunction", t"." ]
           , par [ t"A pistil ", b"implies", t" the ", b"disjunction", t" of its petals." ]
-          , par [ t"Flowers can be ", b"nested", t" inside each other." ]
-          , par [ t"Flowers can be ", b"proved", t", ", b"edited",  t" and ", b"navigated", t"." ]
           ]
+      , par [ t"Flowers can be ", b"proved", t", ", b"edited",  t" and ", b"navigated", t"." ]
 
       , h1 proofIcon "Proof Mode"
 
       , h2 "QED"
       , par [ t"Click on an ", el greenActionable.active (text "empty petal"), t" to erase its flower." ]
       , sandbox "QED"
+      , par [ t"Note that emptiness is interpreted as ", b"truth", t"." ]
       
       , h2 "Justify"
       , par [ t"Click on an ", el greenActionable.active (text "atom"), t" to erase it." ]
       , sandbox "Justify"
+
+      , h2 "Unlock"
+      , par [ t"Click on an ", el orangeActionable.active (text "empty pistil"), t" to unlock its petal." ]
+      , sandbox "Unlock"
+      , par [ t"Note that flowers can be ", b"nested", t" inside each other." ]
+      
+      , h2 "Import"
+      , par [ t"Drag a ", el (draggable importColor).active (text "flower")
+            , t" to copy it, and drop it in an ", el (droppable importColor).active (text "area")
+            , t" to paste it." ]
+      , sandbox "Import"
+
+      , h2 "Case"
+      , par [ t"Click on an ", el orangeActionable.active (text "empty pistil"), t" to turn its attached petals into pistils." ]
+      , sandbox "Case"
+
+      , h2 "Decompose"
+      , par [ t"Click on a ", el pinkActionable.active (text "symbolic formula"), t" to turn it into a flower." ]
+      , sandbox "Decompose"
 
       , h1 editIcon "Edit Mode"
 

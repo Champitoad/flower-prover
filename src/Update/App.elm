@@ -15,6 +15,7 @@ import Keyboard.Event exposing (KeyboardEvent)
 import Url
 import Browser
 import Browser.Navigation
+import View.Route as Route
 
 
 port dragstart : Value -> Cmd msg
@@ -229,7 +230,15 @@ update msg ({ goal, manualExamples } as model) =
       (model, Cmd.none)
     
     UrlChanged url ->
-      ({ model | url = url }, Cmd.none)
+      let
+        newModel =
+          case Route.fromUrl url of
+            Route.Manual ->
+              { model | manualExamples = resetAllSandboxes model.manualExamples }
+            _ ->
+              model
+      in
+      ({ newModel | url = url }, Cmd.none)
     
     LinkClicked urlRequest ->
       case urlRequest of

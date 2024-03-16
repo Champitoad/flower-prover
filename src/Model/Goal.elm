@@ -139,6 +139,11 @@ resetSandbox id sandboxes =
       updateSandbox id sandbox.initialGoal sandboxes
 
 
+resetAllSandboxes : Sandboxes -> Sandboxes
+resetAllSandboxes sandboxes =
+  Dict.map (\_ sb -> { sb | currentGoal = sb.initialGoal }) sandboxes
+
+
 manualExamples : Sandboxes
 manualExamples =
   let
@@ -152,10 +157,14 @@ manualExamples =
     
     examples : List (SandboxID, UIMode, Bouquet)
     examples =
-      [ ( "Flower", ProofMode Justifying, [makeFlower [a"a", a"b"] [[a"c"], [a"d"]]] )
-      , ( "QED", ProofMode Justifying, [makeFlower [a"a"] [[]]] )
+      [ ( "Flower", ProofMode Justifying, [fl[a"a",a"b"][[a"c"],[a"d"]]] )
+      , ( "QED", ProofMode Justifying, [fl[a"a"][[]]] )
       , ( "Justify", ProofMode Justifying, [Flower.identity] )
-      , ( "Modus Ponens", ProofMode Justifying, [Flower.modusPonensCurryfied] )
+      , ( "Unlock", ProofMode Justifying, [fl[fl[][[a"a"]]][[a"a"]]] )
+      , ( "Import", ProofMode Justifying, [Flower.modusPonensCurryfied] )
+      , ( "Case", ProofMode Justifying,
+          [fl[fl[][[a"a"],[a"b"]],fl[a"a"][[a"c"]],fl[a"b"][[a"c"]]][[a"c"]]] )
+      , ( "Decompose", ProofMode Justifying, [Flower.orElim] )
       ]
   in
   examples |>

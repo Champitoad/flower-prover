@@ -107,8 +107,12 @@ mkFakeFlower =
   mkFlower { grown = True, newAtomName = "" }
 
 
-makeFlower : Bouquet -> List Bouquet -> Flower
-makeFlower pistil petals =
+{-| Make a flower from a pistil and a list of petals.
+    
+    fl [a"a", a"b"] [[a"c"], [a"d"]]
+-}
+fl : Bouquet -> List Bouquet -> Flower
+fl pistil petals =
   mkRealFlower (mkRealGarden pistil) (List.map mkRealGarden petals)
 
 

@@ -617,11 +617,28 @@ viewGarden dnd goal (Garden { metadata, flowers }) =
 viewGoal : FlowerDnD -> Goal -> Element Msg
 viewGoal dnd goal =
   let
+    congratsFontSize =
+      case goal.location of
+        App -> 48
+        Manual _ -> 32
+
     goalEl () =
-      el
-        ( scrollbars ::
-          fillXY )
-        ( viewBouquet dnd goal "" goal.focus )
+      if List.isEmpty goal.focus then
+        centered
+          ( el
+              ( fillXY ++
+                [ Font.size congratsFontSize
+                , Font.color
+                    ( Utils.Color.fromRgb { red = 0.6, green = 0.6, blue = 0.6 } |>
+                      Utils.Color.toElement )
+                , padding 20
+                ] )
+                ( text "Proof complete!" ) )
+      else
+        el
+          ( scrollbars ::
+            fillXY )
+          ( viewBouquet dnd goal "" goal.focus )
   in
   case goal.mode of
     ProofMode _ ->

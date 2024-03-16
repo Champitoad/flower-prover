@@ -128,7 +128,7 @@ greenActionable =
 
 pinkActionable : ZoneStyle msg
 pinkActionable =  
-  actionable (Color.fromRgb { red = 1, green = 0.1, blue = 0.8 })
+  actionable (Color.fromRgb { red = 1, green = 0.4, blue = 0.8 })
 
 orangeActionable : ZoneStyle msg
 orangeActionable =
