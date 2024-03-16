@@ -1,9 +1,12 @@
 - Fix different text sizes between `par` and `tcol` in manual on mobile
 - Remove all Debug uses to build with --optimize flag
-- Responsive layout with bigger text on high resolution mobile devices
+- Responsive layout with bigger text on high resolution mobile devices (maybe
+  use `scale` and `modular`?)
 - Fix newAtomName not being updated when typing at top-level
 
 # Features
+
+- Restrict pollination to zones of same polarity (the "more scientific principle")
 
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers

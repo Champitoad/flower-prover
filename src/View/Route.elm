@@ -15,9 +15,11 @@ routeParser =
   in
   oneOf
     [ map App top
-    , map Manual (s "manual")
-
+    , map App (top </> s "index.html")
     , map App lix
+    , map App (lix </> s "index.html")
+
+    , map Manual (s "manual")
     , map Manual (lix </> s "manual")
     ]
 
