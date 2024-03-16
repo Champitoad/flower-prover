@@ -14,12 +14,42 @@ import Element.Font as Font
 import FeatherIcons as Icons
 
 
+mkIcon : Float -> Icons.Icon -> Element msg
+mkIcon size icon  =
+  icon |>
+  Icons.withSize size |>
+  Icons.toHtml [] |>
+  html |>
+  el []
+
+
+headingIconSize : Float
+headingIconSize =
+  40
+
+
+flowerIcon : Element msg
+flowerIcon =
+  el [Font.size (round headingIconSize + 10)] (text "❀")
+
+proofIcon : Element msg
+proofIcon =
+  mkIcon headingIconSize Icons.checkSquare
+
+
+editIcon : Element msg
+editIcon =
+  mkIcon headingIconSize Icons.edit2
+
+
+navigateIcon : Element msg
+navigateIcon =
+  mkIcon headingIconSize Icons.navigation
+
+
 resetIcon : Element msg
 resetIcon =
-  Icons.refreshCw |>
-  Icons.withSize 20 |>
-  Icons.toHtml [] |>
-  html
+  mkIcon 20 Icons.rotateCw
 
 
 resetButton : SandboxID -> Element Msg
@@ -34,7 +64,8 @@ viewSandbox : FlowerDnD -> Sandbox -> String -> Element Msg
 viewSandbox dnd { currentGoal } id =
   row
     [ width fill
-    , spacing 10
+    , spacing 20
+    , padding 10
     ]
     [ viewGoal dnd currentGoal
     , resetButton id
@@ -73,6 +104,9 @@ body { manualExamples, dragDrop } =
     
     (t, b, i) =
       (text, bold, italic)
+    
+    heading icon txt =
+      row [spacing 20] [ icon, h1 txt ]
   in
   row
     ( scrollbarY ::
@@ -84,7 +118,7 @@ body { manualExamples, dragDrop } =
       , padding 20
       , spacing 20
       , centerX ]
-      [ h1 "Flowers"
+      [ heading flowerIcon "Flowers"
       , par [ t"Look at this box:" ]
       , sandbox "Flower"
       , tcol
@@ -102,8 +136,9 @@ body { manualExamples, dragDrop } =
           , par [ t"Flowers can be ", b"nested", t" inside each other." ]
           , par [ t"Flowers can be ", b"proved", t", ", b"edited",  t" and ", b"navigated", t"." ]
           ]
-      , h1 "Proof Mode"
-      , h1 "Edit Mode"
+      , heading proofIcon "Proof Mode"
+      , heading editIcon "Edit Mode"
+      , heading navigateIcon "Navigation Mode"
       ]
     , padder
     ]
