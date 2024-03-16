@@ -2,13 +2,17 @@ module View.App exposing (..)
 
 import View.Goal exposing (..)
 import View.Toolbar exposing (..)
-import View.Style exposing (fillXY)
+import View.Style exposing (fillXY, centered)
+import View.Route as Route
+import View.Manual as Manual
 
 import Model.App exposing (Model)
 
 import Update.App exposing (..)
 
 import Element exposing (..)
+import Element.Background as Background
+import Element.Font as Font
 
 import Html exposing (div)
 import Html.Events exposing (on)
@@ -19,10 +23,6 @@ import Json.Decode
 import Keyboard.Event exposing (decodeKeyboardEvent)
 import Html.Attributes exposing (tabindex)
 import Browser exposing (Document)
-
-import View.Route as Route
-import View.Widgets as Widgets
-import View.Manual as Manual
 
 
 keyboardListener : Html.Attribute Msg
@@ -63,7 +63,13 @@ view model =
       , body = [ layout [] (Manual.page model) ]
       }
     
-    Route.NotFound _ ->
+    Route.NotFound url ->
       { title = "Error 404"
-      , body = [ layout [] (Widgets.fullPageTextMessage "Page not found!") ]
+      , body = [ layout [] (
+          column
+            ( spacing 30 :: fillXY )
+            [ centered (el [Font.size 50] (text "Page not found!"))
+            , centered (el [Font.size 25, Font.color (rgb 0.6 0.6 0.6)] (text url))
+            ]
+        ) ]
       }

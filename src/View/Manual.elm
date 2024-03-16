@@ -12,8 +12,6 @@ import Element.Border as Border
 import Element.Input as Input
 import Element.Font as Font
 
-import Html5.DragDrop as DnD
-
 import FeatherIcons as Icons
 
 
@@ -182,6 +180,7 @@ body { manualExamples, dragDrop } =
       , sandbox "Decompose"
 
       , h1 editIcon "Edit Mode"
+      , par [ t"Coming soon!" ]
 
       , h1 navigateIcon "Navigation Mode"
       , par [ t"Coming soon!" ]
