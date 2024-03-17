@@ -101,7 +101,9 @@ body { manualExamples, dragDrop } =
       el [width shrink, height fill] none
     
     (tcol, par) =
-      (textColumn [spacing 10], paragraph [])
+      let fontSize = 20 in
+      ( textColumn [spacing 10, Font.size fontSize]
+      , paragraph [Font.size fontSize] )
     
     (t, b, i) =
       (text, bold, italic)

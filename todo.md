@@ -1,4 +1,3 @@
-- Fix different text sizes between `par` and `tcol` in manual on mobile
 - Remove all Debug uses to build with --optimize flag
 - Responsive layout with bigger text on high resolution mobile devices (maybe
   use `scale` and `modular`?)

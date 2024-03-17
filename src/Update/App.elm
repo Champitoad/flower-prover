@@ -243,7 +243,18 @@ update msg ({ goal, manualExamples } as model) =
     LinkClicked urlRequest ->
       case urlRequest of
         Browser.Internal url ->
-          ( model, Browser.Navigation.pushUrl model.key (Url.toString url) )
+          let 
+            newPath =
+              case url.host of
+                "www.lix.polytechnique.fr" ->
+                  "/Labo/Pablo.DONATO/flowerprover" ++ url.path
+                _ ->
+                  url.path
+            
+            newUrl =
+              { url | path = newPath }  
+          in
+          ( model, Browser.Navigation.pushUrl model.key (Url.toString newUrl) )
 
         Browser.External href ->
           ( model, Browser.Navigation.load href )
