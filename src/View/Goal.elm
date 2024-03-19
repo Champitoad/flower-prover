@@ -614,6 +614,13 @@ viewGarden dnd goal (Garden { metadata, flowers }) =
     ( viewBouquet dnd goal metadata.newAtomName flowers )
 
 
+inEditMode : Goal -> Bool
+inEditMode { mode } =
+  case mode of
+    EditMode _ _ -> True
+    _ -> False
+
+
 viewGoal : FlowerDnD -> Goal -> Element Msg
 viewGoal dnd goal =
   let
@@ -623,7 +630,7 @@ viewGoal dnd goal =
         Manual _ -> 32
 
     goalEl () =
-      if List.isEmpty goal.focus then
+      if List.isEmpty goal.focus && not (inEditMode goal)  then
         centered
           ( el
               ( fillXY ++
