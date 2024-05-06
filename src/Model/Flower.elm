@@ -274,9 +274,38 @@ isHypothesis flower zipper =
   List.member flower (hypsZipper zipper)
 
 
+type Polarity
+  = Pos
+  | Neg
+
+
+invert : Polarity -> Polarity
+invert polarity =
+  case polarity of
+    Pos -> Neg
+    Neg -> Pos
+
+
+polarityOf : Zipper -> Polarity
+polarityOf zipper =
+  case zipper of
+    [] ->
+      Pos
+
+    Bouquet _ :: parent ->
+      polarityOf parent
+
+    Pistil _ :: parent ->
+      invert (polarityOf parent)
+
+    Petal _ :: parent ->
+      polarityOf parent
+
+
 justifies : Zipper -> Zipper -> Bool
 justifies source destination =
   let lca = Utils.List.longestCommonSuffix source destination in
+  polarityOf source == polarityOf destination &&
   case source of
     -- Self pollination
     Bouquet _ :: (Pistil _ :: grandParent as parent) ->
@@ -289,18 +318,6 @@ justifies source destination =
     
     _ ->
       False
-
-
-type Polarity
-  = Pos
-  | Neg
-
-
-invert : Polarity -> Polarity
-invert polarity =
-  case polarity of
-    Pos -> Neg
-    Neg -> Pos
 
 
 type alias Context

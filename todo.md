@@ -5,8 +5,6 @@
 
 # Features
 
-- Restrict pollination to zones of same polarity (the "more scientific principle")
-
 - Implement Navigation mode
   - Underlying data structure: *focus stack* = list of zippers
   - Global context at top of the screen = hypotheses in top of focus stack
