@@ -42,14 +42,71 @@ type UIMode
   = ProofMode ProofInteraction
   | EditMode EditInteraction Surgery
   | NavigationMode
+  
+
+{- A Navigation is a non-empty sequence of visited [Context]s.
+
+   It is used to keep track of the user's navigation history, i.e. the different
+   locations in a goal that she has visited.
+
+   The head of the list corresponds to the last visited location, and the last
+   element to the initial location.
+-}
+
+
+type alias Navigation = List Context
+
+
+initialNavigation : Navigation
+initialNavigation =
+  [Context [] Pos]
+
+
+visit : Context -> Navigation -> Navigation
+visit context navigation =
+  context :: navigation
+
+
+current : Navigation -> Context
+current navigation =
+  case navigation of
+    context :: _ ->
+      context
+
+    [] ->
+      Context [] Pos -- should never happen
+
+
+changeFocus : Context -> Navigation -> Navigation
+changeFocus context navigation =
+  case navigation of
+    _ :: rest ->
+      context :: rest
+
+    [] ->
+      [context] -- should never happen
+
+
+backtrack : Navigation -> Navigation
+backtrack navigation =
+  case navigation of
+    [_] ->
+      navigation
+      
+    _ :: (_ :: _ as rest) ->
+      rest
+
+    [] ->
+      initialNavigation -- should never happen
 
 
 {- A Goal is made of the following data:
 
-   focus: the bouquet that the user is currently working on
-   context: the context in which the bouquet occurs
-   location: a unique, semantic identifier for the goal location
-   mode: the current mode of interaction
+   [focus]: the bouquet that the user is currently working on
+   [navigation]: the navigation history
+   [location]: a unique, semantic identifier for the goal location
+   [mode]: the current mode of interaction
+
 -}
 
 
@@ -57,10 +114,9 @@ type Location
   = App
   | Manual SandboxID
 
-
 type alias Goal
   = { focus : Bouquet
-    , context : Context
+    , navigation : Navigation
     , location : Location
     , mode : UIMode
     }
@@ -69,7 +125,7 @@ type alias Goal
 fromBouquet : Bouquet -> Goal
 fromBouquet bouquet =
   { focus = bouquet
-  , context = Context [] Pos
+  , navigation = initialNavigation
   , location = App
   , mode = ProofMode Justifying
   }
@@ -150,7 +206,7 @@ manualExamples =
     makeSandbox id mode bouquet =
       mkSandbox
         { focus = bouquet
-        , context = Context [] Pos
+        , navigation = initialNavigation
         , location = Manual id
         , mode = mode
         }

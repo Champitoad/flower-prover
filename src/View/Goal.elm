@@ -75,10 +75,13 @@ drawGrownBorder doit =
 
 
 viewFormula : FlowerDnD -> Goal -> FormulaData -> Element Msg
-viewFormula dnd { mode, context, location } ({ metadata, statement } as data) =
+viewFormula dnd { mode, navigation, location } ({ metadata, statement } as data) =
   let
     form =
       Formula data
+    
+    context =
+      current navigation
 
     clickAction =
       let
@@ -135,8 +138,11 @@ viewFormula dnd { mode, context, location } ({ metadata, statement } as data) =
 
 
 viewPistil : FlowerDnD -> Goal -> PistilData -> Garden -> Element Msg
-viewPistil dnd ({ mode, context, location } as goal) { metadata, pistilMetadata, petals } pistil =
+viewPistil dnd ({ mode, navigation, location } as goal) { metadata, pistilMetadata, petals } pistil =
   let
+    context =
+      current navigation
+
     newZipper =
       mkPistil metadata pistilMetadata petals :: context.zipper
 
@@ -191,21 +197,24 @@ viewPistil dnd ({ mode, context, location } as goal) { metadata, pistilMetadata,
           , padding paddingSize ]
          ++ clickAction )
         ( viewGarden dnd
-            { goal | context =
+            { goal | navigation = changeFocus
               { context
               | zipper = newZipper
               , polarity = invert context.polarity
-              }
+              } goal.navigation
             }
             pistil ) )
 
 
 viewPetal : FlowerDnD -> Goal -> PetalData -> Garden -> Element Msg
 viewPetal dnd
-  ({ mode, context, location } as goal)
+  ({ mode, navigation, location } as goal)
   { metadata, petalMetadata, pistil, left, right }
   (Garden petalData as petal) =
   let
+    context =
+      current navigation
+    
     newZipper =
       mkPetal metadata petalMetadata pistil left right :: context.zipper
 
@@ -242,7 +251,7 @@ viewPetal dnd
           , padding paddingSize ]
          ++ clickAction )
         ( viewGarden dnd
-            { goal | context = { context | zipper = newZipper } }
+            { goal | navigation = changeFocus { context | zipper = newZipper } goal.navigation }
             petal ) )
 
 
@@ -340,13 +349,16 @@ viewAddFlowerZone location context newAtomName flowers =
 
 
 viewFlower : FlowerDnD -> Goal -> Flower -> Element Msg
-viewFlower dnd ({ mode, context, location } as goal) flower =
+viewFlower dnd ({ mode, navigation, location } as goal) flower =
   case flower of
     Formula formula ->
       viewFormula dnd goal formula
     
     Flower ({ metadata, pistil, petals } as data) ->
       let
+        context =
+          current navigation
+
         (Garden pistilData) = pistil
 
         pistilEl =
@@ -418,14 +430,17 @@ viewFlower dnd ({ mode, context, location } as goal) flower =
 
 
 viewBouquet : FlowerDnD -> Goal -> String -> Bouquet -> Element Msg
-viewBouquet dnd ({ mode, context, location } as goal) newAtomName bouquet =
+viewBouquet dnd ({ mode, navigation, location } as goal) newAtomName bouquet =
   let
+    context =
+      current navigation
+
     flowerEl (left, right) =
       viewFlower dnd
-        { goal | context =
+        { goal | navigation = changeFocus
           { context | zipper =
             mkBouquet left right :: context.zipper
-          }
+          } goal.navigation
         }
     
     dropAction (left, right) =
