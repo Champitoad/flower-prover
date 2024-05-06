@@ -6,11 +6,11 @@
 # Features
 
 - Implement Navigation mode
-  - Underlying data structure: *focus stack* = list of zippers
-  - Global context at top of the screen = hypotheses in top of focus stack
+  - Shelf at top of the screen = hypotheses in top of focus stack
   - Focus on flower by clicking
-  - Jump to flower in global context by clicking
   - Unfocus by clicking on focused flower
+  - Jump to flower in shelf by clicking
+  - Pollination of flower in shelf in Proof mode
   - Scale/Unscale animation?
 
 - Automation of some proof actions
