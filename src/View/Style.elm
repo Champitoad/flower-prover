@@ -60,21 +60,29 @@ transparent =
 -- Flower styling
 
 
+negativeColor : Color
+negativeColor =
+  rgb 0.2 0.2 0.2
+
+positiveColor : Color
+positiveColor =
+  rgb 1 1 1
+
 flowerForegroundColor : Polarity -> Color
 flowerForegroundColor polarity =
   case polarity of
     Pos ->
-      rgb 0 0 0
+      negativeColor
     Neg ->
-      rgb 1 1 1
+      positiveColor
 
 flowerBackgroundColor : Polarity -> Color
 flowerBackgroundColor polarity =
   case polarity of
     Pos ->
-      rgb 1 1 1
+      positiveColor
     Neg ->
-      rgb 0 0 0
+      negativeColor
 
 
 grownColor : Color

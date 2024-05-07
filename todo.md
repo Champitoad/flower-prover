@@ -12,6 +12,8 @@
   - Jump to flower in shelf by clicking
   - Pollination of flower in shelf in Proof mode
   - Scale/Unscale animation?
+  - Resizable shelf with handle
+  - Relocatable shelf on either side of the screen + automatic relocation based on the current screen ratio (left for horizontal layout, top for vertical layout)
 
 - Automation of some proof actions
   - Click on it opens either:

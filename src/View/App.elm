@@ -1,5 +1,6 @@
 module View.App exposing (..)
 
+import View.Shelf exposing (..)
 import View.Goal exposing (..)
 import View.Toolbar exposing (..)
 import View.Style exposing (fillXY, centered)
@@ -36,6 +37,9 @@ view model =
   case Route.fromUrl model.url of
     Route.App ->
       let
+        shelf =
+          viewShelf model.goal
+        
         goal =
           viewGoal model.dragDrop model.goal
         
@@ -43,7 +47,7 @@ view model =
           viewToolbar model
         
         app =
-          column fillXY [ goal, toolbar ]
+          column fillXY [ shelf, goal, toolbar ]
           |> layout []
       in
       { title = "Flower Prover"

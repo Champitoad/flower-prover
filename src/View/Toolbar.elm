@@ -36,7 +36,7 @@ viewAutoButton mode =
   defaultButton
     { action = Msg Auto
     , title = "Auto"
-    , icon = Icons.settings
+    , icon = Icons.zap
     , enabled = enabled }
 
 
@@ -154,6 +154,13 @@ viewToolbar model =
     [ width fill
     , height shrink
     , padding 15
+    , Border.widthEach { top = 1, right = 0, bottom = 0, left = 0 }
+    , Border.color (rgb 0.6 0.6 0.6)
+    -- , Border.shadow
+    --     { offset = (0, -3)
+    --     , size = 0.1
+    --     , blur = 5
+    --     , color = rgb 0.5 0.5 0.5 }
     , Background.gradient
         { angle = 0
         , steps = [ rgb 0.8 0.8 0.8, rgb 0.9 0.9 0.9 ] } ]

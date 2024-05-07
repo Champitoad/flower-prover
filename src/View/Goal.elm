@@ -643,23 +643,28 @@ viewGoal dnd goal =
       case goal.location of
         App -> 48
         Manual _ -> 32
+        
+    goalHeight =
+      height (fillPortion 4)
 
     goalEl () =
-      if List.isEmpty goal.focus && not (inEditMode goal)  then
-        centered
+      if List.isEmpty goal.focus && not (inEditMode goal) then
+        el [width fill, goalHeight]
           ( el
-              ( fillXY ++
-                [ Font.size congratsFontSize
-                , Font.color
-                    ( Utils.Color.fromRgb { red = 0.6, green = 0.6, blue = 0.6 } |>
-                      Utils.Color.toElement )
-                , padding 20
-                ] )
-                ( text "Proof complete!" ) )
+              [ centerX, centerY
+              , Font.size congratsFontSize
+              , Font.color
+                  ( Utils.Color.fromRgb { red = 0.6, green = 0.6, blue = 0.6 } |>
+                    Utils.Color.toElement )
+              , padding 20
+              ]
+              ( text "Proof complete!" )
+          )
       else
         el
-          ( scrollbars ::
-            fillXY )
+          [ scrollbars
+          , width fill
+          , goalHeight ]
           ( viewBouquet dnd goal "" goal.focus )
   in
   case goal.mode of
@@ -670,4 +675,4 @@ viewGoal dnd goal =
       goalEl ()
 
     _ ->
-      Widgets.fullPageTextMessage "Working on it!"
+      el [goalHeight, centerX] (Widgets.fullPageTextMessage "Working on it!")
