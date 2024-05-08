@@ -62,7 +62,7 @@ transparent =
 
 negativeColor : Color
 negativeColor =
-  rgb 0.2 0.2 0.2
+  rgb 0.18 0.2 0.25
 
 positiveColor : Color
 positiveColor =
