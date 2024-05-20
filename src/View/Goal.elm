@@ -74,6 +74,41 @@ drawGrownBorder doit =
   if doit then grownBorder.active else grownBorder.inactive
 
 
+viewAtom : Ident -> Element Msg
+viewAtom ident =
+  case ident of
+    Name name ->
+      text name
+    
+    Image data ->
+      image [] data
+
+
+viewStatement : Formula -> Element Msg
+viewStatement formula =
+  case formula of
+    Atom ident ->
+      viewAtom ident
+    
+    Truth ->
+      text "⊤"
+    
+    Falsity ->
+      text "⊥"
+    
+    And f1 f2 ->
+      row [] [viewStatement f1, text " ∧ ", viewStatement f2]
+
+    Or f1 f2 ->
+      row [] [viewStatement f1, text " v ", viewStatement f2]
+
+    Implies f1 f2 ->
+      row [] [text "(", viewStatement f1, text " ⇒ ", viewStatement f2, text ")"]
+    
+    Not f1 ->
+      row [] [text "¬ (", viewStatement f1, text ")"]
+
+
 viewFormula : FlowerDnD -> Goal -> FormulaData -> Element Msg
 viewFormula dnd { mode, context, location } ({ metadata, statement } as data) =
   let
@@ -131,7 +166,7 @@ viewFormula dnd { mode, context, location } ({ metadata, statement } as data) =
       ++ reorderDragAction
       ++ clickAction
       ++ drawGrownBorder metadata.grown )
-    ( text (Formula.toString statement) )
+    ( viewStatement statement )
 
 
 viewPistil : FlowerDnD -> Goal -> PistilData -> Garden -> Element Msg
@@ -288,7 +323,7 @@ viewAddFlowerZone location context newAtomName flowers =
       if String.isEmpty newAtomName then
         mkFakeFlower (mkFakeGarden []) [mkFakeGarden []]
       else
-        mkFakeFormula (Atom newAtomName)
+        mkFakeFormula (Formula.atom newAtomName)
 
     newZipper newName =
       case context.zipper of

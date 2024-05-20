@@ -419,7 +419,7 @@ viewGardenText (Garden { flowers }) =
 
 viewZipperText : Zipper -> String
 viewZipperText zipper =
-  fillZipper [mkRealFormula (Atom "□")] zipper
+  fillZipper [mkRealFormula (Formula.atom "□")] zipper
   |> List.map (viewFlowerText)
   |> String.join ", "
 
@@ -442,7 +442,7 @@ logBouquet msg bouquet =
 
 atom : String -> Flower
 atom name =
-  mkRealFormula (Atom name)
+  mkRealFormula (Formula.atom name)
 
 
 {-| Make an atomic flower from a string.
@@ -481,29 +481,29 @@ bigFlower : Flower
 bigFlower =
   mkRealFlower
     ( mkRealGarden
-        [ mkRealFormula (Atom "a")
+        [ mkRealFormula (Formula.atom "a")
         , mkRealFlower
             ( mkRealGarden
-                [ mkRealFormula (Atom "a") ] )
+                [ mkRealFormula (Formula.atom "a") ] )
             [ mkRealGarden
-                [ mkRealFormula (Atom "b") ],
+                [ mkRealFormula (Formula.atom "b") ],
               mkRealGarden
                 [ mkRealFlower
                     ( mkRealGarden
-                        [ mkRealFormula (Atom "b") ] )
+                        [ mkRealFormula (Formula.atom "b") ] )
                     [ mkRealGarden
-                        [ mkRealFormula (Atom "c") ] ],
-                  mkRealFormula (Atom "b") ] ]
+                        [ mkRealFormula (Formula.atom "c") ] ],
+                  mkRealFormula (Formula.atom "b") ] ]
         , mkRealFlower
             ( mkRealGarden
-                [ mkRealFormula (Atom "d")] )
+                [ mkRealFormula (Formula.atom "d")] )
             [ mkRealGarden
-                [ mkRealFormula (Atom "e") ] ] ] )
+                [ mkRealFormula (Formula.atom "e") ] ] ] )
     [ mkRealGarden
-        [ mkRealFormula (Atom "b")
-        , mkRealFormula (Atom "a") ]
+        [ mkRealFormula (Formula.atom "b")
+        , mkRealFormula (Formula.atom "a") ]
     , mkRealGarden
-      [ mkRealFormula (Atom "c") ] ]
+      [ mkRealFormula (Formula.atom "c") ] ]
  
 
 modusPonensCurryfied : Flower
@@ -528,7 +528,7 @@ criticalPair =
             , mkRealGarden [ atom "b"  ] ]
         , entails [atom "a"] [atom "c"]
         , entails [atom "b"] [atom "c"] ] )
-    [ mkRealGarden [ mkRealFormula (Atom "c") ] ]
+    [ mkRealGarden [ mkRealFormula (Formula.atom "c") ] ]
 
 
 orElim : Flower
@@ -536,11 +536,11 @@ orElim =
   mkRealFormula
     ( Implies
         ( And
-          ( Implies (Atom "a") (Atom "c") )
-          ( Implies (Atom "b") (Atom "c") ) )
+          ( Implies (Formula.atom "a") (Formula.atom "c") )
+          ( Implies (Formula.atom "b") (Formula.atom "c") ) )
         ( Implies
-          ( Or (Atom "a") (Atom "b") )
-          ( Atom "c" ) ) )
+          ( Or (Formula.atom "a") (Formula.atom "b") )
+          ( Formula.atom "c" ) ) )
 
 
 orElimInvertible : Flower
@@ -548,11 +548,11 @@ orElimInvertible =
   mkRealFormula
     ( Implies
         ( Implies
-          ( Or (Atom "a") (Atom "b") )
-          ( Atom "c" ) )
+          ( Or (Formula.atom "a") (Formula.atom "b") )
+          ( Formula.atom "c" ) )
         ( And
-          ( Implies (Atom "a") (Atom "c") )
-          ( Implies (Atom "b") (Atom "c") ) ) )
+          ( Implies (Formula.atom "a") (Formula.atom "c") )
+          ( Implies (Formula.atom "b") (Formula.atom "c") ) ) )
 
 
 kreiselPutnam : Flower
@@ -560,8 +560,15 @@ kreiselPutnam =
   mkRealFormula
     ( Implies
         ( Implies
-            ( Not (Atom "a") )
-            ( Or (Atom "b") (Atom "c") ) )
+            ( Not (Formula.atom "a") )
+            ( Or (Formula.atom "b") (Formula.atom "c") ) )
         ( Or
-            ( Implies (Not (Atom "a")) (Atom "b") )
-            ( Implies (Not (Atom "a")) (Atom "c") ) ) )
+            ( Implies (Not (Formula.atom "a")) (Formula.atom "b") )
+            ( Implies (Not (Formula.atom "a")) (Formula.atom "c") ) ) )
+
+
+mascarpone : Flower
+mascarpone =
+  mkRealFormula (Atom (Image
+  { src = "https://www.thespruceeats.com/thmb/N8x-MJe1i52Cqo77K-oSl9AbVik=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/SES-what-is-mascarpone-cheese-591332-hero-03-5b564ecf68374d1abe9b3f02ad31d04a.jpg"
+  , description = "mascarpone" }))

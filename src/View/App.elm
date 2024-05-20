@@ -11,7 +11,6 @@ import Model.App exposing (Model)
 import Update.App exposing (..)
 
 import Element exposing (..)
-import Element.Background as Background
 import Element.Font as Font
 
 import Html exposing (div)

@@ -1,8 +1,12 @@
 module Model.Formula exposing (..)
 
 
+type Ident
+  = Name String
+  | Image { src : String, description : String }
+
 type Formula
-  = Atom String
+  = Atom Ident
   | Truth | Falsity
   | And Formula Formula
   | Or Formula Formula
@@ -10,11 +14,19 @@ type Formula
   | Not Formula
 
 
+atom : String -> Formula
+atom name =
+  Atom (Name name)
+
+
 toString : Formula -> String
 toString formula =
   case formula of
-    Atom name ->
+    Atom (Name name) ->
       name
+
+    Atom (Image { description }) ->
+      description
     
     Truth ->
       "⊤"
