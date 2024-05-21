@@ -1,7 +1,7 @@
+- Fix newAtomName not being updated when typing at top-level
 - Remove all Debug uses to build with --optimize flag
 - Responsive layout with bigger text on high resolution mobile devices (maybe
   use `scale` and `modular`?)
-- Fix newAtomName not being updated when typing at top-level
 
 # Features
 
@@ -98,3 +98,7 @@
   $\delta$ by *pinching* them towards $\delta$; then, one can cycle through
   petals by *swiping* left/right on the view, and *unpinch* to go back to the
   full view. A similar mechanism for bouquets would also make sense.
+
+- Split Edit mode in Strengthen/Weaken modes:
+  - Strengthen mode is for **strengthening** goals. It corresponds to the current implementation of cultural rules.
+  - Weaken mode is for **weakening** goals. It can only be used on theories on which no other theories depend, in order to preserve truth (?).
