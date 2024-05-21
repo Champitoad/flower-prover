@@ -333,6 +333,24 @@ viewAddFlowerZone location context newAtomName flowers =
           "egg" ->
             mkFakeFormula egg
 
+          "white" ->
+            mkFakeFormula white
+
+          "yolk" ->
+            mkFakeFormula yolk
+
+          "whisked whites" ->
+            mkFakeFormula whiskedWhites
+
+          "yolky paste" ->
+            mkFakeFormula yolkyPaste
+
+          "thick paste" ->
+            mkFakeFormula thickPaste
+
+          "mascarpone cream" ->
+            mkFakeFormula mascarponeCream
+
           _ ->
             mkFakeFormula (Formula.atom newAtomName)
 
