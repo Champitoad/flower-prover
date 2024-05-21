@@ -101,4 +101,4 @@
 
 - Split Edit mode in Strengthen/Weaken modes:
   - Strengthen mode is for **strengthening** goals. It corresponds to the current implementation of cultural rules.
-  - Weaken mode is for **weakening** goals. It can only be used on theories on which no other theories depend, in order to preserve truth (?).
+  - Weaken mode is for **weakening** goals. It can only be used on theories on which no other theories depend, in order to preserve truth (question: is that compatible with the fact that we still want the ability to depend on *partial* theories?).
