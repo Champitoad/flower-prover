@@ -567,8 +567,21 @@ kreiselPutnam =
             ( Implies (Not (Formula.atom "a")) (Formula.atom "c") ) ) )
 
 
-mascarpone : Flower
+mascarpone : Formula
 mascarpone =
-  mkRealFormula (Atom (Image
-  { src = "https://www.thespruceeats.com/thmb/N8x-MJe1i52Cqo77K-oSl9AbVik=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/SES-what-is-mascarpone-cheese-591332-hero-03-5b564ecf68374d1abe9b3f02ad31d04a.jpg"
-  , description = "mascarpone" }))
+  Atom (Image
+  { src = "https://cdn.iconscout.com/icon/premium/png-256-thumb/mascarpone-8021586-6817680.png?f=webp"
+  , description = "mascarpone" })
+
+sugar : Formula
+sugar =
+  Atom (Image
+  { src = "https://cdn-icons-png.flaticon.com/256/5900/5900648.png"
+  , description = "sugar" })
+
+
+egg : Formula
+egg =
+  Atom (Image
+  { src = "https://icons.iconarchive.com/icons/google/noto-emoji-food-drink/256/32390-egg-icon.png"
+  , description = "egg" })

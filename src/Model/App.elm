@@ -38,7 +38,7 @@ type alias Model
 
 init : Url.Url -> Browser.Navigation.Key -> Model
 init url key =
-  { goal = Goal.fromBouquet [orElim]
+  { goal = Goal.fromBouquet []
   , history = History { prev = Nothing, next = Nothing }
   , manualExamples = manualExamples
   , dragDrop = DnD.init

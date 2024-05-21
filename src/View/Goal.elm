@@ -81,7 +81,7 @@ viewAtom ident =
       text name
     
     Image data ->
-      image [] data
+      image [width (px 150), height (px 150)] data
 
 
 viewStatement : Formula -> Element Msg
@@ -323,7 +323,18 @@ viewAddFlowerZone location context newAtomName flowers =
       if String.isEmpty newAtomName then
         mkFakeFlower (mkFakeGarden []) [mkFakeGarden []]
       else
-        mkFakeFormula (Formula.atom newAtomName)
+        case newAtomName of
+          "sugar" ->
+            mkFakeFormula sugar
+
+          "mascarpone" ->
+            mkFakeFormula mascarpone
+
+          "egg" ->
+            mkFakeFormula egg
+
+          _ ->
+            mkFakeFormula (Formula.atom newAtomName)
 
     newZipper newName =
       case context.zipper of
