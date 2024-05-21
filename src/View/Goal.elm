@@ -6,6 +6,7 @@ import View.Events exposing (..)
 
 import Model.Formula as Formula exposing (..)
 import Model.Flower exposing (..)
+import Model.Mascarpone exposing (..)
 import Model.Goal exposing (..)
 import Model.App exposing (..)
 
@@ -81,7 +82,7 @@ viewAtom ident =
       text name
     
     Image data ->
-      image [width (px 150), height (px 150)] data
+      image [width (px 100), height (px 100)] data
 
 
 viewStatement : Formula -> Element Msg

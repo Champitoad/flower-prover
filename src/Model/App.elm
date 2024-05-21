@@ -1,6 +1,7 @@
 module Model.App exposing (..)
 
 import Model.Flower exposing (..)
+import Model.Mascarpone exposing (..)
 import Model.Goal as Goal exposing (Goal, Location, Sandboxes, manualExamples)
 
 import Url
@@ -38,7 +39,7 @@ type alias Model
 
 init : Url.Url -> Browser.Navigation.Key -> Model
 init url key =
-  { goal = Goal.fromBouquet []
+  { goal = Goal.fromBouquet [entails [crack, whisk, beat, stir, fold] [entails [f egg, f sugar, f mascarpone] [f mascarponeCream]]]
   , history = History { prev = Nothing, next = Nothing }
   , manualExamples = manualExamples
   , dragDrop = DnD.init
