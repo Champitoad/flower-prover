@@ -248,6 +248,8 @@ update msg ({ goal, manualExamples } as model) =
               case url.host of
                 "www.lix.polytechnique.fr" ->
                   "/Labo/Pablo.DONATO/flowerprover" ++ url.path
+                "pablogician.refl.fr" ->
+                  "/flowerprover" ++ url.path
                 _ ->
                   url.path
             
