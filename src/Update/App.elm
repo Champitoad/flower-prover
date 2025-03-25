@@ -241,7 +241,6 @@ update msg ({ goal, manualExamples } as model) =
       ({ newModel | url = url }, Cmd.none)
     
     LinkClicked urlRequest ->
-      let _ = Debug.log "foo" "huh?" in
       case urlRequest of
         Browser.Internal url ->
           let 
@@ -250,10 +249,8 @@ update msg ({ goal, manualExamples } as model) =
                 "www.lix.polytechnique.fr" ->
                   "/Labo/Pablo.DONATO/flowerprover" ++ url.path
                 "pablogician.refl.fr" ->
-                  let _ = Debug.log "[Routing]" "You are on the epidictic server!" in
                   "/flowerprover" ++ url.path
                 _ ->
-                  let _ = Debug.log "[Routing]" "I don't know this place," ++ url.path ++ "?" in
                   url.path
             
             newUrl =

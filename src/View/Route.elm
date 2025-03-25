@@ -12,15 +12,19 @@ routeParser : Parser (Route -> a) a
 routeParser =
   let
     lix = s "Labo" </> s "Pablo.DONATO" </> s "flowerprover"
+    refl = s "flowerprover"
   in
   oneOf
     [ map App top
     , map App (top </> s "index.html")
     , map App lix
     , map App (lix </> s "index.html")
+    , map App refl
+    , map App (refl </> s "index.html")
 
     , map Manual (s "manual")
     , map Manual (lix </> s "manual")
+    , map Manual (refl </> s "manual")
     ]
 
 fromUrl : Url.Url -> Route
