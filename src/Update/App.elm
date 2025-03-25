@@ -241,6 +241,7 @@ update msg ({ goal, manualExamples } as model) =
       ({ newModel | url = url }, Cmd.none)
     
     LinkClicked urlRequest ->
+      let _ = Debug.log "foo" "huh?" in
       case urlRequest of
         Browser.Internal url ->
           let 

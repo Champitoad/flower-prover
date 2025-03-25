@@ -7608,9 +7608,9 @@ var $author$project$Update$App$handleDragDropMsg = F2(
 					},
 					$author$project$Update$App$dragstart),
 				dragStart));
-		var _v12 = A2($norpan$elm_html5_drag_drop$Html5$DragDrop$update, dndMsg, model.dragDrop);
-		var newDragDrop = _v12.a;
-		var result = _v12.b;
+		var _v13 = A2($norpan$elm_html5_drag_drop$Html5$DragDrop$update, dndMsg, model.dragDrop);
+		var newDragDrop = _v13.a;
+		var result = _v13.b;
 		var model_ = function () {
 			if (dragStart.$ === 'Just') {
 				var dragId = dragStart.a.dragId;
@@ -7619,22 +7619,22 @@ var $author$project$Update$App$handleDragDropMsg = F2(
 					{dragDrop: newDragDrop});
 				var goal = A2($author$project$Model$App$getGoal, dragId.location, model);
 				var newMode = function () {
-					var _v14 = goal.mode;
-					_v14$2:
+					var _v15 = goal.mode;
+					_v15$2:
 					while (true) {
-						switch (_v14.$) {
+						switch (_v15.$) {
 							case 'ProofMode':
-								if (_v14.a.$ === 'Justifying') {
-									var _v15 = _v14.a;
+								if (_v15.a.$ === 'Justifying') {
+									var _v16 = _v15.a;
 									return $author$project$Model$Goal$ProofMode($author$project$Model$Goal$Importing);
 								} else {
-									break _v14$2;
+									break _v15$2;
 								}
 							case 'EditMode':
-								var surgery = _v14.b;
+								var surgery = _v15.b;
 								return A2($author$project$Model$Goal$EditMode, $author$project$Model$Goal$Reordering, surgery);
 							default:
-								break _v14$2;
+								break _v15$2;
 						}
 					}
 					return goal.mode;
@@ -7645,17 +7645,17 @@ var $author$project$Update$App$handleDragDropMsg = F2(
 				return A3($author$project$Model$App$setGoal, dragId.location, newGoal, newModel);
 			} else {
 				if (result.$ === 'Just') {
-					var _v17 = result.a;
-					var drag = _v17.a;
-					var drop = _v17.b;
+					var _v18 = result.a;
+					var drag = _v18.a;
+					var drop = _v18.b;
 					var goal = A2($author$project$Model$App$getGoal, drag.location, model);
 					var defaultMode = function () {
-						var _v22 = goal.mode;
-						switch (_v22.$) {
+						var _v23 = goal.mode;
+						switch (_v23.$) {
 							case 'ProofMode':
 								return $author$project$Model$Goal$ProofMode($author$project$Model$Goal$Justifying);
 							case 'EditMode':
-								var surgery = _v22.b;
+								var surgery = _v23.b;
 								return A2($author$project$Model$Goal$EditMode, $author$project$Model$Goal$Operating, surgery);
 							default:
 								return goal.mode;
@@ -7664,13 +7664,13 @@ var $author$project$Update$App$handleDragDropMsg = F2(
 					if (drop.$ === 'Just') {
 						var destination = drop.a;
 						var action = function () {
-							var _v19 = goal.mode;
-							_v19$2:
+							var _v20 = goal.mode;
+							_v20$2:
 							while (true) {
-								switch (_v19.$) {
+								switch (_v20.$) {
 									case 'ProofMode':
-										if (_v19.a.$ === 'Importing') {
-											var _v20 = _v19.a;
+										if (_v20.a.$ === 'Importing') {
+											var _v21 = _v20.a;
 											return A4(
 												$author$project$Update$App$Action,
 												$author$project$Update$Rules$Import,
@@ -7679,17 +7679,17 @@ var $author$project$Update$App$handleDragDropMsg = F2(
 												_List_fromArray(
 													[drag.content]));
 										} else {
-											break _v19$2;
+											break _v20$2;
 										}
 									case 'EditMode':
-										if (_v19.a.$ === 'Reordering') {
-											var _v21 = _v19.a;
+										if (_v20.a.$ === 'Reordering') {
+											var _v22 = _v20.a;
 											return A4($author$project$Update$App$Action, $author$project$Update$Rules$Reorder, goal.location, destination.target, destination.content);
 										} else {
-											break _v19$2;
+											break _v20$2;
 										}
 									default:
-										break _v19$2;
+										break _v20$2;
 								}
 							}
 							return $author$project$Update$App$DoNothing;
@@ -7902,18 +7902,19 @@ var $author$project$Update$App$update = F2(
 					$elm$core$Platform$Cmd$none);
 			default:
 				var urlRequest = msg.a;
+				var _v8 = A2($elm$core$Debug$log, 'foo', 'huh?');
 				if (urlRequest.$ === 'Internal') {
 					var url = urlRequest.a;
 					var newPath = function () {
-						var _v9 = url.host;
-						switch (_v9) {
+						var _v10 = url.host;
+						switch (_v10) {
 							case 'www.lix.polytechnique.fr':
 								return '/Labo/Pablo.DONATO/flowerprover' + url.path;
 							case 'pablogician.refl.fr':
-								var _v10 = A2($elm$core$Debug$log, '[Routing]', 'You are on the epidictic server!');
+								var _v11 = A2($elm$core$Debug$log, '[Routing]', 'You are on the epidictic server!');
 								return '/flowerprover' + url.path;
 							default:
-								var _v11 = A2($elm$core$Debug$log, '[Routing]', 'I don\'t know this place,') + (url.path + '?');
+								var _v12 = A2($elm$core$Debug$log, '[Routing]', 'I don\'t know this place,') + (url.path + '?');
 								return url.path;
 						}
 					}();
