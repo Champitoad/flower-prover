@@ -248,9 +248,11 @@ update msg ({ goal, manualExamples } as model) =
               case url.host of
                 "www.lix.polytechnique.fr" ->
                   "/Labo/Pablo.DONATO/flowerprover" ++ url.path
-                "refl.fr" ->
+                "pablogician.refl.fr" ->
+                  let _ = Debug.log "[Routing]" "You are on the epidictic server!" in
                   "/flowerprover" ++ url.path
                 _ ->
+                  let _ = Debug.log "[Routing]" "I don't know this place," ++ url.path ++ "?" in
                   url.path
             
             newUrl =
